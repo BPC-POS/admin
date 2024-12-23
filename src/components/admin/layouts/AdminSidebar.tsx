@@ -9,7 +9,10 @@ import {
   Assessment,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Restaurant,
+  FamilyRestroom,
+  TableRestaurant
 } from '@mui/icons-material';
 
 interface AdminSidebarProps {
@@ -23,7 +26,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggle }) =>
   const menuItems = [
     { icon: <Home sx={{ fontSize: 28 }} />, text: 'Dashboard', href: '/admin/dashboard' },
     { icon: <People sx={{ fontSize: 28 }} />, text: 'Users', href: '/admin/users' },
+    { icon: <FamilyRestroom sx={{ fontSize: 28 }} />, text: 'Staff', href: '/admin/staff' },
     { icon: <Inventory sx={{ fontSize: 28 }} />, text: 'Products', href: '/admin/products' },
+    { icon: <Restaurant sx={{ fontSize: 28 }} />, text: 'Menu', href: '/admin/menu' },
+    { icon: <TableRestaurant sx={{ fontSize: 28 }} />, text: 'Tables', href: '/admin/tables' },
     { icon: <ShoppingCart sx={{ fontSize: 28 }} />, text: 'Orders', href: '/admin/orders' },
     { icon: <Assessment sx={{ fontSize: 28 }} />, text: 'Reports', href: '/admin/reports' },
     { icon: <Settings sx={{ fontSize: 28 }} />, text: 'Settings', href: '/admin/settings' },

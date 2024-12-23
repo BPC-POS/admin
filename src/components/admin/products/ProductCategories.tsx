@@ -1,157 +1,180 @@
-import React from 'react';
-import { 
-  Box, 
-  Tabs, 
-  Tab, 
-  Badge,
-  Chip,
+import React, { useState } from 'react';
+import {
+  Paper,
+  Tabs,
+  Tab,
+  IconButton,
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
   Typography,
-  useTheme,
-  useMediaQuery
+  Box,
+  Tooltip,
 } from '@mui/material';
-import { 
-  Coffee, 
-  LocalCafe,
-  EmojiFoodBeverage,
-  LocalBar,
-  Fastfood,
-  Category as CategoryIcon
+import {
+  Add,
+  MoreVert,
+  Edit,
+  Delete,
+  Visibility,
+  VisibilityOff,
 } from '@mui/icons-material';
 import { Category } from '@/types/product';
+import CategoryModal from './CategoryModal';
 
 interface ProductCategoriesProps {
   categories: Category[];
-  currentTab: string;
-  onTabChange: (value: string) => void;
-  productCounts?: Record<string, number>;
+  currentCategory: string;
+  onCategoryChange: (categoryId: string) => void;
+  onAddCategory?: (category: Omit<Category, 'id'>) => void;
+  onEditCategory?: (id: string, category: Omit<Category, 'id'>) => void;
+  onDeleteCategory?: (id: string) => void;
+  onToggleCategory?: (id: string) => void;
 }
-
-const categoryIcons = {
-  coffee: Coffee,
-  tea: EmojiFoodBeverage,
-  milktea: LocalCafe,
-  smoothie: LocalBar,
-  default: Fastfood
-};
 
 const ProductCategories: React.FC<ProductCategoriesProps> = ({
   categories,
-  currentTab,
-  onTabChange,
-  productCounts = {}
+  currentCategory,
+  onCategoryChange,
+  onAddCategory,
+  onEditCategory,
+  onDeleteCategory,
+  onToggleCategory,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    onTabChange(newValue);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, category: Category) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedCategory(category);
   };
 
-  const getCategoryIcon = (categoryId: string) => {
-    const IconComponent = categoryIcons[categoryId as keyof typeof categoryIcons] || categoryIcons.default;
-    return <IconComponent />;
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedCategory(null);
   };
 
-  const renderBadge = (count: number) => {
-    if (!count) return null;
-    return (
-      <Chip
-        size="small"
-        label={count}
-        color="primary"
-        className="ml-2"
-      />
-    );
+  const handleEdit = () => {
+    handleMenuClose();
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedCategory && onDeleteCategory) {
+      onDeleteCategory(selectedCategory.id);
+    }
+    handleMenuClose();
+  };
+
+  const handleToggle = () => {
+    if (selectedCategory && onToggleCategory) {
+      onToggleCategory(selectedCategory.id);
+    }
+    handleMenuClose();
+  };
+
+  const handleSubmit = (data: Omit<Category, 'id'>) => {
+    if (selectedCategory && onEditCategory) {
+      onEditCategory(selectedCategory.id, data);
+    } else if (onAddCategory) {
+      onAddCategory(data);
+    }
+    setIsModalOpen(false);
+    setSelectedCategory(null);
   };
 
   return (
-    <Box className="mb-6">
-      <Box className="border-b border-gray-200">
-        <Tabs
-          value={currentTab}
-          onChange={handleChange}
-          variant={isMobile ? "scrollable" : "standard"}
-          scrollButtons={isMobile ? "auto" : false}
-          allowScrollButtonsMobile
-          className="min-h-[48px]"
-        >
-          <Tab
-            value="all"
-            label={
-              <Box className="flex items-center">
-                <CategoryIcon className="mr-2" />
-                <span>Tất cả</span>
-                {renderBadge(
-                  Object.values(productCounts).reduce((a, b) => a + b, 0)
-                )}
-              </Box>
-            }
-            className="min-h-[48px]"
-          />
-          
-          {categories
-            .filter(category => category.isActive)
-            .map((category) => (
-              <Tab
-                key={category.id}
-                value={category.id}
-                label={
-                  <Box className="flex items-center">
-                    {getCategoryIcon(category.id)}
-                    <span className="mx-2">{category.name}</span>
-                    {renderBadge(productCounts[category.id] || 0)}
-                  </Box>
-                }
-                className="min-h-[48px]"
-              />
-            ))}
-        </Tabs>
-      </Box>
-
-      {/* Category Description */}
-      {currentTab !== 'all' && (
-        <Box className="mt-4 px-4">
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-            className="flex items-center"
+    <>
+      <Paper className="mb-4">
+        <Box className="p-4 flex justify-between items-center">
+          <Typography variant="h6">Danh mục sản phẩm</Typography>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setSelectedCategory(null);
+              setIsModalOpen(true);
+            }}
           >
-            {getCategoryIcon(currentTab)}
-            <span className="ml-2">
-              {categories.find(c => c.id === currentTab)?.description || 
-               'Danh mục sản phẩm'}
-            </span>
-          </Typography>
+            Thêm danh mục
+          </Button>
         </Box>
-      )}
+        <Tabs
+          value={currentCategory}
+          onChange={(_, value) => onCategoryChange(value)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          <Tab label="Tất cả" value="all" />
+          {categories.map((category) => (
+            <Tab
+              key={category.id}
+              label={
+                <div className="flex items-center gap-2">
+                  {category.name}
+                  {!category.isActive && (
+                    <VisibilityOff fontSize="small" className="text-gray-400" />
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleMenuOpen(e, category)}
+                    className="ml-1"
+                  >
+                    <MoreVert fontSize="small" />
+                  </IconButton>
+                </div>
+              }
+              value={category.id}
+            />
+          ))}
+        </Tabs>
+      </Paper>
 
-      {/* Category Stats */}
-      <Box className="mt-4 flex flex-wrap gap-4">
-        {currentTab === 'all' ? (
-          <Box className="flex flex-wrap gap-4">
-            {categories
-              .filter(category => category.isActive)
-              .map((category) => (
-                <Chip
-                  key={category.id}
-                  icon={getCategoryIcon(category.id)}
-                  label={`${category.name}: ${productCounts[category.id] || 0}`}
-                  variant="outlined"
-                  onClick={() => onTabChange(category.id)}
-                  className="cursor-pointer"
-                />
-              ))}
-          </Box>
-        ) : (
-          <Chip
-            icon={getCategoryIcon(currentTab)}
-            label={`Tổng số: ${productCounts[currentTab] || 0} sản phẩm`}
-            color="primary"
-            variant="outlined"
-          />
-        )}
-      </Box>
-    </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEdit}>
+          <ListItemIcon>
+            <Edit fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Chỉnh sửa</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleToggle}>
+          <ListItemIcon>
+            {selectedCategory?.isActive ? (
+              <VisibilityOff fontSize="small" />
+            ) : (
+              <Visibility fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>
+            {selectedCategory?.isActive ? 'Ẩn danh mục' : 'Hiện danh mục'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete} className="text-red-600">
+          <ListItemIcon>
+            <Delete fontSize="small" className="text-red-600" />
+          </ListItemIcon>
+          <ListItemText>Xóa</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      <CategoryModal
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCategory(null);
+        }}
+        onSubmit={handleSubmit}
+        editItem={selectedCategory || undefined}
+      />
+    </>
   );
 };
 

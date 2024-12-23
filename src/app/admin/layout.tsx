@@ -21,10 +21,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <div className={`fixed h-full transition-all duration-300 ease-in-out ${
         isSidebarCollapsed ? 'w-20' : 'w-64'
       }`}>
-        <AdminSidebar 
-          isCollapsed={isSidebarCollapsed}
-          onToggle={toggleSidebar}
-        />
+        <AdminSidebar isCollapsed={false} onToggle={function (): void {
+          throw new Error('Function not implemented.');
+        } } />
       </div>
 
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${

@@ -63,21 +63,124 @@ const mockProducts: Product[] = [
 ];
 
 const ProductsPage = () => {
-  const [currentTab, setCurrentTab] = useState('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>();
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [currentCategory, setCurrentCategory] = useState('all');
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({
+  const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success'
+    severity: 'success' as 'success' | 'error',
   });
+
+  // Category handlers
+  const handleAddCategory = async (data: Omit<Category, 'id'>) => {
+    try {
+      setIsLoading(true);
+      // TODO: API call
+      const newCategory = {
+        ...data,
+        id: `category-${Date.now()}`, // Temporary ID
+      };
+      setCategories(prev => [...prev, newCategory]);
+      setSnackbar({
+        open: true,
+        message: 'Thêm danh mục thành công',
+        severity: 'success',
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi thêm danh mục',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditCategory = async (id: string, data: Omit<Category, 'id'>) => {
+    try {
+      setIsLoading(true);
+      // TODO: API call
+      setCategories(prev =>
+        prev.map(category =>
+          category.id === id
+            ? { ...category, ...data }
+            : category
+        )
+      );
+      setSnackbar({
+        open: true,
+        message: 'Cập nhật danh mục thành công',
+        severity: 'success',
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi cập nhật danh mục',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!window.confirm('Bạn có chắc muốn xóa danh mục này?')) return;
+    
+    try {
+      setIsLoading(true);
+      // TODO: API call
+      setCategories(prev => prev.filter(category => category.id !== id));
+      if (currentCategory === id) {
+        setCurrentCategory('all');
+      }
+      setSnackbar({
+        open: true,
+        message: 'Xóa danh mục thành công',
+        severity: 'success',
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa danh mục',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleCategory = async (id: string) => {
+    try {
+      setIsLoading(true);
+      // TODO: API call
+      setCategories(prev =>
+        prev.map(category =>
+          category.id === id
+            ? { ...category, isActive: !category.isActive }
+            : category
+        )
+      );
+      setSnackbar({
+        open: true,
+        message: 'Cập nhật trạng thái danh mục thành công',
+        severity: 'success',
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi cập nhật trạng thái danh mục',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
@@ -91,7 +194,7 @@ const ProductsPage = () => {
       };
       
       setProducts(prev => [...prev, newProduct]);
-      setIsModalOpen(false);
+      setIsProductModalOpen(false);
       showSnackbar('Thêm sản phẩm thành công', 'success');
     } catch (err) {
       showSnackbar('Có lỗi xảy ra khi thêm sản phẩm', 'error');
@@ -117,7 +220,7 @@ const ProductsPage = () => {
         prev.map(p => p.id === editingProduct.id ? updatedProduct : p)
       );
       
-      setIsModalOpen(false);
+      setIsProductModalOpen(false);
       setEditingProduct(undefined);
       showSnackbar('Cập nhật sản phẩm thành công', 'success');
     } catch (err) {
@@ -156,11 +259,11 @@ const ProductsPage = () => {
 
   const handleOpenModal = (product?: Product) => {
     setEditingProduct(product);
-    setIsModalOpen(true);
+    setIsProductModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsProductModalOpen(false);
     setEditingProduct(undefined);
   };
 
@@ -181,29 +284,33 @@ const ProductsPage = () => {
 
       {error && (
         <Alert severity="error" className="mb-4">
-          {error}
+          {error.toString()}
         </Alert>
       )}
 
       <ProductCategories
-        categories={mockCategories}
-        currentTab={currentTab}
-        onTabChange={setCurrentTab}
+        categories={categories}
+        currentCategory={currentCategory}
+        onCategoryChange={setCurrentCategory}
+        onAddCategory={handleAddCategory}
+        onEditCategory={handleEditCategory}
+        onDeleteCategory={handleDeleteCategory}
+        onToggleCategory={handleToggleCategory}
       />
 
       <ProductList
         products={products}
-        currentCategory={currentTab}
+        currentCategory={currentCategory}
         isLoading={isLoading}
         onEdit={handleOpenModal}
         onDelete={handleDeleteProduct}
       />
 
       <AddProductModal
-        open={isModalOpen}
+        open={isProductModalOpen}
         onClose={handleCloseModal}
         onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
-        categories={mockCategories}
+        categories={categories}
         editProduct={editingProduct}
         isLoading={isLoading}
       />
