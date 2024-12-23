@@ -13,6 +13,9 @@ export default {
         foreground: "var(--foreground)",
       },
     },
+    fontFamily: {
+      poppins: ['Poppins', 'sans-serif']
+  }
   },
   plugins: [],
 } satisfies Config;
