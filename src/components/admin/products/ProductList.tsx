@@ -105,16 +105,16 @@ const ProductList: React.FC<ProductListProps> = ({
 
   if (error) {
     return (
-      <Alert severity="error" className="mb-4">
+      <Alert severity="error" className="mb-4 font-poppins">
         {error}
       </Alert>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-8 font-poppins">
       {/* Filters */}
-      <Box className="flex flex-wrap gap-4 mb-6">
+      <Box className="flex flex-wrap gap-6 mb-8 bg-white/50 backdrop-blur-lg p-6 rounded-xl shadow-lg">
         <TextField
           placeholder="Tìm kiếm sản phẩm..."
           value={searchQuery}
@@ -123,21 +123,23 @@ const ProductList: React.FC<ProductListProps> = ({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search />
+                <Search className="text-gray-500" />
               </InputAdornment>
             ),
+            className: "bg-white rounded-lg"
           }}
         />
 
         <FormControl className="min-w-[200px]">
-          <InputLabel>Trạng thái</InputLabel>
+          <InputLabel className="font-poppins">Trạng thái</InputLabel>
           <Select
             value={statusFilter}
             label="Trạng thái"
             onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-white rounded-lg"
           >
             {statusFilters.map(option => (
-              <MenuItem key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value} className="font-poppins">
                 {option.label}
               </MenuItem>
             ))}
@@ -145,19 +147,20 @@ const ProductList: React.FC<ProductListProps> = ({
         </FormControl>
 
         <FormControl className="min-w-[200px]">
-          <InputLabel>Sắp xếp</InputLabel>
+          <InputLabel className="font-poppins">Sắp xếp</InputLabel>
           <Select
             value={sortBy}
             label="Sắp xếp"
             onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="bg-white rounded-lg"
             startAdornment={
               <InputAdornment position="start">
-                <Sort />
+                <Sort className="text-gray-500" />
               </InputAdornment>
             }
           >
             {sortOptions.map(option => (
-              <MenuItem key={option.value} value={option.value}>
+              <MenuItem key={option.value} value={option.value} className="font-poppins">
                 {option.label}
               </MenuItem>
             ))}
@@ -166,8 +169,8 @@ const ProductList: React.FC<ProductListProps> = ({
       </Box>
 
       {/* Results summary */}
-      <Box className="flex justify-between items-center mb-4">
-        <Typography variant="body2" color="text.secondary">
+      <Box className="flex justify-between items-center mb-6 px-4">
+        <Typography variant="body2" className="text-gray-600 font-poppins">
           Hiển thị {paginatedProducts.length} trên tổng số {filteredProducts.length} sản phẩm
         </Typography>
       </Box>
@@ -178,23 +181,25 @@ const ProductList: React.FC<ProductListProps> = ({
           <CircularProgress />
         </Box>
       ) : paginatedProducts.length === 0 ? (
-        <Box className="text-center py-8">
-          <Typography variant="h6" color="text.secondary">
+        <Box className="text-center py-12 bg-white/50 backdrop-blur-lg rounded-xl shadow-lg">
+          <Typography variant="h6" className="text-gray-600 font-poppins mb-2">
             Không tìm thấy sản phẩm nào
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" className="text-gray-500 font-poppins">
             Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {paginatedProducts.map((product) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              <ProductCard
-                product={product}
-                onEdit={() => onEdit?.(product)}
-                onDelete={() => onDelete?.(product.id)}
-              />
+              <div className="transform transition-all duration-300 hover:scale-105">
+                <ProductCard
+                  product={product}
+                  onEdit={() => onEdit?.(product)}
+                  onDelete={() => onDelete?.(product.id)}
+                />
+              </div>
             </Grid>
           ))}
         </Grid>
@@ -202,13 +207,20 @@ const ProductList: React.FC<ProductListProps> = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <Box className="flex justify-center mt-6">
+        <Box className="flex justify-center mt-8">
           <Pagination
             count={totalPages}
             page={page}
             onChange={handlePageChange}
             color="primary"
             shape="rounded"
+            className="font-poppins"
+            sx={{
+              '& .MuiPaginationItem-root': {
+                fontFamily: 'Poppins',
+                fontSize: '0.9rem'
+              }
+            }}
           />
         </Box>
       )}

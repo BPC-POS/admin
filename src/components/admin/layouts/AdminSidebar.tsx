@@ -50,9 +50,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggle }) =>
     >
       <div className="flex items-center justify-between p-4 border-b border-blue-400">
         {!isCollapsed && (
-          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
+          <Link href="/admin/dashboard" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
             Admin Panel
-          </h2>
+          </Link>
         )}
         <button onClick={onToggle} className="p-2 rounded-lg hover:bg-blue-600 transition-colors">
           {isCollapsed ? '→' : '←'}

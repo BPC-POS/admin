@@ -42,54 +42,54 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
   const basePrice = defaultSize ? defaultSize.price : product.price;
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow duration-200">
-      <Box className="relative w-full pt-[100%]">
+    <Card className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden">
+      <Box className="relative w-full pt-[100%] group">
         <Image
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-3 right-3">
           <Chip
             label={statusLabels[product.status]}
             color={statusColors[product.status]}
             size="small"
-            className="shadow-md"
+            className="shadow-lg font-poppins font-medium"
           />
         </div>
       </Box>
-      <CardContent>
-        <div className="space-y-2">
+      <CardContent className="p-4">
+        <div className="space-y-3">
           <div className="flex justify-between items-start">
             <div>
-              <Typography variant="h6" className="font-semibold line-clamp-2">
+              <Typography variant="h6" className="font-poppins font-bold line-clamp-2 text-gray-800">
                 {product.name}
               </Typography>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 mt-1">
                 <Circle 
                   className={`w-2 h-2 ${product.isAvailable ? 'text-green-500' : 'text-red-500'}`}
                 />
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" className="font-poppins text-gray-600">
                   {product.isAvailable ? 'Còn hàng' : 'Hết hàng'}
                 </Typography>
               </div>
             </div>
-            <div className="flex gap-1">
-              <Tooltip title="Sửa">
+            <div className="flex gap-2">
+              <Tooltip title="Chỉnh sửa">
                 <IconButton 
                   size="small" 
-                  color="primary"
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-600"
                   onClick={() => onEdit?.(product)}
                 >
                   <Edit />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Xóa">
+              <Tooltip title="Xóa sản phẩm">
                 <IconButton 
                   size="small" 
-                  color="error"
+                  className="bg-red-50 hover:bg-red-100 text-red-600"
                   onClick={() => onDelete?.(product.id)}
                 >
                   <Delete />
@@ -98,36 +98,36 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
             </div>
           </div>
 
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} className="flex-wrap gap-2">
             {product.size.map((size) => (
               <Chip
                 key={size.name}
                 label={`${size.name}: ${size.price.toLocaleString('vi-VN')}đ`}
                 size="small"
                 variant={size.isDefault ? "filled" : "outlined"}
+                className="font-poppins shadow-sm"
               />
             ))}
           </Stack>
 
           {product.toppings && product.toppings.length > 0 && (
-            <Typography variant="body2" color="text.secondary" className="line-clamp-1">
-              Toppings: {product.toppings.map(t => t.name).join(', ')}
+            <Typography variant="body2" className="font-poppins text-gray-600 line-clamp-1">
+              Topping: {product.toppings.map(t => t.name).join(', ')}
             </Typography>
           )}
 
-          <Typography variant="body2" color="text.secondary" className="line-clamp-2">
+          <Typography variant="body2" className="font-poppins text-gray-600 line-clamp-2">
             {product.description}
           </Typography>
 
-          <div className="flex justify-between items-center">
-            <Typography variant="h6" color="primary" className="font-bold">
+          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+            <Typography variant="h6" className="font-poppins font-bold text-blue-600">
               {basePrice.toLocaleString('vi-VN')}đ
             </Typography>
             {product.originalPrice && (
               <Typography 
                 variant="body2" 
-                color="text.secondary" 
-                className="line-through"
+                className="font-poppins line-through text-gray-400"
               >
                 {product.originalPrice.toLocaleString('vi-VN')}đ
               </Typography>

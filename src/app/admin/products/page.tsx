@@ -12,7 +12,7 @@ import ProductCategories from '@/components/admin/products/ProductCategories';
 import ProductList from '@/components/admin/products/ProductList';
 import AddProductModal from '@/components/admin/products/AddProductModal';
 import { Product, Category, ProductStatus } from '@/types/product';
-
+import test from '../../../../public/assets/images/tet.png'
 // Mock data - sau này sẽ được thay thế bằng API call
 const mockCategories: Category[] = [
   { 
@@ -46,8 +46,8 @@ const mockProducts: Product[] = [
     id: 1,
     name: 'Cà phê đen',
     price: 25000,
-    image: '/images/products/black-coffee.jpg',
-    category: 'coffee',
+    image: test.src,
+    category: 'coffee', 
     description: 'Cà phê đen đậm đà hương vị Việt Nam',
     status: ProductStatus.ACTIVE,
     size: [
@@ -268,13 +268,14 @@ const ProductsPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" component="h1" className="font-bold">
+    <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
+      <Box className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Typography variant="h4" component="h1" className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-200">
           Quản lý sản phẩm
         </Typography>
         <Button
           variant="contained"
+           className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           startIcon={<Add />}
           onClick={() => handleOpenModal()}
         >
@@ -283,29 +284,32 @@ const ProductsPage = () => {
       </Box>
 
       {error && (
-        <Alert severity="error" className="mb-4">
+        <Alert severity="error" className="mb-4 backdrop-blur-lg shadow-lg [font-family:system-ui,Poppins,sans-serif]">
           {error.toString()}
         </Alert>
       )}
 
-      <ProductCategories
-        categories={categories}
-        currentCategory={currentCategory}
-        onCategoryChange={setCurrentCategory}
-        onAddCategory={handleAddCategory}
-        onEditCategory={handleEditCategory}
-        onDeleteCategory={handleDeleteCategory}
-        onToggleCategory={handleToggleCategory}
-      />
+       <Box className="rounded-2xl  shadow-lg">
+           <ProductCategories
+             categories={categories}
+             currentCategory={currentCategory}
+             onCategoryChange={setCurrentCategory}
+             onAddCategory={handleAddCategory}
+             onEditCategory={handleEditCategory}
+             onDeleteCategory={handleDeleteCategory}
+             onToggleCategory={handleToggleCategory}
+           />
+       </Box>
 
-      <ProductList
-        products={products}
-        currentCategory={currentCategory}
-        isLoading={isLoading}
-        onEdit={handleOpenModal}
-        onDelete={handleDeleteProduct}
-      />
-
+      <Box className="mt-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+         <ProductList
+           products={products}
+           currentCategory={currentCategory}
+           isLoading={isLoading}
+           onEdit={handleOpenModal}
+           onDelete={handleDeleteProduct}
+          />
+       </Box>
       <AddProductModal
         open={isProductModalOpen}
         onClose={handleCloseModal}
@@ -324,6 +328,7 @@ const ProductsPage = () => {
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
+          className="backdrop-blur-lg shadow-lg [font-family:system-ui,Poppins,sans-serif]"
         >
           {snackbar.message}
         </Alert>

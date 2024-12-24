@@ -89,9 +89,9 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
 
   return (
     <>
-      <Paper className="mb-4">
-        <Box className="p-4 flex justify-between items-center">
-          <Typography variant="h6">Danh mục sản phẩm</Typography>
+      <Paper className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Box className="flex justify-between items-center">
+          <Typography variant="h6" className="font-poppins text-black">Danh mục sản phẩm</Typography>
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -99,6 +99,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
               setSelectedCategory(null);
               setIsModalOpen(true);
             }}
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 font-poppins"
           >
             Thêm danh mục
           </Button>
@@ -108,13 +109,20 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
           onChange={(_, value) => onCategoryChange(value)}
           variant="scrollable"
           scrollButtons="auto"
+          className="font-poppins"
+          TabIndicatorProps={{
+            style: {
+              backgroundColor: '#3498DB',
+              fontFamily: 'Poppins',
+            }
+          }}
         >
-          <Tab label="Tất cả" value="all" />
+          <Tab label="Tất cả" value="all" className="font-poppins font-bold" />
           {categories.map((category) => (
             <Tab
               key={category.id}
               label={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 font-poppins">
                   {category.name}
                   {!category.isActive && (
                     <VisibilityOff fontSize="small" className="text-gray-400" />
@@ -129,6 +137,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
                 </div>
               }
               value={category.id}
+              className="font-poppins font-bold"
             />
           ))}
         </Tabs>
@@ -138,14 +147,17 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        PaperProps={{
+          className: "bg-white/80 backdrop-blur-lg rounded-xl shadow-lg"
+        }}
       >
-        <MenuItem onClick={handleEdit}>
+        <MenuItem onClick={handleEdit} className="font-poppins">
           <ListItemIcon>
             <Edit fontSize="small" />
           </ListItemIcon>
           <ListItemText>Chỉnh sửa</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleToggle}>
+        <MenuItem onClick={handleToggle} className="font-poppins">
           <ListItemIcon>
             {selectedCategory?.isActive ? (
               <VisibilityOff fontSize="small" />
@@ -157,7 +169,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
             {selectedCategory?.isActive ? 'Ẩn danh mục' : 'Hiện danh mục'}
           </ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleDelete} className="text-red-600">
+        <MenuItem onClick={handleDelete} className="text-red-600 font-poppins">
           <ListItemIcon>
             <Delete fontSize="small" className="text-red-600" />
           </ListItemIcon>

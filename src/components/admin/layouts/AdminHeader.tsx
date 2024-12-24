@@ -18,10 +18,7 @@ const AdminHeader: React.FC = () => {
     return (
         <header className="text-white p-4 font-poppins" style={{ backgroundColor: "#2C3E50" }}>
             <div className="container mx-auto flex justify-between items-center">
-                <Link href='/admin/dashboard'>
-                    <h1 className="font-bold text-xl">Admin Panel</h1>
-                </Link>
-
+                
                 {/* Search bar */}
                 <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-8">
                     <div className="relative">

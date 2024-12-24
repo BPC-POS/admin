@@ -16,10 +16,12 @@ import {
   Chip,
   FormHelperText,
   Grid,
+  Alert,
 } from '@mui/material';
 import { Close, Add, Remove } from '@mui/icons-material';
 import ImageUpload from './ImageUpload';
 import { Category, Product, ProductStatus, Size, Topping } from '@/types/product';
+import { LoadingButton } from '@mui/lab';
 
 interface AddProductModalProps {
   open: boolean;
@@ -28,17 +30,10 @@ interface AddProductModalProps {
   categories: Category[];
   editProduct?: Product;
   isLoading?: boolean;
+  error?: string;
 }
 
-interface FormErrors {
-  name?: string;
-  price?: string;
-  category?: string;
-  image?: string;
-  sizes?: string;
-}
-
-interface FormData {
+interface FormState {
   name: string;
   price: string;
   originalPrice: string;
@@ -51,10 +46,17 @@ interface FormData {
   isAvailable: boolean;
 }
 
-const initialSizeState: Size = {
+const initialFormState: FormState = {
   name: '',
-  price: 0,
-  isDefault: false,
+  price: '',
+  originalPrice: '',
+  category: '',
+  description: '',
+  image: '',
+  status: ProductStatus.ACTIVE,
+  sizes: [{ name: '', price: 0, isDefault: true }],
+  toppings: [],
+  isAvailable: true
 };
 
 const AddProductModal: React.FC<AddProductModalProps> = ({
@@ -63,24 +65,12 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   onSubmit,
   categories,
   editProduct,
-  isLoading
+  isLoading,
+  error
 }) => {
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    price: '',
-    originalPrice: '',
-    category: '',
-    description: '',
-    image: '',
-    status: ProductStatus.ACTIVE,
-    sizes: [{ ...initialSizeState, isDefault: true }],
-    toppings: [],
-    isAvailable: true
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [formData, setFormData] = useState<FormState>(initialFormState);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageError, setImageError] = useState<string>();
 
   useEffect(() => {
     if (editProduct) {
@@ -99,11 +89,14 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         toppings: editProduct.toppings || [],
         isAvailable: editProduct.isAvailable
       });
+    } else {
+      setFormData(initialFormState);
     }
-  }, [editProduct]);
+    setErrors({});
+  }, [editProduct, open]);
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Vui lòng nhập tên sản phẩm';
@@ -117,7 +110,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       newErrors.category = 'Vui lòng chọn danh mục';
     }
 
-    if (!formData.image && !imageFile) {
+    if (!formData.image && !imageFile && !editProduct) {
       newErrors.image = 'Vui lòng chọn ảnh sản phẩm';
     }
 
@@ -155,7 +148,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   const handleAddSize = () => {
     setFormData(prev => ({
       ...prev,
-      sizes: [...prev.sizes, { ...initialSizeState }]
+      sizes: [...prev.sizes, { name: '', price: 0, isDefault: false }]
     }));
   };
 
@@ -177,7 +170,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             isDefault: field === 'isDefault' ? Boolean(value) : size.isDefault 
           };
         }
-        // Nếu đang set isDefault = true, các size khác phải là false
         if (field === 'isDefault' && value === true) {
           return { ...size, isDefault: false };
         }
@@ -193,20 +185,27 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       maxWidth="md" 
       fullWidth
       PaperProps={{
-        className: 'max-h-[90vh]'
+        className: 'max-h-[90vh] bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
       }}
     >
       <form onSubmit={handleSubmit}>
-        <DialogTitle className="flex justify-between items-center">
-          {editProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-          <IconButton onClick={onClose} size="small">
+        <DialogTitle className="flex justify-between items-center border-b bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white">
+          <Typography variant="h6" className="font-bold">
+            {editProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
+          </Typography>
+          <IconButton onClick={onClose} size="small" className="text-white">
             <Close />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers className="overflow-y-auto">
-          <Grid container spacing={3}>
-            {/* Cột trái */}
+        <DialogContent className="overflow-y-auto">
+          {error && (
+            <Alert severity="error" className="mb-4 mt-4 backdrop-blur-lg">
+              {error}
+            </Alert>
+          )}
+
+          <Grid container spacing={3} className="mt-0">
             <Grid item xs={12} md={8}>
               <div className="space-y-4">
                 <TextField
@@ -217,6 +216,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   error={!!errors.name}
                   helperText={errors.name}
                   required
+                  className="bg-white/50 backdrop-blur-sm rounded-lg"
                 />
 
                 <div className="flex gap-4">
@@ -229,6 +229,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                     error={!!errors.price}
                     helperText={errors.price}
                     required
+                    className="bg-white/50 backdrop-blur-sm rounded-lg"
                   />
 
                   <TextField
@@ -237,10 +238,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                     type="number"
                     value={formData.originalPrice}
                     onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                    className="bg-white/50 backdrop-blur-sm rounded-lg"
                   />
                 </div>
 
-                <FormControl fullWidth error={!!errors.category} required>
+                <FormControl fullWidth error={!!errors.category} required className="bg-white/90 backdrop-blur-sm rounded-lg">
                   <InputLabel>Danh mục</InputLabel>
                   <Select
                     value={formData.category}
@@ -256,7 +258,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
                 </FormControl>
 
-                <FormControl fullWidth>
+                <FormControl fullWidth className="bg-white/50 backdrop-blur-sm rounded-lg">
                   <InputLabel>Trạng thái</InputLabel>
                   <Select
                     value={formData.status}
@@ -278,29 +280,34 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="bg-white/50 backdrop-blur-sm rounded-lg"
                 />
               </div>
             </Grid>
 
-            {/* Cột phải */}
             <Grid item xs={12} md={4}>
               <div className="space-y-4">
                 <ImageUpload
                   onImageSelect={(file) => {
                     setImageFile(file);
-                    setImageError(undefined);
+                    setErrors(prev => {
+                      const newErrors = { ...prev };
+                      delete newErrors.image;
+                      return newErrors;
+                    });
                   }}
                   currentImage={formData.image}
-                  error={imageError}
+                  error={errors.image}
                 />
 
-                <Box>
+                <Box className="bg-white/50 backdrop-blur-sm rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <Typography variant="subtitle2">Kích thước</Typography>
+                    <Typography variant="subtitle2" className="font-semibold">Kích thước</Typography>
                     <Button
                       size="small"
                       startIcon={<Add />}
                       onClick={handleAddSize}
+                      className="text-blue-600"
                     >
                       Thêm size
                     </Button>
@@ -313,7 +320,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                         label="Size"
                         value={size.name}
                         onChange={(e) => handleSizeChange(index, 'name', e.target.value)}
-                        className="w-20"
+                        className="w-20 bg-white/70"
                       />
                       <TextField
                         size="small"
@@ -321,6 +328,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                         type="number"
                         value={size.price}
                         onChange={(e) => handleSizeChange(index, 'price', Number(e.target.value))}
+                        className="bg-white/70"
                       />
                       <Chip
                         label="Mặc định"
@@ -348,15 +356,21 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           </Grid>
         </DialogContent>
 
-        <DialogActions className="p-4">
-          <Button onClick={onClose}>Hủy</Button>
+        <DialogActions className="border-t p-4 bg-gradient-to-r ">
           <Button 
-            type="submit" 
-            variant="contained" 
-            disabled={isLoading}
+            onClick={onClose} 
+            className="mr-2 text-black hover:bg-white/20"
           >
-            {isLoading ? 'Đang xử lý...' : editProduct ? 'Cập nhật' : 'Thêm sản phẩm'}
+            Hủy
           </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            loading={isLoading}
+            className="bg-white text-[#2C3E50] hover:bg-white/90"
+          >
+            {editProduct ? 'Cập nhật' : 'Thêm sản phẩm'}
+          </LoadingButton>
         </DialogActions>
       </form>
     </Dialog>
