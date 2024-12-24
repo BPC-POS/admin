@@ -77,17 +77,17 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
   );
 
   return (
-    <Box>
-      <TableContainer component={Paper}>
+    <Box className="">
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nhân viên</TableCell>
-              <TableCell>Vị trí</TableCell>
-              <TableCell>Bộ phận</TableCell>
-              <TableCell>Ngày vào làm</TableCell>
-              <TableCell>Lương cơ bản</TableCell>
-              <TableCell align="right">Thao tác</TableCell>
+              <TableCell className="font-poppins">Nhân viên</TableCell>
+              <TableCell className="font-poppins">Vị trí</TableCell>
+              <TableCell className="font-poppins">Bộ phận</TableCell>
+              <TableCell className="font-poppins">Ngày vào làm</TableCell>
+              <TableCell className="font-poppins">Lương cơ bản</TableCell>
+              <TableCell align="right" className="font-poppins">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -97,7 +97,7 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
                   <Box className="flex items-center gap-3">
                     <Avatar>{staffMember.id}</Avatar>
                     <div>
-                      <Typography variant="subtitle2">
+                      <Typography variant="subtitle2" className="font-poppins">
                         ID: {staffMember.userId}
                       </Typography>
                     </div>
@@ -108,11 +108,12 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
                     label={getPositionLabel(staffMember.position)}
                     color="primary"
                     variant="outlined"
+                    className="font-poppins"
                   />
                 </TableCell>
-                <TableCell>{getDepartmentLabel(staffMember.department)}</TableCell>
-                <TableCell>{formatDate(staffMember.startDate)}</TableCell>
-                <TableCell>{formatCurrency(staffMember.salary.base)}</TableCell>
+                <TableCell className="font-poppins">{getDepartmentLabel(staffMember.department)}</TableCell>
+                <TableCell className="font-poppins">{formatDate(staffMember.startDate)}</TableCell>
+                <TableCell className="font-poppins">{formatCurrency(staffMember.salary.base)}</TableCell>
                 <TableCell align="right">
                   <IconButton
                     size="small"
@@ -133,6 +134,7 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
           page={page}
           onChange={(_, value) => setPage(value)}
           color="primary"
+          className="font-poppins"
         />
       </Box>
 
@@ -140,29 +142,30 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+          className="bg-white/80"
       >
         <MenuItem onClick={() => {
           if (selectedStaff) onEdit(selectedStaff);
           handleMenuClose();
-        }}>
+        }} className="font-poppins">
           <ListItemIcon>
             <Edit fontSize="small" />
           </ListItemIcon>
           <ListItemText>Chỉnh sửa thông tin</ListItemText>
         </MenuItem>
-        <MenuItem>
+        <MenuItem className="font-poppins">
           <ListItemIcon>
             <Schedule fontSize="small" />
           </ListItemIcon>
           <ListItemText>Xem lịch làm việc</ListItemText>
         </MenuItem>
-        <MenuItem>
+        <MenuItem className="font-poppins">
           <ListItemIcon>
             <RequestPage fontSize="small" />
           </ListItemIcon>
           <ListItemText>Xem đơn xin nghỉ</ListItemText>
         </MenuItem>
-        <MenuItem>
+        <MenuItem className="font-poppins">
           <ListItemIcon>
             <Payments fontSize="small" />
           </ListItemIcon>

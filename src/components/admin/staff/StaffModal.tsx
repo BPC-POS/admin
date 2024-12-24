@@ -81,22 +81,49 @@ const StaffModal: React.FC<StaffModalProps> = ({
     }
   };
 
+  const getPositionLabel = (position: StaffPosition) => {
+    const labels: Record<StaffPosition, string> = {
+      [StaffPosition.MANAGER]: 'Quản lý',
+      [StaffPosition.SUPERVISOR]: 'Giám sát',
+      [StaffPosition.BARISTA]: 'Pha chế',
+      [StaffPosition.WAITER]: 'Phục vụ',
+      [StaffPosition.CASHIER]: 'Thu ngân',
+    };
+    return labels[position];
+  };
+
+  const getDepartmentLabel = (department: Department) => {
+    const labels: Record<Department, string> = {
+      [Department.COFFEE_BAR]: 'Quầy pha chế',
+      [Department.KITCHEN]: 'Nhà bếp',
+      [Department.SERVICE]: 'Phục vụ',
+      [Department.CASHIER]: 'Thu ngân',
+    };
+    return labels[department];
+  };
+
   return (
     <Dialog 
       open={open} 
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      className="font-poppins"
+      PaperProps={{
+        className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+      }}
     >
       <form onSubmit={handleSubmit}>
-        <DialogTitle className="flex justify-between items-center">
-          {editItem ? 'Chỉnh sửa thông tin nhân viên' : 'Thêm nhân viên mới'}
-          <IconButton onClick={onClose} size="small">
+      <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+          <span className="text-xl font-bold">
+            {editItem ? 'Chỉnh sửa thông tin nhân viên' : 'Thêm nhân viên mới'}
+          </span>
+          <IconButton onClick={onClose} size="small" className="text-white hover:text-gray-200">
             <Close />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers>
+        <DialogContent dividers className="p-6">
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -108,12 +135,13 @@ const StaffModal: React.FC<StaffModalProps> = ({
                 error={!!errors.userId}
                 helperText={errors.userId}
                 required
+                className="font-poppins"
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required error={!!errors.position}>
-                <InputLabel>Vị trí</InputLabel>
+                <InputLabel className="font-poppins">Vị trí</InputLabel>
                 <Select
                   value={formData.position || ''}
                   label="Vị trí"
@@ -121,10 +149,11 @@ const StaffModal: React.FC<StaffModalProps> = ({
                     ...formData, 
                     position: e.target.value as StaffPosition 
                   })}
+                  className="font-poppins"
                 >
                   {Object.values(StaffPosition).map((position) => (
-                    <MenuItem key={position} value={position}>
-                      {position}
+                    <MenuItem key={position} value={position} className="font-poppins">
+                      {getPositionLabel(position)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -133,7 +162,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required error={!!errors.department}>
-                <InputLabel>Bộ phận</InputLabel>
+                <InputLabel className="font-poppins">Bộ phận</InputLabel>
                 <Select
                   value={formData.department || ''}
                   label="Bộ phận"
@@ -141,10 +170,11 @@ const StaffModal: React.FC<StaffModalProps> = ({
                     ...formData, 
                     department: e.target.value as Department 
                   })}
+                  className="font-poppins"
                 >
                   {Object.values(Department).map((dept) => (
-                    <MenuItem key={dept} value={dept}>
-                      {dept}
+                    <MenuItem key={dept} value={dept} className="font-poppins">
+                      {getDepartmentLabel(dept)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -163,6 +193,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
                 })}
                 InputLabelProps={{ shrink: true }}
                 required
+                className="font-poppins"
               />
             </Grid>
 
@@ -183,6 +214,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
                 error={!!errors.salary}
                 helperText={errors.salary}
                 required
+                className="font-poppins"
               />
             </Grid>
 
@@ -200,8 +232,9 @@ const StaffModal: React.FC<StaffModalProps> = ({
                     allowance: formData.salary?.allowance || 0
                   } 
                 })}
+                className="font-poppins"
               />
-            </Grid>
+            </Grid> 
 
             <Grid item xs={12} md={4}>
               <TextField
@@ -217,17 +250,22 @@ const StaffModal: React.FC<StaffModalProps> = ({
                     allowance: Number(e.target.value)
                   } 
                 })}
+                className="font-poppins"
               />
             </Grid>
           </Grid>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose}>Hủy</Button>
+        <DialogActions className="p-4">
+          <Button 
+            onClick={onClose}
+            className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl"
+            >Hủy</Button>
           <Button 
             type="submit" 
             variant="contained"
             disabled={isLoading}
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
             {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
           </Button>

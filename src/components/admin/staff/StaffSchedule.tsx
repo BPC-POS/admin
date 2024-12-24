@@ -74,27 +74,36 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
   const availableStaff = staff.filter(s => !assignedStaff.includes(s.id));
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        Sắp xếp lịch làm - {shift.name}
-        <Typography variant="subtitle2" color="text.secondary">
-          {formatDate(date)} ({shift.startTime} - {shift.endTime})
-        </Typography>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+      }}
+    >
+      <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+        <div>
+          <Typography variant="h6" className="font-poppins">Sắp xếp lịch làm - {shift.name}</Typography>
+          <Typography variant="subtitle2" className="font-poppins text-gray-200">
+            {formatDate(date)} ({shift.startTime} - {shift.endTime})
+          </Typography>
+        </div>
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers className="p-6">
         <Box className="space-y-4">
-          {/* Thêm nhân viên mới */}
           <Box className="flex gap-2">
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" className="font-poppins">
               <InputLabel>Chọn nhân viên</InputLabel>
               <Select
                 value={selectedStaff}
                 label="Chọn nhân viên"
                 onChange={(e) => setSelectedStaff(Number(e.target.value))}
               >
-                <MenuItem value={0}>-- Chọn nhân viên --</MenuItem>
+                <MenuItem value={0} className="font-poppins">-- Chọn nhân viên --</MenuItem>
                 {availableStaff.map(s => (
-                  <MenuItem key={s.id} value={s.id}>
+                  <MenuItem key={s.id} value={s.id} className="font-poppins">
                     ID: {s.userId} 
                   </MenuItem>
                 ))}
@@ -109,18 +118,18 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
                 }
               }}
               disabled={!selectedStaff}
+              className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 font-poppins"
             >
               Thêm
             </Button>
           </Box>
 
-          {/* Danh sách nhân viên đã phân công */}
           <List>
             {assignedStaff.map(staffId => {
               const staffMember = staff.find(s => s.id === staffId);
               if (!staffMember) return null;
               return (
-                <ListItem key={staffId} divider>
+                <ListItem key={staffId} divider className="font-poppins">
                   <ListItemText
                     primary={`ID: ${staffMember.userId}`}
                     secondary={staffMember.position}
@@ -140,8 +149,8 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
           </List>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Đóng</Button>
+      <DialogActions className="p-4">
+        <Button onClick={onClose} className="font-poppins">Đóng</Button>
       </DialogActions>
     </Dialog>
   );
@@ -155,13 +164,12 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
     date: Date;
   } | null>(null);
   
-  // Mock data - replace with actual schedule data
   const [schedules, setSchedules] = useState<Record<string, number[]>>({});
 
   const getWeekDates = () => {
     const dates = [];
     const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Start from Monday
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
@@ -213,7 +221,7 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
   return (
     <Box>
       <Box className="mb-4 flex justify-between items-center">
-        <Typography variant="h6">
+        <Typography variant="h6" className="font-poppins text-black">
           Lịch làm việc tuần {formatDate(getWeekDates()[0])} - {formatDate(getWeekDates()[6])}
         </Typography>
         <Box className="flex gap-2">
@@ -226,18 +234,18 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
         </Box>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Ca làm việc</TableCell>
+              <TableCell className="font-poppins">Ca làm việc</TableCell>
               {getWeekDates().map((date) => (
-                <TableCell key={date.toISOString()} align="center" style={{ minWidth: 150 }}>
-                  <Typography variant="subtitle2">
+                <TableCell key={date.toISOString()} align="center" className="font-poppins" style={{ minWidth: 150 }}>
+                  <Typography variant="subtitle2" className="font-poppins">
                     {date.toLocaleDateString('vi-VN', { weekday: 'long' })}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatDate(date)}
+                  <Typography variant="body2" color="text.secondary" className="font-poppins">
+                    {date.toLocaleDateString('vi-VN')}
                   </Typography>
                 </TableCell>
               ))}
@@ -246,11 +254,11 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
           <TableBody>
             {SHIFTS.map((shift) => (
               <TableRow key={shift.id}>
-                <TableCell>
-                  <Typography variant="subtitle2" style={{ color: shift.color }}>
+                <TableCell className="font-poppins">
+                  <Typography variant="subtitle2" style={{ color: shift.color }} className="font-poppins">
                     {shift.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" className="font-poppins">
                     {shift.startTime} - {shift.endTime}
                   </Typography>
                 </TableCell>
@@ -261,8 +269,8 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
                       key={date.toISOString()} 
                       align="center"
                       onClick={() => setScheduleDialog({ open: true, shift, date })}
+                      className="font-poppins cursor-pointer"
                       style={{ 
-                        cursor: 'pointer',
                         backgroundColor: assignedStaff.length ? `${shift.color}10` : undefined,
                       }}
                     >

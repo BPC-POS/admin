@@ -28,6 +28,7 @@ import {
   Visibility,
   PictureAsPdf,
   Calculate,
+  Close,
 } from '@mui/icons-material';
 import { Staff, PayrollRecord, PayrollStatus } from '@/types/staff';
 import { formatCurrency } from '@/utils/format';
@@ -90,32 +91,34 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
     <Box>
       <Box className="mb-4 flex justify-between items-center">
         <Box className="flex gap-4">
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Tháng</InputLabel>
+          <FormControl sx={{ minWidth: 120 }} className="font-poppins">
+            <InputLabel className="font-poppins">Tháng</InputLabel>
             <Select
               value={selectedMonth}
               label="Tháng"
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="font-poppins"
             >
               {Array.from({ length: 12 }, (_, i) => (
-                <MenuItem key={i} value={i}>
+                <MenuItem key={i} value={i} className="font-poppins">
                   Tháng {i + 1}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Năm</InputLabel>
+          <FormControl sx={{ minWidth: 120 }} className="font-poppins">
+            <InputLabel className="font-poppins">Năm</InputLabel>
             <Select
               value={selectedYear}
               label="Năm"
               onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="font-poppins"
             >
               {Array.from({ length: 5 }, (_, i) => {
                 const year = new Date().getFullYear() - 2 + i;
                 return (
-                  <MenuItem key={year} value={year}>
+                  <MenuItem key={year} value={year} className="font-poppins">
                     {year}
                   </MenuItem>
                 );
@@ -128,46 +131,47 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
           variant="contained"
           startIcon={<Calculate />}
           onClick={handleGeneratePayroll}
+          className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
         >
           Tính lương
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nhân viên</TableCell>
-              <TableCell align="center">Ngày công</TableCell>
-              <TableCell align="right">Lương cơ bản</TableCell>
-              <TableCell align="right">Phụ cấp</TableCell>
-              <TableCell align="right">Thưởng</TableCell>
-              <TableCell align="right">Khấu trừ</TableCell>
-              <TableCell align="right">Thực lĩnh</TableCell>
-              <TableCell align="center">Trạng thái</TableCell>
-              <TableCell align="right">Thao tác</TableCell>
+              <TableCell className="font-poppins">Nhân viên</TableCell>
+              <TableCell align="center" className="font-poppins">Ngày công</TableCell>
+              <TableCell align="right" className="font-poppins">Lương cơ bản</TableCell>
+              <TableCell align="right" className="font-poppins">Phụ cấp</TableCell>
+              <TableCell align="right" className="font-poppins">Thưởng</TableCell>
+              <TableCell align="right" className="font-poppins">Khấu trừ</TableCell>
+              <TableCell align="right" className="font-poppins">Thực lĩnh</TableCell>
+              <TableCell align="center" className="font-poppins">Trạng thái</TableCell>
+              <TableCell align="right" className="font-poppins">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {payrollRecords.map((record) => (
               <TableRow key={record.id}>
                 <TableCell>
-                  <Typography variant="subtitle2">
+                  <Typography variant="subtitle2" className="font-poppins">
                     ID: {record.staffId}
                   </Typography>
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" className="font-poppins">
                   {record.workingDays} ngày
-                  <Typography variant="caption" display="block" color="text.secondary">
+                  <Typography variant="caption" display="block" color="text.secondary" className="font-poppins">
                     ({record.totalHours} giờ)
                   </Typography>
                 </TableCell>
-                <TableCell align="right">{formatCurrency(record.baseSalary)}</TableCell>
-                <TableCell align="right">{formatCurrency(record.allowance)}</TableCell>
-                <TableCell align="right">{formatCurrency(record.bonus)}</TableCell>
-                <TableCell align="right">{formatCurrency(record.deductions)}</TableCell>
-                <TableCell align="right">
-                  <Typography color="primary" fontWeight="bold">
+                <TableCell align="right" className="font-poppins">{formatCurrency(record.baseSalary)}</TableCell>
+                <TableCell align="right" className="font-poppins">{formatCurrency(record.allowance)}</TableCell>
+                <TableCell align="right" className="font-poppins">{formatCurrency(record.bonus)}</TableCell>
+                <TableCell align="right" className="font-poppins">{formatCurrency(record.deductions)}</TableCell>
+                <TableCell align="right" className="font-poppins">
+                  <Typography color="primary" fontWeight="bold" className="font-poppins">
                     {formatCurrency(record.netSalary)}
                   </Typography>
                 </TableCell>
@@ -176,6 +180,7 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
                     label={getStatusLabel(record.status)}
                     color={getStatusColor(record.status)}
                     size="small"
+                    className="font-poppins"
                   />
                 </TableCell>
                 <TableCell align="right">
@@ -197,54 +202,69 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
         onClose={() => setIsDetailModalOpen(false)}
         maxWidth="md"
         fullWidth
+        className="font-poppins"
+        PaperProps={{
+          className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+        }}
       >
-        <DialogTitle className="flex justify-between items-center">
-          Chi tiết bảng lương
-          <Button
-            startIcon={<PictureAsPdf />}
-            onClick={() => {/* TODO: Export PDF */}}
-          >
-            Xuất PDF
-          </Button>
+        <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+          <span className="text-xl font-bold font-poppins">Chi tiết bảng lương</span>
+          <Box className="flex gap-2">
+            <Button
+              startIcon={<PictureAsPdf />}
+              onClick={() => {/* TODO: Export PDF */}}
+              className="text-white hover:text-gray-200 font-poppins"
+            >
+              Xuất PDF
+            </Button>
+            <IconButton onClick={() => setIsDetailModalOpen(false)} size="small" className="text-white hover:text-gray-200">
+              <Close />
+            </IconButton>
+          </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className="p-6">
           {selectedPayroll && (
             <Grid container spacing={3} className="mt-2">
               <Grid item xs={12} md={6}>
-                <Typography variant="subtitle2">Thông tin cơ bản</Typography>
+                <Typography variant="subtitle2" className="font-poppins">Thông tin cơ bản</Typography>
                 <Box className="mt-2 space-y-2">
-                  <Typography>Nhân viên ID: {selectedPayroll.staffId}</Typography>
-                  <Typography>
+                  <Typography className="font-poppins">Nhân viên ID: {selectedPayroll.staffId}</Typography>
+                  <Typography className="font-poppins">
                     Kỳ lương: Tháng {selectedPayroll.month + 1}/{selectedPayroll.year}
                   </Typography>
-                  <Typography>Số ngày làm việc: {selectedPayroll.workingDays} ngày</Typography>
-                  <Typography>Tổng giờ làm: {selectedPayroll.totalHours} giờ</Typography>
-                  <Typography>Giờ làm thêm: {selectedPayroll.overtime} giờ</Typography>
+                  <Typography className="font-poppins">Số ngày làm việc: {selectedPayroll.workingDays} ngày</Typography>
+                  <Typography className="font-poppins">Tổng giờ làm: {selectedPayroll.totalHours} giờ</Typography>
+                  <Typography className="font-poppins">Giờ làm thêm: {selectedPayroll.overtime} giờ</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} md={6}>
-                <Typography variant="subtitle2">Chi tiết lương</Typography>
+                <Typography variant="subtitle2" className="font-poppins">Chi tiết lương</Typography>
                 <Box className="mt-2 space-y-2">
-                  <Typography>Lương cơ bản: {formatCurrency(selectedPayroll.baseSalary)}</Typography>
-                  <Typography>Phụ cấp: {formatCurrency(selectedPayroll.allowance)}</Typography>
-                  <Typography>Thưởng: {formatCurrency(selectedPayroll.bonus)}</Typography>
-                  <Typography>Khấu trừ: {formatCurrency(selectedPayroll.deductions)}</Typography>
-                  <Typography color="primary" fontWeight="bold">
+                  <Typography className="font-poppins">Lương cơ bản: {formatCurrency(selectedPayroll.baseSalary)}</Typography>
+                  <Typography className="font-poppins">Phụ cấp: {formatCurrency(selectedPayroll.allowance)}</Typography>
+                  <Typography className="font-poppins">Thưởng: {formatCurrency(selectedPayroll.bonus)}</Typography>
+                  <Typography className="font-poppins">Khấu trừ: {formatCurrency(selectedPayroll.deductions)}</Typography>
+                  <Typography color="primary" fontWeight="bold" className="font-poppins">
                     Thực lĩnh: {formatCurrency(selectedPayroll.netSalary)}
                   </Typography>
                 </Box>
               </Grid>
               {selectedPayroll.note && (
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2">Ghi chú</Typography>
-                  <Typography className="mt-1">{selectedPayroll.note}</Typography>
+                  <Typography variant="subtitle2" className="font-poppins">Ghi chú</Typography>
+                  <Typography className="mt-1 font-poppins">{selectedPayroll.note}</Typography>
                 </Grid>
               )}
             </Grid>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsDetailModalOpen(false)}>Đóng</Button>
+        <DialogActions className="p-4">
+          <Button 
+            onClick={() => setIsDetailModalOpen(false)}
+            className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl"
+          >
+            Đóng
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -20,23 +20,23 @@ import { Staff, StaffPosition, Department } from '@/types/staff';
 
 // Mock data
 const mockStaff: Staff[] = [
-  {
-    id: 1,
-    userId: 1,
-    position: StaffPosition.MANAGER,
-    department: Department.COFFEE_BAR,
-    startDate: new Date('2023-01-01'),
-    salary: {
-      base: 10000000,
-      hourly: 50000,
-      allowance: 1000000,
-    },
-    schedule: [],
-    leaves: [],
-    shifts: [],
-  },
-  // Thêm mock data khác...
-];
+    {
+        id: 1,
+        userId: 1,
+        position: StaffPosition.MANAGER,
+        department: Department.COFFEE_BAR,
+        startDate: new Date('2023-01-01'),
+        salary: {
+          base: 10000000,
+          hourly: 50000,
+          allowance: 1000000,
+        },
+        schedule: [],
+        leaves: [],
+        shifts: [],
+      },
+      // Thêm mock data khác...
+    ];
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -122,53 +122,63 @@ const StaffPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <Box className="mb-6">
-        <Typography variant="h4" component="h1" className="font-bold mb-4">
-          Quản lý nhân viên
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => {
-            setEditingStaff(undefined);
-            setIsModalOpen(true);
-          }}
-        >
-          Thêm nhân viên
-        </Button>
+    <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
+        <Box className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+          <Typography variant="h4" component="h1" className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-200">
+            Quản lý nhân viên
+          </Typography>
+          <Button
+            variant="contained"
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
+            startIcon={<Add />}
+            onClick={() => {
+              setEditingStaff(undefined);
+              setIsModalOpen(true);
+            }}
+          >
+            Thêm nhân viên
+          </Button>
+        </Box>
+
+      <Box className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={activeTab} onChange={handleTabChange}
+            TabIndicatorProps={{
+                style: {
+                  background: 'linear-gradient(to right, #2C3E50, #3498DB)',
+                },
+              }}
+              className="text-gray-800"
+          >
+              <Tab label="Danh sách nhân viên" className="font-medium text-gray-800"/>
+              <Tab label="Lịch làm việc" className="font-medium text-gray-800"/>
+              <Tab label="Đơn xin nghỉ" className="font-medium text-gray-800"/>
+              <Tab label="Bảng lương" className="font-medium text-gray-800"/>
+          </Tabs>
+        </Box>
+
+        <TabPanel value={activeTab} index={0}>
+          <StaffList
+            staff={staff}
+            onEdit={(staff) => {
+              setEditingStaff(staff);
+              setIsModalOpen(true);
+            }}
+          />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={1}>
+          <StaffSchedule staff={staff} />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={2}>
+          <LeaveRequests staff={staff} />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={3}>
+          <PayrollManagement staff={staff} />
+        </TabPanel>
       </Box>
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label="Danh sách nhân viên" />
-          <Tab label="Lịch làm việc" />
-          <Tab label="Đơn xin nghỉ" />
-          <Tab label="Bảng lương" />
-        </Tabs>
-      </Box>
-
-      <TabPanel value={activeTab} index={0}>
-        <StaffList
-          staff={staff}
-          onEdit={(staff) => {
-            setEditingStaff(staff);
-            setIsModalOpen(true);
-          }}
-        />
-      </TabPanel>
-
-      <TabPanel value={activeTab} index={1}>
-        <StaffSchedule staff={staff} />
-      </TabPanel>
-
-      <TabPanel value={activeTab} index={2}>
-        <LeaveRequests staff={staff} />
-      </TabPanel>
-
-      <TabPanel value={activeTab} index={3}>
-        <PayrollManagement staff={staff} />
-      </TabPanel>
 
       <StaffModal
         open={isModalOpen}
@@ -192,7 +202,7 @@ const StaffPage = () => {
         autoHideDuration={6000}
         onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
       >
-        <Alert severity={snackbar.severity}>
+        <Alert severity={snackbar.severity} className="backdrop-blur-lg shadow-lg [font-family:system-ui,Poppins,sans-serif]">
           {snackbar.message}
         </Alert>
       </Snackbar>
