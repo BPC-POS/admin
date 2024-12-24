@@ -28,7 +28,7 @@ const UserFilter: React.FC<UserFilterProps> = ({
   };
 
   return (
-    <Paper className="p-12 font-poppin bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg mb-6 ">
+    <Paper className="p-12 font-poppin bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg mb-6 ">
       <Grid container spacing={3}>
         <Grid item xs={12} sm={4}>
           <TextField

@@ -89,7 +89,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
 
   return (
     <>
-      <Paper className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <Paper className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
         <Box className="flex justify-between items-center">
           <Typography variant="h6" className="font-poppins text-black">Danh mục sản phẩm</Typography>
           <Button
@@ -148,7 +148,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         PaperProps={{
-          className: "bg-white/80 backdrop-blur-lg rounded-xl shadow-lg"
+          className: "bg-white/90 backdrop-blur-lg rounded-xl shadow-lg"
         }}
       >
         <MenuItem onClick={handleEdit} className="font-poppins">

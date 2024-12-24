@@ -174,13 +174,14 @@ const MenuPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" component="h1" className="font-bold">
+    <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
+      <Box className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Typography variant="h4" component="h1" className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-200">
           Quản lý Menu
         </Typography>
         <Button
           variant="contained"
+          className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           startIcon={<Add />}
           onClick={() => setIsModalOpen(true)}
         >
@@ -188,16 +189,18 @@ const MenuPage = () => {
         </Button>
       </Box>
 
-      <MenuList
-        menuItems={menuItems}
-        onEdit={(item) => {
-          setEditingItem(item);
-          setIsModalOpen(true);
-        }}
-        onDelete={handleDeleteMenu}
-        onToggleActive={handleToggleActive}
-        onReorder={handleReorderMenu}
-      />
+      <div className="rounded-2xl shadow-lg">
+        <MenuList
+          menuItems={menuItems}
+          onEdit={(item) => {
+            setEditingItem(item);
+            setIsModalOpen(true);
+          }}
+          onDelete={handleDeleteMenu}
+          onToggleActive={handleToggleActive}
+          onReorder={handleReorderMenu}
+        />
+      </div>
 
       <MenuModal
         open={isModalOpen}
@@ -216,7 +219,7 @@ const MenuPage = () => {
         autoHideDuration={6000}
         onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
       >
-        <Alert severity={snackbar.severity}>
+        <Alert severity={snackbar.severity} className="backdrop-blur-lg shadow-lg [font-family:system-ui,Poppins,sans-serif]">
           {snackbar.message}
         </Alert>
       </Snackbar>

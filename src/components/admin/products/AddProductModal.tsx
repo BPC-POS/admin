@@ -185,7 +185,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       maxWidth="md" 
       fullWidth
       PaperProps={{
-        className: 'max-h-[90vh] bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
+        className: 'max-h-[90vh] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -267,7 +267,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   >
                     {Object.values(ProductStatus).map((status) => (
                       <MenuItem key={status} value={status}>
-                        {status}
+                        {status === ProductStatus.ACTIVE ? 'Đang bán' : 
+                         status === ProductStatus.INACTIVE ? 'Ngừng bán' :
+                         status === ProductStatus.OUT_OF_STOCK ? 'Hết hàng' : status}
                       </MenuItem>
                     ))}
                   </Select>

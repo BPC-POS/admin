@@ -34,6 +34,39 @@ const mockTables: Table[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: 2, 
+    name: 'Bàn 2',
+    capacity: 6,
+    status: TableStatus.AVAILABLE,
+    area: 'indoor',
+    isActive: true,
+    qrCode: '/qr/table-2.png',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 3,
+    name: 'Bàn 3',
+    capacity: 2,
+    status: TableStatus.OCCUPIED,
+    area: 'outdoor',
+    isActive: true,
+    qrCode: '/qr/table-3.png', 
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 4,
+    name: 'Bàn VIP 1',
+    capacity: 8,
+    status: TableStatus.RESERVED,
+    area: 'vip',
+    isActive: true,
+    qrCode: '/qr/table-4.png',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
   // Thêm mock data khác...
 ];
 
@@ -135,36 +168,39 @@ const TablesPage = () => {
     : tables.filter(table => table.area === currentArea);
 
   return (
-    <div className="p-6">
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" component="h1" className="font-bold">
+    <div className="min-h-screen bg-gradient-to-br from-[#2C3E50] to-[#3498DB] p-6">
+      <Box className="flex justify-between items-center mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Typography variant="h4" component="h1" className=" font-montserrat font-bold mb-4 bor bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-300">
           Quản lý bàn
         </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => setIsModalOpen(true)}
+          className="bg-white text-[#2C3E50] hover:bg-white/90 font-poppins font-bold"
         >
           Thêm bàn
         </Button>
       </Box>
 
-      <TableAreaTabs
-        areas={mockAreas}
-        currentArea={currentArea}
-        onAreaChange={setCurrentArea}
-        tables={tables}
-      />
+      <Paper className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+        <TableAreaTabs
+          areas={mockAreas}
+          currentArea={currentArea}
+          onAreaChange={setCurrentArea}
+          tables={tables}
+        />
 
-      <TableList
-        tables={filteredTables}
-        onEdit={(table) => {
-          setEditingTable(table);
-          setIsModalOpen(true);
-        }}
-        onDelete={handleDeleteTable}
-        onStatusChange={handleStatusChange}
-      />
+        <TableList
+          tables={filteredTables}
+          onEdit={(table) => {
+            setEditingTable(table);
+            setIsModalOpen(true);
+          }}
+          onDelete={handleDeleteTable}
+          onStatusChange={handleStatusChange}
+        />
+      </Paper>
 
       <TableModal
         open={isModalOpen}
@@ -191,4 +227,4 @@ const TablesPage = () => {
   );
 };
 
-export default TablesPage; 
+export default TablesPage;

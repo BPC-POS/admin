@@ -64,7 +64,7 @@ const ProductSelection: React.FC<{
 
   return (
     <Box>
-      <Typography variant="subtitle2" className="mb-2">
+      <Typography variant="subtitle2" className="mb-2 font-poppins">
         Chọn sản phẩm cho menu
       </Typography>
       <Autocomplete
@@ -81,6 +81,7 @@ const ProductSelection: React.FC<{
             label="Sản phẩm"
             placeholder="Tìm kiếm sản phẩm..."
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="font-poppins"
           />
         )}
         renderOption={(props, option) => (
@@ -94,10 +95,10 @@ const ProductSelection: React.FC<{
                 />
               )}
               <div>
-                <Typography variant="body1">
+                <Typography variant="body1" className="font-poppins">
                   {option.name}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" className="font-poppins">
                   {option.category} - {option.price.toLocaleString()}đ
                 </Typography>
               </div>
@@ -112,6 +113,7 @@ const ProductSelection: React.FC<{
                 key={option.id}
                 label={option.name}
                 {...tagProps}
+                className="font-poppins"
                 avatar={
                   option.image ? (
                     <img 
@@ -129,7 +131,7 @@ const ProductSelection: React.FC<{
       
       {selectedProducts.length > 0 && (
         <Box className="mt-4">
-          <Typography variant="subtitle2" className="mb-2">
+          <Typography variant="subtitle2" className="mb-2 font-poppins">
             Sản phẩm đã chọn ({selectedProducts.length})
           </Typography>
           <Box className="flex flex-wrap gap-2">
@@ -146,10 +148,10 @@ const ProductSelection: React.FC<{
                   />
                 )}
                 <div>
-                  <Typography variant="body2">
+                  <Typography variant="body2" className="font-poppins">
                     {product.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" className="font-poppins">
                     {product.price.toLocaleString()}đ
                   </Typography>
                 </div>
@@ -205,19 +207,27 @@ const MenuModal: React.FC<MenuModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
+      }}
+    >
       <form onSubmit={handleSubmit}>
-        <DialogTitle>
-          {editItem ? 'Chỉnh sửa menu' : 'Thêm menu mới'}
+        <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+          <Typography variant="h6" className="font-poppins">
+            {editItem ? 'Chỉnh sửa menu' : 'Thêm menu mới'}
+          </Typography>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers className="p-6">
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <ImageUpload
                 currentImage={formData.image}
                 onImageSelect={(file) => {
-                  // TODO: Implement actual image upload
-                  // For now, just create a temporary URL
                   const imageUrl = URL.createObjectURL(file);
                   handleChange('image', imageUrl);
                 }}
@@ -233,6 +243,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 required
+                className="font-poppins"
               />
             </Grid>
 
@@ -244,21 +255,23 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 rows={3}
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
+                className="font-poppins"
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <InputLabel>Loại menu</InputLabel>
+                <InputLabel className="font-poppins">Loại menu</InputLabel>
                 <Select
                   value={formData.type}
                   label="Loại menu"
                   onChange={(e) => handleChange('type', e.target.value)}
                   required
+                  className="font-poppins"
                 >
                   {Object.values(MenuType).map((type) => (
-                    <MuiMenuItem key={type} value={type}>
-                      {type}
+                    <MuiMenuItem key={type} value={type} className="font-poppins">
+                      {type === MenuType.REGULAR ? 'Thường xuyên' : 'Theo mùa'}
                     </MuiMenuItem>
                   ))}
                 </Select>
@@ -284,6 +297,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 })}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ step: 300 }}
+                className="font-poppins"
               />
             </Grid>
 
@@ -298,6 +312,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 })}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ step: 300 }}
+                className="font-poppins"
               />
             </Grid>
 
@@ -312,7 +327,19 @@ const MenuModal: React.FC<MenuModalProps> = ({
                     {...params}
                     label="Ngày phục vụ"
                     placeholder="Chọn ngày"
+                    className="font-poppins"
                   />
+                )}
+                renderOption={(props, option) => (
+                  <li {...props} className="font-poppins">
+                    {option === WeekDay.MONDAY ? 'Thứ 2' :
+                     option === WeekDay.TUESDAY ? 'Thứ 3' :
+                     option === WeekDay.WEDNESDAY ? 'Thứ 4' :
+                     option === WeekDay.THURSDAY ? 'Thứ 5' :
+                     option === WeekDay.FRIDAY ? 'Thứ 6' :
+                     option === WeekDay.SATURDAY ? 'Thứ 7' :
+                     'Chủ nhật'}
+                  </li>
                 )}
               />
             </Grid>
@@ -326,16 +353,23 @@ const MenuModal: React.FC<MenuModalProps> = ({
                   />
                 }
                 label="Hiển thị menu"
+                className="font-poppins"
               />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Hủy</Button>
+        <DialogActions className="p-4">
+          <Button 
+            onClick={onClose}
+            className="font-poppins"
+          >
+            Hủy
+          </Button>
           <Button 
             type="submit" 
             variant="contained"
             disabled={isLoading}
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 font-poppins"
           >
             {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
           </Button>

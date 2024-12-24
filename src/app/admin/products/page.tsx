@@ -269,7 +269,7 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
-      <Box className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <Box className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
         <Typography variant="h4" component="h1" className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-200">
           Quản lý sản phẩm
         </Typography>
@@ -301,7 +301,7 @@ const ProductsPage = () => {
            />
        </Box>
 
-      <Box className="mt-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <Box className="mt-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
          <ProductList
            products={products}
            currentCategory={currentCategory}

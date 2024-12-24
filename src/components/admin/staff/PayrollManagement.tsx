@@ -137,7 +137,7 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
         </Button>
       </Box>
 
-      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
@@ -204,7 +204,7 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
         fullWidth
         className="font-poppins"
         PaperProps={{
-          className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+          className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
         }}
       >
         <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">

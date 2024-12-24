@@ -23,6 +23,7 @@ const mockStaff: Staff[] = [
     {
         id: 1,
         userId: 1,
+        fullName: "Nguyễn Văn A",
         position: StaffPosition.MANAGER,
         department: Department.COFFEE_BAR,
         startDate: new Date('2023-01-01'),
@@ -123,7 +124,7 @@ const StaffPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
-        <Box className="mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+        <Box className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
           <Typography variant="h4" component="h1" className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-200">
             Quản lý nhân viên
           </Typography>
@@ -140,7 +141,7 @@ const StaffPage = () => {
           </Button>
         </Box>
 
-      <Box className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <Box className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={handleTabChange}
             TabIndicatorProps={{

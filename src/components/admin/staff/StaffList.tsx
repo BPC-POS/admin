@@ -78,7 +78,7 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
 
   return (
     <Box className="">
-      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
@@ -95,9 +95,12 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
               <TableRow key={staffMember.id}>
                 <TableCell>
                   <Box className="flex items-center gap-3">
-                    <Avatar>{staffMember.id}</Avatar>
+                    <Avatar>{staffMember.fullName[0]}</Avatar>
                     <div>
                       <Typography variant="subtitle2" className="font-poppins">
+                        {staffMember.fullName}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" className="font-poppins">
                         ID: {staffMember.userId}
                       </Typography>
                     </div>
@@ -142,7 +145,7 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-          className="bg-white/80"
+          className="bg-white/90"
       >
         <MenuItem onClick={() => {
           if (selectedStaff) onEdit(selectedStaff);

@@ -96,7 +96,7 @@ const UserList: React.FC<UserListProps> = ({
 
   return (
     <Box className="">
-      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
@@ -173,7 +173,7 @@ const UserList: React.FC<UserListProps> = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        className="bg-white/80"
+        className="bg-white/90"
       >
         <MenuItem onClick={() => {
           if (selectedUser) onEdit(selectedUser);

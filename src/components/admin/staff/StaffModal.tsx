@@ -57,6 +57,9 @@ const StaffModal: React.FC<StaffModalProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
+    if (!formData.fullName?.trim()) {
+      newErrors.fullName = 'Họ và tên không được để trống';
+    }
     if (!formData.userId) {
       newErrors.userId = 'ID người dùng không được để trống';
     }
@@ -110,7 +113,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
       fullWidth
       className="font-poppins"
       PaperProps={{
-        className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+        className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -125,6 +128,19 @@ const StaffModal: React.FC<StaffModalProps> = ({
 
         <DialogContent dividers className="p-6">
           <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Họ và tên"
+                value={formData.fullName || ''}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                error={!!errors.fullName}
+                helperText={errors.fullName}
+                required
+                className="font-poppins"
+              />
+            </Grid>
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth

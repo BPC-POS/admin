@@ -83,79 +83,88 @@ const OrderList: React.FC<OrderListProps> = ({
 
   return (
     <Box>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="rounded-xl overflow-hidden shadow-lg bg-white/90 backdrop-blur-sm">
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Mã đơn</TableCell>
-              <TableCell>Khách hàng</TableCell>
-              <TableCell align="center">Bàn</TableCell>
-              <TableCell align="center">Trạng thái</TableCell>
-              <TableCell align="center">Thanh toán</TableCell>
-              <TableCell align="right">Tổng tiền</TableCell>
-              <TableCell align="center">Thao tác</TableCell>
+            <TableRow className="bg-gradient-to-r from-blue-100 to-blue-50">
+              <TableCell className="font-poppins font-semibold">Mã đơn</TableCell>
+              <TableCell className="font-poppins font-semibold">Khách hàng</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Bàn</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Trạng thái</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Thanh toán</TableCell>
+              <TableCell align="right" className="font-poppins font-semibold">Tổng tiền</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedOrders.map((order) => (
-              <TableRow key={order.id} hover>
-                <TableCell>
-                  <Typography variant="subtitle2">
+              <TableRow 
+                key={order.id} 
+                hover 
+                className="transition-colors duration-150 hover:bg-blue-50/50"
+              >
+                <TableCell className="border-b border-blue-100/30">
+                  <Typography variant="subtitle2" className="font-poppins font-medium">
                     {order.orderNumber}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" className="font-poppins text-gray-500">
                     {new Date(order.createdAt).toLocaleString()}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2">
+                <TableCell className="border-b border-blue-100/30">
+                  <Typography variant="subtitle2" className="font-poppins font-medium">
                     {order.customerName}
                   </Typography>
                   {order.customerPhone && (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" className="font-poppins text-gray-500">
                       {order.customerPhone}
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" className="border-b border-blue-100/30 font-poppins">
                   {order.tableId || '-'}
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" className="border-b border-blue-100/30">
                   <Chip
                     label={statusLabels[order.status]}
                     color={statusColors[order.status]}
                     size="small"
+                    className="font-poppins"
                   />
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" className="border-b border-blue-100/30">
                   <Chip
                     label={paymentStatusLabels[order.paymentStatus]}
                     color={paymentStatusColors[order.paymentStatus]}
                     size="small"
+                    className="font-poppins"
                   />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" className="border-b border-blue-100/30 font-poppins font-medium">
                   {formatCurrency(order.totalAmount)}
                 </TableCell>
-                <TableCell align="center">
-                  <Tooltip title="Xem chi tiết">
-                    <IconButton
-                      size="small"
-                      onClick={() => onViewDetail(order)}
-                    >
-                      <Visibility />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="In hóa đơn">
-                    <IconButton size="small">
-                      <Receipt />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="In chế biến">
-                    <IconButton size="small">
-                      <LocalPrintshop />
-                    </IconButton>
-                  </Tooltip>
+                <TableCell align="center" className="border-b border-blue-100/30">
+                  <Box className="flex justify-center gap-1">
+                    <Tooltip title="Xem chi tiết">
+                      <IconButton
+                        size="small"
+                        onClick={() => onViewDetail(order)}
+                        className="text-blue-600 hover:bg-blue-50"
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="In hóa đơn">
+                      <IconButton size="small" className="text-green-600 hover:bg-green-50">
+                        <Receipt />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="In chế biến">
+                      <IconButton size="small" className="text-purple-600 hover:bg-purple-50">
+                        <LocalPrintshop />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -163,12 +172,14 @@ const OrderList: React.FC<OrderListProps> = ({
         </Table>
       </TableContainer>
 
-      <Box className="mt-4 flex justify-center">
+      <Box className="mt-6 flex justify-center">
         <Pagination
           count={Math.ceil(orders.length / ITEMS_PER_PAGE)}
           page={page}
           onChange={handlePageChange}
           color="primary"
+          className="font-poppins"
+          size="large"
         />
       </Box>
     </Box>

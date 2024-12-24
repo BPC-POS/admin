@@ -64,16 +64,16 @@ const MenuList: React.FC<MenuListProps> = ({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell width={50}></TableCell>
-              <TableCell>Tên menu</TableCell>
-              <TableCell>Mô tả</TableCell>
-              <TableCell align="center">Số sản phẩm</TableCell>
-              <TableCell align="center">Trạng thái</TableCell>
-              <TableCell align="right">Thao tác</TableCell>
+              <TableCell width={50} className="font-poppins font-semibold"></TableCell>
+              <TableCell className="font-poppins font-semibold">Tên menu</TableCell>
+              <TableCell className="font-poppins font-semibold">Mô tả</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Số sản phẩm</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Trạng thái</TableCell>
+              <TableCell align="right" className="font-poppins font-semibold">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <Droppable droppableId="menu-items">
@@ -93,9 +93,10 @@ const MenuList: React.FC<MenuListProps> = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         hover
+                        className="hover:bg-gray-50/50"
                       >
                         <TableCell {...provided.dragHandleProps}>
-                          <DragIndicator color="action" />
+                          <DragIndicator className="text-gray-400" />
                         </TableCell>
                         <TableCell>
                           <Box className="flex items-center gap-3">
@@ -105,17 +106,19 @@ const MenuList: React.FC<MenuListProps> = ({
                                 alt={item.name}
                                 width={48}
                                 height={48}
-                                className="rounded-md object-cover"
+                                className="rounded-lg object-cover shadow-sm"
                               />
                             )}
-                            <Typography variant="subtitle1">
+                            <Typography variant="subtitle1" className="font-poppins font-medium">
                               {item.name}
                             </Typography>
                           </Box>
                         </TableCell>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell align="center">
-                          {item.products.length}
+                        <TableCell className="font-poppins text-gray-600">{item.description}</TableCell>
+                        <TableCell align="center" className="font-poppins">
+                          <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600">
+                            {item.products.length}
+                          </span>
                         </TableCell>
                         <TableCell align="center">
                           <div className="flex items-center justify-center gap-2">
@@ -125,8 +128,8 @@ const MenuList: React.FC<MenuListProps> = ({
                               color="primary"
                             />
                             {item.isActive ? 
-                              <Visibility color="primary" /> : 
-                              <VisibilityOff color="action" />
+                              <Visibility className="text-blue-500" /> : 
+                              <VisibilityOff className="text-gray-400" />
                             }
                           </div>
                         </TableCell>
@@ -135,14 +138,15 @@ const MenuList: React.FC<MenuListProps> = ({
                             <IconButton 
                               size="small" 
                               onClick={() => onEdit(item)}
+                              className="hover:text-blue-600"
                             >
                               <Edit />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Xóa">
                             <IconButton 
-                              size="small" 
-                              color="error"
+                              size="small"
+                              className="text-red-500 hover:text-red-600"
                               onClick={() => onDelete(item.id)}
                             >
                               <Delete />

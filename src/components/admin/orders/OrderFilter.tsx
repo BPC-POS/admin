@@ -28,7 +28,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
   };
 
   return (
-    <Paper className="p-4">
+    <Paper className="p-6 rounded-xl bg-white/90 backdrop-blur-sm shadow-lg ">
       <Grid container spacing={3}>
         <Grid item xs={12} sm={4}>
           <TextField
@@ -36,27 +36,30 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             placeholder="Tìm kiếm đơn hàng..."
             value={filter.search || ''}
             onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
+            className="font-poppins"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search />
+                  <Search className="text-gray-500" />
                 </InputAdornment>
               ),
+              className: "rounded-lg bg-white",
             }}
           />
         </Grid>
 
         <Grid item xs={12} sm={4} md={2}>
           <FormControl fullWidth>
-            <InputLabel>Trạng thái</InputLabel>
+            <InputLabel className="font-poppins">Trạng thái</InputLabel>
             <Select
               value={filter.status || ''}
               label="Trạng thái"
               onChange={(e) => onFilterChange({ ...filter, status: e.target.value as OrderStatus })}
+              className="rounded-lg bg-white font-poppins"
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="" className="font-poppins">Tất cả</MenuItem>
               {Object.values(OrderStatus).map((status) => (
-                <MenuItem key={status} value={status}>
+                <MenuItem key={status} value={status} className="font-poppins">
                   {status}
                 </MenuItem>
               ))}
@@ -66,15 +69,16 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
 
         <Grid item xs={12} sm={4} md={2}>
           <FormControl fullWidth>
-            <InputLabel>Thanh toán</InputLabel>
+            <InputLabel className="font-poppins">Thanh toán</InputLabel>
             <Select
               value={filter.paymentStatus || ''}
               label="Thanh toán"
               onChange={(e) => onFilterChange({ ...filter, paymentStatus: e.target.value as PaymentStatus })}
+              className="rounded-lg bg-white font-poppins"
             >
-              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="" className="font-poppins">Tất cả</MenuItem>
               {Object.values(PaymentStatus).map((status) => (
-                <MenuItem key={status} value={status}>
+                <MenuItem key={status} value={status} className="font-poppins">
                   {status}
                 </MenuItem>
               ))}
@@ -90,6 +94,10 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             value={filter.startDate?.toISOString().split('T')[0] || ''}
             onChange={(e) => onFilterChange({ ...filter, startDate: e.target.value ? new Date(e.target.value) : undefined })}
             InputLabelProps={{ shrink: true }}
+            className="font-poppins"
+            InputProps={{
+              className: "rounded-lg bg-white",
+            }}
           />
         </Grid>
 
@@ -101,14 +109,19 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             value={filter.endDate?.toISOString().split('T')[0] || ''}
             onChange={(e) => onFilterChange({ ...filter, endDate: e.target.value ? new Date(e.target.value) : undefined })}
             InputLabelProps={{ shrink: true }}
+            className="font-poppins"
+            InputProps={{
+              className: "rounded-lg bg-white",
+            }}
           />
         </Grid>
 
-        <Grid item xs={12} className="flex justify-end gap-2">
+        <Grid item xs={12} className="flex justify-end gap-3">
           <Button
             variant="outlined"
             startIcon={<RestartAlt />}
             onClick={handleReset}
+            className="font-poppins font-medium text-blue-600 border-blue-600 hover:bg-blue-50"
           >
             Đặt lại
           </Button>
@@ -116,6 +129,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             variant="contained"
             startIcon={<FilterList />}
             onClick={() => {/* TODO: Apply filters */}}
+            className="font-poppins font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white shadow-md hover:shadow-lg transition-all duration-300"
           >
             Lọc
           </Button>

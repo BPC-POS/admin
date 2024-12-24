@@ -1,6 +1,7 @@
 export interface Staff {
   id: number;
   userId: number;
+  fullName: string;
   position: StaffPosition;
   department: Department;
   startDate: Date;

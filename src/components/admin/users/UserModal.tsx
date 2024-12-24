@@ -100,7 +100,7 @@ const UserModal: React.FC<UserModalProps> = ({
       fullWidth
       className="font-poppins"
       PaperProps={{
-        className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+        className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
       }}
     >
       <form onSubmit={handleSubmit}>
