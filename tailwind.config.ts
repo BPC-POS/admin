@@ -14,7 +14,9 @@ export default {
       },
     },
     fontFamily: {
-      poppins: ['Poppins', 'sans-serif']
+      poppins: ['Poppins', 'sans-serif'],
+      roboto: ['Roboto', 'sans-serif'],
+      montserrat: ['Montserrat', 'sans-serif'],
   }
   },
   plugins: [],

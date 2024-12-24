@@ -11,23 +11,23 @@ const AdminHeader: React.FC = () => {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        // Xử lý tìm kiếm ở đây
+        // Handle search here
         console.log('Searching for:', searchQuery);
     };
 
     return (
-        <header className="text-white p-4 rounded-lg" style={{ backgroundColor: "#2C3E50" }}>
+        <header className="text-white p-4 font-poppins" style={{ backgroundColor: "#2C3E50" }}>
             <div className="container mx-auto flex justify-between items-center">
                 <Link href='/admin/dashboard'>
                     <h1 className="font-bold text-xl">Admin Panel</h1>
                 </Link>
 
-                {/* Thanh tìm kiếm */}
+                {/* Search bar */}
                 <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-8">
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Tìm kiếm..."
+                            placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 
@@ -42,7 +42,7 @@ const AdminHeader: React.FC = () => {
                     </div>
                 </form>
 
-                {/* Icons bên phải */}
+                {/* Right icons */}
                 <div className="flex items-center space-x-4">
                     <IconButton sx={{ color: 'white' }}>
                         <Badge badgeContent={4} color="error">

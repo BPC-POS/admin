@@ -64,21 +64,21 @@ const UserModal: React.FC<UserModalProps> = ({
     if (!editItem) {
       const createData = formData as CreateUserDTO;
       if (!createData.username?.trim()) {
-        newErrors.username = 'Tên đăng nhập không được để trống';
+        newErrors.username = 'Vui lòng nhập tên đăng nhập';
       }
       if (!createData.password?.trim()) {
-        newErrors.password = 'Mật khẩu không được để trống';
+        newErrors.password = 'Vui lòng nhập mật khẩu';
       }
     }
 
     if (!formData.email?.trim()) {
-      newErrors.email = 'Email không được để trống';
+      newErrors.email = 'Vui lòng nhập email';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
 
     if (!formData.fullName?.trim()) {
-      newErrors.fullName = 'Họ tên không được để trống';
+      newErrors.fullName = 'Vui lòng nhập họ tên';
     }
 
     setErrors(newErrors);
@@ -98,16 +98,22 @@ const UserModal: React.FC<UserModalProps> = ({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      className="font-poppins"
+      PaperProps={{
+        className: "bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg"
+      }}
     >
       <form onSubmit={handleSubmit}>
-        <DialogTitle className="flex justify-between items-center">
-          {editItem ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
-          <IconButton onClick={onClose} size="small">
+        <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+          <span className="text-xl font-bold">
+            {editItem ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
+          </span>
+          <IconButton onClick={onClose} size="small" className="text-white hover:text-gray-200">
             <Close />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers>
+        <DialogContent dividers className="p-6">
           <Grid container spacing={3}>
             {!editItem && (
               <Grid item xs={12}>
@@ -119,6 +125,7 @@ const UserModal: React.FC<UserModalProps> = ({
                   error={!!errors.username}
                   helperText={errors.username}
                   required
+                  className="font-poppins"
                 />
               </Grid>
             )}
@@ -133,6 +140,7 @@ const UserModal: React.FC<UserModalProps> = ({
                 error={!!errors.email}
                 helperText={errors.email}
                 required
+                className="font-poppins"
               />
             </Grid>
 
@@ -147,6 +155,7 @@ const UserModal: React.FC<UserModalProps> = ({
                   error={!!errors.password}
                   helperText={errors.password}
                   required
+                  className="font-poppins"
                 />
               </Grid>
             )}
@@ -154,12 +163,13 @@ const UserModal: React.FC<UserModalProps> = ({
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Họ tên"
+                label="Họ và tên"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 error={!!errors.fullName}
                 helperText={errors.fullName}
                 required
+                className="font-poppins"
               />
             </Grid>
 
@@ -169,36 +179,44 @@ const UserModal: React.FC<UserModalProps> = ({
                 label="Số điện thoại"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="font-poppins"
               />
             </Grid>
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <InputLabel>Vai trò</InputLabel>
+                <InputLabel className="font-poppins">Vai trò</InputLabel>
                 <Select
                   value={formData.role}
                   label="Vai trò"
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                  className="font-poppins"
                 >
-                  <MenuItem value={UserRole.ADMIN}>Quản trị viên</MenuItem>
-                  <MenuItem value={UserRole.STAFF}>Nhân viên</MenuItem>
-                  <MenuItem value={UserRole.CASHIER}>Thu ngân</MenuItem>
-                  <MenuItem value={UserRole.WAITER}>Phục vụ</MenuItem>
-                  <MenuItem value={UserRole.CUSTOMER}>Khách hàng</MenuItem>
+                  <MenuItem value={UserRole.ADMIN} className="font-poppins">Quản trị viên</MenuItem>
+                  <MenuItem value={UserRole.STAFF} className="font-poppins">Nhân viên</MenuItem>
+                  <MenuItem value={UserRole.CASHIER} className="font-poppins">Thu ngân</MenuItem>
+                  <MenuItem value={UserRole.WAITER} className="font-poppins">Phục vụ</MenuItem>
+                  <MenuItem value={UserRole.CUSTOMER} className="font-poppins">Khách hàng</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose}>Hủy</Button>
+        <DialogActions className="p-4">
+          <Button 
+            onClick={onClose} 
+            className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl"
+          >
+            Hủy bỏ
+          </Button>
           <Button 
             type="submit" 
             variant="contained"
             disabled={isLoading}
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
-            {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
+            {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm mới'}
           </Button>
         </DialogActions>
       </form>

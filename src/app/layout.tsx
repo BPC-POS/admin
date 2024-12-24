@@ -1,32 +1,26 @@
 // app/layout.tsx
 import type { Metadata } from 'next';
 import './globals.css';
-import localFont from 'next/font/local';
+import { Poppins, Roboto, Montserrat } from 'next/font/google';
 
-const poppins = localFont({
-  src: [
-    {
-      path: '../../public/fonts/Poppins/Poppins-Regular.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-     {
-      path: '../../public/fonts/Poppins/Poppins-Medium.ttf',
-      weight: '500',
-      style: 'normal',
-    },
-      {
-      path: '../../public/fonts/Poppins/Poppins-SemiBold.ttf',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/Poppins/Poppins-Bold.ttf',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  display: 'swap'
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['100', '300', '400', '500', '700', '900'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  style: ['normal', 'italic'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -40,7 +34,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={poppins.className}>
+    <html lang="en" className={`${poppins.className} ${roboto.className} ${montserrat.className}`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:wght@400;600;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet" />
+      </head>
       <body>{children}</body>
     </html>
   );
