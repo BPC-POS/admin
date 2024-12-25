@@ -268,8 +268,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                     {Object.values(ProductStatus).map((status) => (
                       <MenuItem key={status} value={status}>
                         {status === ProductStatus.ACTIVE ? 'Đang bán' : 
-                         status === ProductStatus.INACTIVE ? 'Ngừng bán' :
-                         status === ProductStatus.OUT_OF_STOCK ? 'Hết hàng' : status}
+                         status === ProductStatus.INACTIVE ? 'Ngừng bán' : status}
                       </MenuItem>
                     ))}
                   </Select>

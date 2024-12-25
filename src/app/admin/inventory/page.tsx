@@ -14,8 +14,8 @@ import { Add } from '@mui/icons-material';
 import InventoryList from '@/components/admin/inventory/InventoryList';
 import InventoryModal from '@/components/admin/inventory/InventoryModal';
 import TransactionHistory from '@/components/admin/inventory/TransactionHistory';
-// import PurchaseOrders from '@/components/admin/inventory/PurchaseOrders';
-// import Suppliers from '@/components/admin/inventory/Suppliers';
+import PurchaseOrders from '@/components/admin/inventory/PurchaseOrders';
+import Suppliers from '@/components/admin/inventory/Suppliers';
 import { InventoryItem, InventoryCategory, InventoryStatus } from '@/types/inventory';
 
 // Mock data

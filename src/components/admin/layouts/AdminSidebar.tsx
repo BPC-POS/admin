@@ -18,7 +18,8 @@ import {
   Store,
   Receipt,
   LocalShipping,
-  EventNote
+  EventNote,
+  EmojiFoodBeverage
 } from '@mui/icons-material';
 
 interface AdminSidebarProps {
@@ -34,6 +35,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggle }) =>
     { icon: <People sx={{ fontSize: 24 }} />, text: 'Users', href: '/admin/users' },
     { icon: <FamilyRestroom sx={{ fontSize: 24 }} />, text: 'Staff', href: '/admin/staff' },
     { icon: <Inventory sx={{ fontSize: 24 }} />, text: 'Products', href: '/admin/products' },
+    { icon: <EmojiFoodBeverage sx={{ fontSize: 24 }} />, text: 'Recipes', href: '/admin/recipes' },
     { icon: <Restaurant sx={{ fontSize: 24 }} />, text: 'Menu', href: '/admin/menu' },
     { icon: <TableRestaurant sx={{ fontSize: 24 }} />, text: 'Tables', href: '/admin/tables' },
     { icon: <Store sx={{ fontSize: 24 }} />, text: 'POS', href: '/admin/pos' },
