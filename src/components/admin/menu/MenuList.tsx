@@ -37,6 +37,7 @@ interface MenuListProps {
   onDelete: (id: number) => void;
   onToggleActive: (id: number, isActive: boolean) => void;
   onReorder: (items: MenuItem[]) => void;
+  onViewDetail: (item: MenuItem) => void;
 }
 
 const MenuList: React.FC<MenuListProps> = ({
@@ -45,6 +46,7 @@ const MenuList: React.FC<MenuListProps> = ({
   onDelete,
   onToggleActive,
   onReorder,
+  onViewDetail,
 }) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;

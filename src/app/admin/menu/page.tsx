@@ -10,10 +10,11 @@ import {
 import { Add } from '@mui/icons-material';
 import MenuList from '@/components/admin/menu/MenuList';
 import MenuModal from '@/components/admin/menu/MenuModal';
+import MenuDetailModal from '@/components/admin/menu/MenuDetailModal';
 import { MenuItem, MenuType, WeekDay } from '@/types/menu';
-import { Product } from '@/types/product';
+import mockProducts from '@/mocks/mockProducts';
 
-// Mock data - sẽ được thay thế bằng API call
+// Mock data cho menu
 const mockMenuItems: MenuItem[] = [
   {
     id: 1,
@@ -80,6 +81,8 @@ const MenuPage = () => {
     message: '',
     severity: 'success',
   });
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
 
   const handleAddMenu = async (data: any) => {
     try {
@@ -199,6 +202,10 @@ const MenuPage = () => {
           onDelete={handleDeleteMenu}
           onToggleActive={handleToggleActive}
           onReorder={handleReorderMenu}
+          onViewDetail={(item: MenuItem) => {
+            setSelectedMenuItem(item);
+            setIsDetailModalOpen(true);
+          }}
         />
       </div>
 
@@ -210,15 +217,20 @@ const MenuPage = () => {
         }}
         onSubmit={editingItem ? handleEditMenu : handleAddMenu}
         editItem={editingItem}
-        products={[]} // TODO: Pass actual products
+        products={mockProducts}
         isLoading={isLoading}
+      />
+
+      <MenuDetailModal
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        menuItem={selectedMenuItem}
       />
 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-      >
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
         <Alert severity={snackbar.severity} className="backdrop-blur-lg shadow-lg [font-family:system-ui,Poppins,sans-serif]">
           {snackbar.message}
         </Alert>
