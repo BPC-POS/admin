@@ -121,7 +121,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             variant="outlined"
             startIcon={<RestartAlt />}
             onClick={handleReset}
-            className="font-poppins font-medium text-blue-600 border-blue-600 hover:bg-blue-50"
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Đặt lại
           </Button>
@@ -129,7 +129,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             variant="contained"
             startIcon={<FilterList />}
             onClick={() => {/* TODO: Apply filters */}}
-            className="font-poppins font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Lọc
           </Button>

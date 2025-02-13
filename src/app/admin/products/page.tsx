@@ -13,54 +13,8 @@ import ProductList from '@/components/admin/products/ProductList';
 import AddProductModal from '@/components/admin/products/AddProductModal';
 import { Product, Category, ProductStatus } from '@/types/product';
 import test from '../../../../public/assets/images/tet.png'
-// Mock data - sau này sẽ được thay thế bằng API call
-const mockCategories: Category[] = [
-  { 
-    id: 'coffee', 
-    name: 'Cà phê', 
-    description: 'Các loại cà phê',
-    isActive: true 
-  },
-  { 
-    id: 'tea', 
-    name: 'Trà', 
-    description: 'Các loại trà',
-    isActive: true 
-  },
-  { 
-    id: 'milktea', 
-    name: 'Trà sữa', 
-    description: 'Các loại trà sữa',
-    isActive: true 
-  },
-  { 
-    id: 'smoothie', 
-    name: 'Sinh tố', 
-    description: 'Các loại sinh tố',
-    isActive: true 
-  }
-];
-
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    name: 'Cà phê đen',
-    price: 25000,
-    image: test.src,
-    category: 'coffee', 
-    description: 'Cà phê đen đậm đà hương vị Việt Nam',
-    status: ProductStatus.ACTIVE,
-    size: [
-      { name: 'S', price: 0, isDefault: true },
-      { name: 'M', price: 5000, isDefault: false },
-      { name: 'L', price: 10000, isDefault: false }
-    ],
-    isAvailable: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  // Thêm các sản phẩm mock khác
-];
+import  mockProducts from '@/mocks/mockProducts';
+import { mockCategories } from '@/mocks/mockCategories';
 
 const ProductsPage = () => {
   const [categories, setCategories] = useState<Category[]>(mockCategories);

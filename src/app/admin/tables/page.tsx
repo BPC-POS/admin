@@ -14,61 +14,8 @@ import TableList from '@/components/admin/tables/TableList';
 import TableModal from '@/components/admin/tables/TableModal';
 import TableAreaTabs from '@/components/admin/tables/TableAreaTabs';
 import { Table, TableStatus, TableArea } from '@/types/table';
-
-// Mock data
-const mockAreas: TableArea[] = [
-  { id: 'indoor', name: 'Trong nhà', isActive: true },
-  { id: 'outdoor', name: 'Ngoài trời', isActive: true },
-  { id: 'vip', name: 'Phòng VIP', isActive: true },
-];
-
-const mockTables: Table[] = [
-  {
-    id: 1,
-    name: 'Bàn 1',
-    capacity: 4,
-    status: TableStatus.AVAILABLE,
-    area: 'indoor',
-    isActive: true,
-    qrCode: '/qr/table-1.png',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 2, 
-    name: 'Bàn 2',
-    capacity: 6,
-    status: TableStatus.AVAILABLE,
-    area: 'indoor',
-    isActive: true,
-    qrCode: '/qr/table-2.png',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 3,
-    name: 'Bàn 3',
-    capacity: 2,
-    status: TableStatus.OCCUPIED,
-    area: 'outdoor',
-    isActive: true,
-    qrCode: '/qr/table-3.png', 
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 4,
-    name: 'Bàn VIP 1',
-    capacity: 8,
-    status: TableStatus.RESERVED,
-    area: 'vip',
-    isActive: true,
-    qrCode: '/qr/table-4.png',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  // Thêm mock data khác...
-];
+import mockTables from '@/mocks/mockTables';
+import mockAreas from '@/mocks/mockAreas';
 
 const TablesPage = () => {
   const [tables, setTables] = useState<Table[]>(mockTables);
@@ -169,15 +116,15 @@ const TablesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2C3E50] to-[#3498DB] p-6">
-      <Box className="flex justify-between items-center mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
-        <Typography variant="h4" component="h1" className=" font-montserrat font-bold mb-4 bor bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-300">
+      <Box className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <Typography variant="h4" component="h1" className=" font-montserrat font-bold mb-4 bor bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-300">
           Quản lý bàn
         </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => setIsModalOpen(true)}
-          className="bg-white text-[#2C3E50] hover:bg-white/90 font-poppins font-bold"
+          className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
         >
           Thêm bàn
         </Button>

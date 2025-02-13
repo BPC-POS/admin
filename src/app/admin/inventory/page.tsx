@@ -17,24 +17,7 @@ import TransactionHistory from '@/components/admin/inventory/TransactionHistory'
 import PurchaseOrders from '@/components/admin/inventory/PurchaseOrders';
 import Suppliers from '@/components/admin/inventory/Suppliers';
 import { InventoryItem, InventoryCategory, InventoryStatus } from '@/types/inventory';
-
-// Mock data
-const mockInventory: InventoryItem[] = [
-  {
-    id: 1,
-    name: 'Cà phê Arabica',
-    sku: 'COF-ARA-001',
-    category: InventoryCategory.COFFEE_BEANS,
-    unit: 'kg',
-    quantity: 25,
-    minQuantity: 10,
-    maxQuantity: 50,
-    location: 'Kho A-01',
-    cost: 280000,
-    status: InventoryStatus.IN_STOCK,
-  },
-  // Thêm mock data khác...
-];
+import mockInventory from '@/mocks/mockInventory';
 
 interface TabPanelProps {
   children?: React.ReactNode;

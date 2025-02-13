@@ -7,7 +7,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useRouter } from "next/navigation";
 
-const AdminHeader: React.FC = () => {
+const POSHeader: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
@@ -80,4 +80,4 @@ const AdminHeader: React.FC = () => {
     );
 };
 
-export default AdminHeader;
+export default POSHeader;

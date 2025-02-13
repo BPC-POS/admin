@@ -39,6 +39,16 @@ export enum InventoryCategory {
   PACKAGING = 'packaging',
   EQUIPMENT = 'equipment',
   OTHER = 'other',
+  SPICES = "SPICES",
+  GRAINS = "GRAINS",
+  SPICES = "SPICES",
+  GRAINS = "GRAINS",
+  SWEETENERS = "SWEETENERS",
+  SWEETENERS = "SWEETENERS",
+  OILS = "OILS",
+  SAUCES = "SAUCES",
+  SAUCES = "SAUCES",
+  CONDIMENTS = "CONDIMENTS",
 }
 
 export enum InventoryStatus {
