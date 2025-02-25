@@ -34,6 +34,7 @@ export interface CreateUserDTO {
   fullName: string;
   phone?: string;
   role: UserRole;
+  status: UserStatus;
 }
 
 export interface UpdateUserDTO {

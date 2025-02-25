@@ -43,7 +43,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ inventory }) => {
 
   const columns = [
     {
-      title: 'Mã ��ơn hàng',
+      title: 'Mã đơn hàng',
       dataIndex: 'orderNumber',
       key: 'orderNumber',
     },
@@ -91,16 +91,16 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ inventory }) => {
     {
       title: 'Thao tác',
       key: 'action',
-      render: (_: any, record: PurchaseOrder) => (
+      render: ( /*record: PurchaseOrder*/) => ( // Changed 'any' to 'void' and commented out unused 'record'
         <Space>
-          <Button 
-            icon={<EditOutlined />} 
+          <Button
+            icon={<EditOutlined />}
             type="primary"
           >
             Sửa
           </Button>
-          <Button 
-            icon={<DeleteOutlined />} 
+          <Button
+            icon={<DeleteOutlined />}
             danger
           >
             Xóa
@@ -112,8 +112,8 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ inventory }) => {
 
   return (
     <div className="font-poppins">
-      <Table 
-        columns={columns} 
+      <Table
+        columns={columns}
         dataSource={mockPurchaseOrders}
         rowKey="id"
         className="shadow-sm rounded-lg"
@@ -122,4 +122,4 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ inventory }) => {
   );
 };
 
-export default PurchaseOrders; 
+export default PurchaseOrders;

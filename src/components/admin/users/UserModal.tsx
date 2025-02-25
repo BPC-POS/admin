@@ -14,7 +14,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { User, UserRole, CreateUserDTO, UpdateUserDTO } from '@/types/user';
+import { User, UserRole, CreateUserDTO, UpdateUserDTO, UserStatus } from '@/types/user';
 
 interface UserModalProps {
   open: boolean;
@@ -31,6 +31,7 @@ const initialFormState: CreateUserDTO = {
   fullName: '',
   phone: '',
   role: UserRole.STAFF,
+  status: UserStatus.ACTIVE
 };
 
 const UserModal: React.FC<UserModalProps> = ({

@@ -6,10 +6,9 @@ import {
   Typography,
   Box,
   Chip,
-  Tooltip,
   Stack
 } from '@mui/material';
-import { Edit, Delete, Circle } from '@mui/icons-material';
+import { Circle } from '@mui/icons-material';
 import { Product, ProductStatus } from '@/types/product';
 
 interface ProductCardPOSProps {
@@ -37,10 +36,7 @@ const statusLabels = {
   [ProductStatus.BEST_SELLER]: 'Bán chạy'
 };
 
-const ProductCardPOS = ({ product, onEdit, onDelete, onProductClick }: ProductCardPOSProps) => {
-  const defaultSize = product.size.find(s => s.isDefault);
-  const basePrice = defaultSize ? defaultSize.price : product.price;
-
+const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
   return (
     <Card
       className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden"

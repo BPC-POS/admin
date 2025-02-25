@@ -12,7 +12,6 @@ import {
   Avatar,
   Typography,
   Box,
-  Tooltip,
   Menu,
   MenuItem,
   ListItemIcon,

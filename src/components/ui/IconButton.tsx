@@ -1,8 +1,6 @@
 import { IconButton as MUIIconButton } from '@mui/material';
 
-interface IconButtonProps extends React.ComponentProps<typeof MUIIconButton> {}
-
-const IconButton: React.FC<IconButtonProps> = ({ children, ...props }) => {
+const IconButton: React.FC<React.ComponentProps<typeof MUIIconButton>> = ({ children, ...props }) => {
     return (
         <MUIIconButton {...props}>
             {children}

@@ -6,14 +6,13 @@ import {
   Button,
   Alert,
   Snackbar,
-  Grid,
   Paper,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import TableList from '@/components/admin/tables/TableList';
 import TableModal from '@/components/admin/tables/TableModal';
 import TableAreaTabs from '@/components/admin/tables/TableAreaTabs';
-import { Table, TableStatus, TableArea } from '@/types/table';
+import { Table, TableStatus } from '@/types/table'; // Đảm bảo import Table và TableStatus
 import mockTables from '@/mocks/mockTables';
 import mockAreas from '@/mocks/mockAreas';
 
@@ -29,7 +28,7 @@ const TablesPage = () => {
     severity: 'success' as 'success' | 'error',
   });
 
-  const handleAddTable = async (data: any) => {
+  const handleAddTable = async (data: Omit<Table, 'id' | 'status' | 'createdAt' | 'updatedAt'>) => {
     try {
       setIsLoading(true);
       // TODO: API call
@@ -43,14 +42,14 @@ const TablesPage = () => {
       setTables(prev => [...prev, newTable]);
       setIsModalOpen(false);
       showSnackbar('Thêm bàn thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEditTable = async (data: any) => {
+  const handleEditTable = async (data: Partial<Table>) => {
     if (!editingTable) return;
 
     try {
@@ -67,7 +66,7 @@ const TablesPage = () => {
       setIsModalOpen(false);
       setEditingTable(undefined);
       showSnackbar('Cập nhật bàn thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -82,7 +81,7 @@ const TablesPage = () => {
       // TODO: API call
       setTables(prev => prev.filter(table => table.id !== id));
       showSnackbar('Xóa bàn thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -99,7 +98,7 @@ const TablesPage = () => {
         )
       );
       showSnackbar('Cập nhật trạng thái thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -110,14 +109,14 @@ const TablesPage = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  const filteredTables = currentArea === 'all' 
-    ? tables 
+  const filteredTables = currentArea === 'all'
+    ? tables
     : tables.filter(table => table.area === currentArea);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2C3E50] to-[#3498DB] p-6">
       <Box className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
-      <Typography variant="h4" component="h1" className=" font-montserrat font-bold mb-4 bor bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-300">
+        <Typography variant="h4" component="h1" className=" font-montserrat font-bold mb-4 bor bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-300">
           Quản lý bàn
         </Typography>
         <Button

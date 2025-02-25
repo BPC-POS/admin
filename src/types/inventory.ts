@@ -41,12 +41,8 @@ export enum InventoryCategory {
   OTHER = 'other',
   SPICES = "SPICES",
   GRAINS = "GRAINS",
-  SPICES = "SPICES",
-  GRAINS = "GRAINS",
-  SWEETENERS = "SWEETENERS",
   SWEETENERS = "SWEETENERS",
   OILS = "OILS",
-  SAUCES = "SAUCES",
   SAUCES = "SAUCES",
   CONDIMENTS = "CONDIMENTS",
 }

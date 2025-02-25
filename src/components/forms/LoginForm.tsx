@@ -71,6 +71,7 @@ const LoginForm: React.FC = () => {
         fullWidth
         className="bg-black hover:bg-white hover:text-black p-3 font-poppins font-bold text-2xl"
         style={{borderRadius: 12}}
+        onClick={handlClickHome}
       >
         LOGIN
       </Button>
@@ -95,7 +96,7 @@ const LoginForm: React.FC = () => {
         </Button>
       </div>
       <div className="flex items-center justify-center space-x-2 mt-4">
-        <div className="text-center text-gray-20">Don't have an account?</div>
+      <div className="text-center text-gray-20">{"Don't have an account?"}</div>
         <Link href="/register" className="text-white hover:underline font-bold">
           Register
         </Link>

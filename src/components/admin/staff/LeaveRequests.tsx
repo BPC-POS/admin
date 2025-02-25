@@ -27,8 +27,6 @@ import {
   MoreVert,
   Check,
   Close,
-  AccessTime,
-  EventNote,
 } from '@mui/icons-material';
 import { Staff, LeaveRequest, LeaveStatus, LeaveType } from '@/types/staff';
 import { formatDate } from '@/utils/format';
@@ -42,7 +40,7 @@ const ITEMS_PER_PAGE = 10;
 const LeaveRequests: React.FC<LeaveRequestsProps> = ({ staff }) => {
   const [page, setPage] = useState(1);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
+  const [, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewNote, setReviewNote] = useState('');
 

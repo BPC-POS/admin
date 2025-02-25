@@ -65,6 +65,12 @@ const InventoryList: React.FC<InventoryListProps> = ({ items, onEdit }) => {
       [InventoryCategory.PACKAGING]: 'Bao bì',
       [InventoryCategory.EQUIPMENT]: 'Thiết bị',
       [InventoryCategory.OTHER]: 'Khác',
+      [InventoryCategory.SPICES]: '',
+      [InventoryCategory.GRAINS]: '',
+      [InventoryCategory.SWEETENERS]: '',
+      [InventoryCategory.OILS]: '',
+      [InventoryCategory.SAUCES]: '',
+      [InventoryCategory.CONDIMENTS]: ''
     };
     return labels[category];
   };

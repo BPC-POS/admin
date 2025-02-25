@@ -1,9 +1,7 @@
 import { FormControlLabel, Checkbox as MUICheckbox } from "@mui/material";
 import React from "react";
 
-interface CheckboxProps extends React.ComponentProps<typeof MUICheckbox> {}
-
-const Checkbox: React.FC<CheckboxProps> = ({ ...props }) => {
+const Checkbox: React.FC<React.ComponentProps<typeof MUICheckbox>> = ({ ...props }) => {
   return (
     <FormControlLabel
       control={
@@ -11,7 +9,7 @@ const Checkbox: React.FC<CheckboxProps> = ({ ...props }) => {
           {...props}
           size="small"
           sx={{
-            color: "white", 
+            color: "white",
             "&.Mui-checked": {
               color: "white",
             },
@@ -20,7 +18,7 @@ const Checkbox: React.FC<CheckboxProps> = ({ ...props }) => {
       }
       label={undefined}
       style={{
-        color: "white",   
+        color: "white",
       }}
     />
   );

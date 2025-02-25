@@ -21,6 +21,7 @@ import {
 import { MenuItem, CreateMenuItemDTO, MenuType, WeekDay } from '@/types/menu';
 import { Product } from '@/types/product';
 import ImageUpload from '../products/ImageUpload';
+import Image from 'next/image'; // Import Next.js Image
 
 interface MenuModalProps {
   open: boolean;
@@ -54,11 +55,11 @@ const ProductSelection: React.FC<{
 }> = ({ products, selectedProducts, onChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredProducts = products.filter(product => 
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedProductObjects = products.filter(p => 
+  const selectedProductObjects = products.filter(p =>
     selectedProducts.includes(p.id)
   );
 
@@ -85,12 +86,14 @@ const ProductSelection: React.FC<{
           />
         )}
         renderOption={(props, option) => (
-          <li {...props}>
+          <li {...props} key={option.id}> {/* Added key here */}
             <Box className="flex items-center gap-2">
               {option.image && (
-                <img 
-                  src={option.image} 
+                <Image
+                  src={option.image}
                   alt={option.name}
+                  width={40} // Adjust size as needed
+                  height={40}
                   className="w-10 h-10 rounded-md object-cover"
                 />
               )}
@@ -107,18 +110,20 @@ const ProductSelection: React.FC<{
         )}
         renderTags={(selected, getTagProps) =>
           selected.map((option, index) => {
-            const { key, ...tagProps } = getTagProps({ index });
+            const { key, ...tagProps } = getTagProps({ index }); // Lấy key từ getTagProps
             return (
               <Chip
-                key={option.id}
+                key={key} // Thêm key vào đây
                 label={option.name}
                 {...tagProps}
                 className="font-poppins"
                 avatar={
                   option.image ? (
-                    <img 
-                      src={option.image} 
+                    <Image
+                      src={option.image}
                       alt={option.name}
+                      width={24}
+                      height={24}
                       className="w-6 h-6 rounded-full object-cover"
                     />
                   ) : undefined
@@ -126,9 +131,9 @@ const ProductSelection: React.FC<{
               />
             );
           })
-        }
+        }              
       />
-      
+
       {selectedProducts.length > 0 && (
         <Box className="mt-4">
           <Typography variant="subtitle2" className="mb-2 font-poppins">
@@ -136,14 +141,16 @@ const ProductSelection: React.FC<{
           </Typography>
           <Box className="flex flex-wrap gap-2">
             {selectedProductObjects.map(product => (
-              <Box 
+              <Box
                 key={product.id}
                 className="p-2 border rounded-md flex items-center gap-2"
               >
                 {product.image && (
-                  <img 
-                    src={product.image} 
+                  <Image
+                    src={product.image}
                     alt={product.name}
+                    width={40} // Adjust size as needed
+                    height={40}
                     className="w-10 h-10 rounded-md object-cover"
                   />
                 )}
@@ -199,7 +206,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
     onSubmit(formData);
   };
 
-  const handleChange = (field: keyof CreateMenuItemDTO, value: any) => {
+  // Corrected handleChange with Generic
+  const handleChange = <K extends keyof CreateMenuItemDTO>(field: K, value: CreateMenuItemDTO[K]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -207,10 +215,10 @@ const MenuModal: React.FC<MenuModalProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
@@ -228,8 +236,12 @@ const MenuModal: React.FC<MenuModalProps> = ({
               <ImageUpload
                 currentImage={formData.image}
                 onImageSelect={(file) => {
-                  const imageUrl = URL.createObjectURL(file);
-                  handleChange('image', imageUrl);
+                  if (file) {
+                    const imageUrl = URL.createObjectURL(file);
+                    handleChange('image', imageUrl);
+                  } else {
+                    handleChange('image', ''); // Handle case when no file is selected (remove image)
+                  }
                 }}
                 error={undefined}
                 isLoading={isLoading}
@@ -241,7 +253,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 fullWidth
                 label="Tên menu"
                 value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                onChange={(e) => handleChange('name', e.target.value as string)} // Type assertion here
                 required
                 className="font-poppins"
               />
@@ -254,7 +266,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 multiline
                 rows={3}
                 value={formData.description}
-                onChange={(e) => handleChange('description', e.target.value)}
+                onChange={(e) => handleChange('description', e.target.value as string)} // Type assertion here
                 className="font-poppins"
               />
             </Grid>
@@ -265,7 +277,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 <Select
                   value={formData.type}
                   label="Loại menu"
-                  onChange={(e) => handleChange('type', e.target.value)}
+                  onChange={(e) => handleChange('type', e.target.value as MenuType)} // Type assertion here
                   required
                   className="font-poppins"
                 >
@@ -292,8 +304,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 type="time"
                 value={formData.timeAvailable?.start}
                 onChange={(e) => handleChange('timeAvailable', {
-                  ...formData.timeAvailable,
-                  start: e.target.value
+                  start: e.target.value,
+                  end: formData.timeAvailable?.end || '23:59'
                 })}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ step: 300 }}
@@ -307,7 +319,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 type="time"
                 value={formData.timeAvailable?.end}
                 onChange={(e) => handleChange('timeAvailable', {
-                  ...formData.timeAvailable,
+                  start: formData.timeAvailable?.start || '00:00',
                   end: e.target.value
                 })}
                 InputLabelProps={{ shrink: true }}
@@ -321,7 +333,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 multiple
                 options={Object.values(WeekDay)}
                 value={formData.daysAvailable || []}
-                onChange={(_, newValue) => handleChange('daysAvailable', newValue)}
+                onChange={(_, newValue) => handleChange('daysAvailable', newValue as WeekDay[])} // Type assertion here
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -331,7 +343,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                   />
                 )}
                 renderOption={(props, option) => (
-                  <li {...props} className="font-poppins">
+                  <li {...props} key={option} className="font-poppins"> {/* Added key here */}
                     {option === WeekDay.MONDAY ? 'Thứ 2' :
                      option === WeekDay.TUESDAY ? 'Thứ 3' :
                      option === WeekDay.WEDNESDAY ? 'Thứ 4' :
@@ -359,14 +371,14 @@ const MenuModal: React.FC<MenuModalProps> = ({
           </Grid>
         </DialogContent>
         <DialogActions className="p-4">
-          <Button 
+          <Button
             onClick={onClose}
             className="font-poppins"
           >
             Hủy
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             variant="contained"
             disabled={isLoading}
             className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 font-poppins"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Space, InputNumber, Select } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Recipe } from '@/types/recipe';
@@ -26,11 +26,22 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
     }
   }, [editRecipe, form]);
 
-  const handleSubmit = (values: any) => {
+  interface RecipeFormValues {
+    name: string;
+    type: 'drink' | 'food';
+    ingredients: Array<{
+      name: string;
+      amount: number;
+      unit: 'ml' | 'g' | 'piece';
+    }>;
+    instructions: string;
+  }
+
+  const handleSubmit = (values: RecipeFormValues): void => {
     onSubmit({
+      ...values,
       id: editRecipe?.id || 0,
-      type: values.type || 'drink',
-      ...values
+      type: values.type || 'drink'
     });
     form.resetFields();
   };

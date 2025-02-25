@@ -11,8 +11,7 @@ import { Add } from '@mui/icons-material';
 import ProductCategories from '@/components/admin/products/ProductCategories';
 import ProductList from '@/components/admin/products/ProductList';
 import AddProductModal from '@/components/admin/products/AddProductModal';
-import { Product, Category, ProductStatus } from '@/types/product';
-import test from '../../../../public/assets/images/tet.png'
+import { Product, Category } from '@/types/product';
 import  mockProducts from '@/mocks/mockProducts';
 import { mockCategories } from '@/mocks/mockCategories';
 
@@ -23,7 +22,7 @@ const ProductsPage = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, ] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -45,7 +44,7 @@ const ProductsPage = () => {
         message: 'Thêm danh mục thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi thêm danh mục',
@@ -72,7 +71,7 @@ const ProductsPage = () => {
         message: 'Cập nhật danh mục thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật danh mục',
@@ -98,7 +97,7 @@ const ProductsPage = () => {
         message: 'Xóa danh mục thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi xóa danh mục',
@@ -125,7 +124,7 @@ const ProductsPage = () => {
         message: 'Cập nhật trạng thái danh mục thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật trạng thái danh mục',
@@ -150,7 +149,7 @@ const ProductsPage = () => {
       setProducts(prev => [...prev, newProduct]);
       setIsProductModalOpen(false);
       showSnackbar('Thêm sản phẩm thành công', 'success');
-    } catch (err) {
+    } catch {
       showSnackbar('Có lỗi xảy ra khi thêm sản phẩm', 'error');
     } finally {
       setIsLoading(false);
@@ -177,7 +176,7 @@ const ProductsPage = () => {
       setIsProductModalOpen(false);
       setEditingProduct(undefined);
       showSnackbar('Cập nhật sản phẩm thành công', 'success');
-    } catch (err) {
+    } catch {
       showSnackbar('Có lỗi xảy ra khi cập nhật sản phẩm', 'error');
     } finally {
       setIsLoading(false);
@@ -192,7 +191,7 @@ const ProductsPage = () => {
       // TODO: Thay thế bằng API call
       setProducts(prev => prev.filter(p => p.id !== productId));
       showSnackbar('Xóa sản phẩm thành công', 'success');
-    } catch (err) {
+    } catch {
       showSnackbar('Có lỗi xảy ra khi xóa sản phẩm', 'error');
     } finally {
       setIsLoading(false);

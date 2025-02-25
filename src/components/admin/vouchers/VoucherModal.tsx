@@ -30,7 +30,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
     }
   }, [editItem]);
 
-  const handleChange = (key: keyof CreateVoucherDTO, value: any) => {
+  const handleChange = <K extends keyof CreateVoucherDTO>(key: K, value: CreateVoucherDTO[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -41,8 +41,8 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
       maxWidth="sm"
       fullWidth
@@ -62,7 +62,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
           <TextField
             label="Mã Voucher"
             value={formData.code}
-            onChange={(e) => handleChange('code', e.target.value)}
+            onChange={(e) => handleChange('code', e.target.value as string)} // Explicitly type e.target.value as string
             fullWidth
             required
             className="mb-4 font-poppins"
@@ -71,7 +71,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
             label="Giá trị"
             type="number"
             value={formData.value}
-            onChange={(e) => handleChange('value', Number(e.target.value))}
+            onChange={(e) => handleChange('value', Number(e.target.value))} // No need to cast, Number() returns number
             fullWidth
             required
             className="mb-4 font-poppins"
@@ -80,7 +80,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
             label="Ngày bắt đầu"
             type="date"
             value={formData.startDate.toISOString().split('T')[0]}
-            onChange={(e) => handleChange('startDate', new Date(e.target.value))}
+            onChange={(e) => handleChange('startDate', new Date(e.target.value))} // No need to cast, new Date() handles string
             fullWidth
             required
             className="mb-4 font-poppins"
@@ -89,7 +89,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
             label="Ngày kết thúc"
             type="date"
             value={formData.endDate.toISOString().split('T')[0]}
-            onChange={(e) => handleChange('endDate', new Date(e.target.value))}
+            onChange={(e) => handleChange('endDate', new Date(e.target.value))} // No need to cast, new Date() handles string
             fullWidth
             required
             className="mb-4 font-poppins"
@@ -100,8 +100,8 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
           <Button onClick={onClose} className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl">
             Hủy
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             variant="contained"
             className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
@@ -113,4 +113,4 @@ const VoucherModal: React.FC<VoucherModalProps> = ({ open, onClose, onSubmit, ed
   );
 };
 
-export default VoucherModal; 
+export default VoucherModal;

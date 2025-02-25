@@ -28,7 +28,7 @@ const SettingsList: React.FC<SettingsListProps> = ({ settings, onEdit }) => {
     {
       title: 'Thao tác',
       key: 'action',
-      render: (_: any, record: Setting) => (
+      render: (_: void, record: Setting) => ( // Thay 'any' bằng 'void'
         <Space>
           <Button onClick={() => onEdit(record)}>Sửa</Button>
         </Space>
@@ -39,4 +39,4 @@ const SettingsList: React.FC<SettingsListProps> = ({ settings, onEdit }) => {
   return <Table columns={columns} dataSource={settings} rowKey="id" />;
 };
 
-export default SettingsList; 
+export default SettingsList;

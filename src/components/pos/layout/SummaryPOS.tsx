@@ -73,7 +73,9 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
                 <IconButton
                   edge="end"
                   aria-label="remove"
-                  onClick={() => onUpdateQuantity(item.productId, item.quantity - 1)}
+                  onClick={() => {
+                    onUpdateQuantity(item.productId, -1); 
+                  }}
                   disabled={item.quantity <= 1}
                 >
                   <Remove />
@@ -81,7 +83,9 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
                 <IconButton
                   edge="end"
                   aria-label="add"
-                  onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
+                  onClick={() => {
+                    onUpdateQuantity(item.productId, 1);
+                  }}
                 >
                   <Add />
                 </IconButton>
@@ -145,6 +149,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
         fullWidth
         onClick={onCheckout}
         className="mt-8 font-poppins"
+        style={{ background: 'linear-gradient(to right, #2C3E50, #3498DB)' }}
       >
         Thanh toán
       </Button>
@@ -154,6 +159,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
         fullWidth
         onClick={handleCancelClick}
         className="mt-2 font-poppins"
+        style={{ background: 'linear-gradient(to right, #F39C20,#E74C3C )' }}
       >
         Hủy
       </Button>

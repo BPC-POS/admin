@@ -1,21 +1,21 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Image from 'next/image';
-import { 
-  Box, 
-  Typography, 
-  IconButton, 
+import {
+  Box,
+  Typography,
+  IconButton,
   CircularProgress,
   Alert
 } from '@mui/material';
-import { 
-  CloudUpload, 
-  Delete, 
-  Edit 
+import {
+  CloudUpload,
+  Delete,
+  Edit
 } from '@mui/icons-material';
 
 interface ImageUploadProps {
-  onImageSelect: (file: File) => void;
+  onImageSelect: (file: File | null) => void;
   currentImage?: string;
   error?: string;
   isLoading?: boolean;
@@ -32,18 +32,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      // Kiểm tra kích thước file (giới hạn 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('Kích thước file không được vượt quá 5MB');
         return;
       }
 
-      // Tạo preview URL
       const objectUrl = URL.createObjectURL(file);
       setPreview(objectUrl);
       onImageSelect(file);
 
-      // Cleanup preview URL khi component unmount
       return () => URL.revokeObjectURL(objectUrl);
     }
   }, [onImageSelect]);
@@ -59,7 +56,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleRemoveImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setPreview(null);
-    onImageSelect(null as any);
+    onImageSelect(null);
   };
 
   return (
@@ -97,15 +94,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200">
               <div className="absolute top-2 right-2 flex gap-2">
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={(e) => e.stopPropagation()}
                   className="bg-white hover:bg-gray-100"
                 >
                   <Edit fontSize="small" />
                 </IconButton>
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={handleRemoveImage}
                   className="bg-white hover:bg-gray-100"
                 >

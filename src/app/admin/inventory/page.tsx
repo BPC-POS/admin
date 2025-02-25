@@ -14,9 +14,7 @@ import { Add } from '@mui/icons-material';
 import InventoryList from '@/components/admin/inventory/InventoryList';
 import InventoryModal from '@/components/admin/inventory/InventoryModal';
 import TransactionHistory from '@/components/admin/inventory/TransactionHistory';
-import PurchaseOrders from '@/components/admin/inventory/PurchaseOrders';
-import Suppliers from '@/components/admin/inventory/Suppliers';
-import { InventoryItem, InventoryCategory, InventoryStatus } from '@/types/inventory';
+import { InventoryItem } from '@/types/inventory';
 import mockInventory from '@/mocks/mockInventory';
 
 interface TabPanelProps {
@@ -58,7 +56,6 @@ const InventoryPage = () => {
   const handleAddItem = async (data: Omit<InventoryItem, 'id'>) => {
     try {
       setIsLoading(true);
-      // TODO: API call
       const newItem = {
         ...data,
         id: Date.now(),
@@ -66,7 +63,7 @@ const InventoryPage = () => {
       setInventory(prev => [...prev, newItem]);
       setIsModalOpen(false);
       showSnackbar('Thêm vật phẩm thành công', 'success');
-    } catch (err) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -76,7 +73,6 @@ const InventoryPage = () => {
   const handleEditItem = async (id: number, data: Partial<InventoryItem>) => {
     try {
       setIsLoading(true);
-      // TODO: API call
       setInventory(prev =>
         prev.map(item =>
           item.id === id
@@ -86,7 +82,7 @@ const InventoryPage = () => {
       );
       setIsModalOpen(false);
       showSnackbar('Cập nhật thành công', 'success');
-    } catch (err) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Paper,
   Box,
-  Grid,
   Typography,
   Button,
   IconButton,
@@ -12,7 +11,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -33,9 +31,8 @@ import {
   ChevronRight,
   Add,
   Delete,
-  Person,
 } from '@mui/icons-material';
-import { Staff, WorkSchedule, ScheduleStatus, Shift } from '@/types/staff';
+import { Staff } from '@/types/staff';
 import { formatDate } from '@/utils/format';
 
 interface StaffScheduleProps {

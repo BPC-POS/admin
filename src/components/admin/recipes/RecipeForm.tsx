@@ -1,12 +1,11 @@
 import React from 'react';
 import { Form, Input, Select, Button } from 'antd';
-import { Recipe } from '@/types/recipe';
 
-interface RecipeFormProps {
-  recipes: Recipe[];
-}
+// interface RecipeFormProps {
+//   recipes: Recipe[];
+// }
 
-const RecipeForm: React.FC<RecipeFormProps> = ({ recipes }) => {
+const RecipeForm: React.FC = ({ }) => {
   return (
     <Form layout="vertical">
       <Form.Item label="Tên công thức" name="name" rules={[{ required: true }]}>

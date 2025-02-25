@@ -4,7 +4,6 @@ import {
   Tabs,
   Tab,
   Badge,
-  Chip,
 } from '@mui/material';
 import { TableArea, Table } from '@/types/table';
 

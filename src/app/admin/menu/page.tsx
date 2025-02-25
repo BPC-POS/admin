@@ -11,7 +11,7 @@ import { Add } from '@mui/icons-material';
 import MenuList from '@/components/admin/menu/MenuList';
 import MenuModal from '@/components/admin/menu/MenuModal';
 import MenuDetailModal from '@/components/admin/menu/MenuDetailModal';
-import { MenuItem, MenuType, WeekDay } from '@/types/menu';
+import { MenuItem } from '@/types/menu'; // Đảm bảo import MenuItem type từ đúng đường dẫn
 import mockMenuItems from '@/mocks/mockMenuItems';
 import mockProducts from '@/mocks/mockProducts';
 
@@ -32,10 +32,9 @@ const MenuPage = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
 
-  const handleAddMenu = async (data: any) => {
+  const handleAddMenu = async (data: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       setIsLoading(true);
-      // TODO: API call
       const newItem: MenuItem = {
         ...data,
         id: menuItems.length + 1,
@@ -45,19 +44,18 @@ const MenuPage = () => {
       setMenuItems(prev => [...prev, newItem]);
       setIsModalOpen(false);
       showSnackbar('Thêm menu thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEditMenu = async (data: any) => {
+  const handleEditMenu = async (data: Partial<MenuItem>) => {
     if (!editingItem) return;
 
     try {
       setIsLoading(true);
-      // TODO: API call
       const updatedItem: MenuItem = {
         ...editingItem,
         ...data,
@@ -69,7 +67,7 @@ const MenuPage = () => {
       setIsModalOpen(false);
       setEditingItem(undefined);
       showSnackbar('Cập nhật menu thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -81,10 +79,9 @@ const MenuPage = () => {
 
     try {
       setIsLoading(true);
-      // TODO: API call
       setMenuItems(prev => prev.filter(item => item.id !== id));
       showSnackbar('Xóa menu thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -94,14 +91,13 @@ const MenuPage = () => {
   const handleToggleActive = async (id: number, isActive: boolean) => {
     try {
       setIsLoading(true);
-      // TODO: API call
       setMenuItems(prev =>
         prev.map(item =>
           item.id === id ? { ...item, isActive, updatedAt: new Date() } : item
         )
       );
       showSnackbar('Cập nhật trạng thái thành công', 'success');
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra', 'error');
     } finally {
       setIsLoading(false);
@@ -111,9 +107,8 @@ const MenuPage = () => {
   const handleReorderMenu = async (items: MenuItem[]) => {
     try {
       setIsLoading(true);
-      // TODO: API call
       setMenuItems(items);
-    } catch (error) {
+    } catch {
       showSnackbar('Có lỗi xảy ra khi sắp xếp menu', 'error');
     } finally {
       setIsLoading(false);

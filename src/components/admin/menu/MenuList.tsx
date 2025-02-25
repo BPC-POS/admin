@@ -46,7 +46,6 @@ const MenuList: React.FC<MenuListProps> = ({
   onDelete,
   onToggleActive,
   onReorder,
-  onViewDetail,
 }) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;

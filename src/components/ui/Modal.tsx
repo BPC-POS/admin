@@ -3,7 +3,7 @@ import style from "styled-jsx/style"
 import { useState } from "react"
 
 const ModalDialog = () => {
-    const [open, setOpen] = useState(false);
+    const [open, ] = useState(false);
     return(
         <Modal
         open={open}

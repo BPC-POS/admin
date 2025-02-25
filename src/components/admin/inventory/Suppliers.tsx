@@ -62,7 +62,7 @@ const Suppliers: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      render: (_: any, record: Supplier) => (
+      render: (_: void, record: Supplier) => ( // Changed 'any' to 'void'
         <Space>
           <Button
             icon={<EditOutlined />}
@@ -184,4 +184,4 @@ const Suppliers: React.FC = () => {
   );
 };
 
-export default Suppliers; 
+export default Suppliers;

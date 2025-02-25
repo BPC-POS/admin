@@ -7,8 +7,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
-  IconButton,
   Chip,
 } from '@mui/material';
 import {
@@ -68,8 +66,8 @@ const TableModalPOS: React.FC<TableModalPOSProps> = ({ open, onClose, table, onC
         p: 4,
         borderRadius: 2,
       }}>
-        <Typography variant="h6" component="h2" gutterBottom>
-          Xác nhận chọn bàn
+        <Typography variant="h6" component="h2" gutterBottom className='font-poppins font-semibold text-black text-center mb-5'>
+          XÁC NHẬN CHỌN BÀN
         </Typography>
 
         <Card
@@ -150,8 +148,11 @@ const TableModalPOS: React.FC<TableModalPOSProps> = ({ open, onClose, table, onC
 
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={onClose}>Huỷ</Button>
-          <Button variant="contained" color="primary" onClick={() => onConfirm(table)}>
+          <Button onClick={onClose}
+          className='font-poppins font-semibold'>Huỷ</Button>
+          <Button variant="contained" color="primary" onClick={() => onConfirm(table)} 
+          className='font-poppins font-semibold'
+          style={{background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)'}}>
             Xác nhận chọn bàn
           </Button>
         </Box>

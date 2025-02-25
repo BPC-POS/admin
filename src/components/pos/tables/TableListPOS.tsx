@@ -49,7 +49,6 @@ const areaColors = {
 
 const TableListPOS: React.FC<TableListPOSProps> = ({
   tables,
-  onEdit,
   onStatusChange,
   onTableSelect, // Get onTableSelect from props
 }) => {

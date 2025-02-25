@@ -8,7 +8,6 @@ import {
   Select,
   MenuItem,
   Button,
-  Box,
   InputAdornment,
 } from '@mui/material';
 import { Search, FilterList, RestartAlt } from '@mui/icons-material';

@@ -16,7 +16,7 @@ import StaffSchedule from '@/components/admin/staff/StaffSchedule';
 import LeaveRequests from '@/components/admin/staff/LeaveRequests';
 import PayrollManagement from '@/components/admin/staff/PayrollManagement';
 import StaffModal from '@/components/admin/staff/StaffModal';
-import { Staff, StaffPosition, Department } from '@/types/staff';
+import { Staff} from '@/types/staff';
 import mockStaff from '@/mocks/mockStaff';  
 
 
@@ -63,7 +63,7 @@ const StaffPage = () => {
         message: 'Thêm nhân viên thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi thêm nhân viên',
@@ -92,7 +92,7 @@ const StaffPage = () => {
         message: 'Cập nhật thông tin nhân viên thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật thông tin nhân viên',

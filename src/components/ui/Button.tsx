@@ -1,8 +1,7 @@
 import { Button as MUIButton } from "@mui/material";
+import React from "react";
 
-interface ButtonProps extends React.ComponentProps<typeof MUIButton> {}
-
-const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
+const Button: React.FC<React.ComponentProps<typeof MUIButton>> = ({ children, ...props }) => {
   return (
     <MUIButton
       {...props}

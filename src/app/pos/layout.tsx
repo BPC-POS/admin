@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import POSHeader from '@/components/pos/layout/POSHeader';
 interface PosLayoutProps {
   children: React.ReactNode;
 }
 
 const PosLayout: React.FC<PosLayoutProps> = ({ children }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
+  // const toggleSidebar = () => {
+  //   setIsSidebarCollapsed(!isSidebarCollapsed);
+  // };
 
   return (
     <div className="flex min-h-screen bg-gray-100">

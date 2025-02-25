@@ -12,13 +12,8 @@ import {
   FamilyRestroom,
   TableRestaurant,
   Warehouse,
-  Category,
-  LocalCafe,
-  Kitchen,
   Store,
-  Receipt,
   LocalShipping,
-  EventNote,
   EmojiFoodBeverage,
   ConfirmationNumber
 } from '@mui/icons-material';

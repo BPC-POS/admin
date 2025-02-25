@@ -3,7 +3,6 @@ import {
     InputLabel,
     Select as MUISelect,
     MenuItem,
-    SelectChangeEvent,
     OutlinedInput,
   } from "@mui/material";
   import React from "react";
@@ -19,22 +18,20 @@ import {
     options: SelectOption<T>[];
     value?: T | null;
     labelColor?: string;
-    onChange?: (value: T | null) => void;
   }
   
   const Select = <T extends string | number = string>({
     label,
     options,
     value,
-    onChange,
     labelColor,
     ...props
   }: SelectProps<T>) => {
-    const handleChange = (event: SelectChangeEvent<T>) => {
-      if (onChange) {
-        onChange(event.target.value as T);
-      }
-    };
+    // const handleChange = (event: SelectChangeEvent<T>) => {
+    //   if (onChange) {
+    //     onChange(event.target.value as T);
+    //   }
+    // };
   
     return (
       <FormControl fullWidth variant="outlined">

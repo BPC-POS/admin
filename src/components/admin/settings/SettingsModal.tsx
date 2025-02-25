@@ -9,6 +9,13 @@ interface SettingsModalProps {
   editSetting: Setting | null;
 }
 
+// Định nghĩa interface cho kiểu dữ liệu form values
+interface SettingsFormValues {
+  name: string;
+  description: string;
+  isActive: boolean;
+}
+
 const SettingsModal: React.FC<SettingsModalProps> = ({
   open,
   onClose,
@@ -25,7 +32,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   }, [editSetting, form]);
 
-  const handleFinish = (values: any) => {
+  // Sử dụng interface SettingsFormValues cho tham số values
+  const handleFinish = (values: SettingsFormValues) => {
     onSubmit({ ...values, id: editSetting ? editSetting.id : Date.now() });
     form.resetFields();
   };
@@ -69,4 +77,4 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   );
 };
 
-export default SettingsModal; 
+export default SettingsModal;

@@ -14,10 +14,9 @@ import {
   TableHead,
   TableRow,
   Box,
-  Divider,
   TableContainer,
 } from '@mui/material';
-import { Order, OrderStatus, PaymentStatus, PaymentMethod } from '@/types/order';
+import { Order, OrderStatus, PaymentStatus } from '@/types/order';
 import { formatCurrency } from '@/utils/format';
 
 interface OrderDetailModalProps {

@@ -12,7 +12,7 @@ import { Add } from '@mui/icons-material';
 import UserList from '@/components/admin/users/UserList';
 import UserModal from '@/components/admin/users/UserModal';
 import UserFilter from '@/components/admin/users/UserFilter';
-import { User, UserRole, UserStatus, UserFilter as UserFilterType } from '@/types/user';
+import { User, UserStatus, UserFilter as UserFilterType } from '@/types/user'; // Đảm bảo import đúng User, UserStatus, UserFilter
 import mockUsers from '@/mocks/mockUsers';
 
 const UsersPage = () => {
@@ -27,11 +27,11 @@ const UsersPage = () => {
     severity: 'success' as 'success' | 'error',
   });
 
-  const handleAddUser = async (data: any) => {
+  const handleAddUser = async (data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       setIsLoading(true);
-      
-      const newUser = {
+
+      const newUser: User = { // Đảm bảo type của newUser là User
         ...data,
         id: Date.now(),
         createdAt: new Date(),
@@ -44,7 +44,7 @@ const UsersPage = () => {
         message: 'Thêm người dùng thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch{
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi thêm người dùng',
@@ -55,10 +55,10 @@ const UsersPage = () => {
     }
   };
 
-  const handleEditUser = async (id: number, data: any) => {
+  const handleEditUser = async (id: number, data: Partial<User>) => {
     try {
       setIsLoading(true);
-      
+
       setUsers(prev =>
         prev.map(user =>
           user.id === id
@@ -73,7 +73,7 @@ const UsersPage = () => {
         message: 'Cập nhật người dùng thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch{
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi cập nhật người dùng',
@@ -96,7 +96,7 @@ const UsersPage = () => {
         message: 'Xóa người dùng thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch{
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi xóa người dùng',
@@ -123,7 +123,7 @@ const UsersPage = () => {
         message: 'Cập nhật trạng thái thành công',
         severity: 'success',
       });
-    } catch (error) {
+    } catch{
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi cập nhật trạng thái',
@@ -137,7 +137,7 @@ const UsersPage = () => {
   const filteredUsers = users.filter(user => {
     if (filter.search) {
       const searchTerm = filter.search.toLowerCase();
-      const found = 
+      const found =
         user.username.toLowerCase().includes(searchTerm) ||
         user.email.toLowerCase().includes(searchTerm) ||
         user.fullName.toLowerCase().includes(searchTerm) ||
@@ -201,7 +201,7 @@ const UsersPage = () => {
           if (editingUser) {
             handleEditUser(editingUser.id, data);
           } else {
-            handleAddUser(data);
+            handleAddUser(data as Omit<User, 'id' | 'createdAt' | 'updatedAt'>);
           }
         }}
         editItem={editingUser}

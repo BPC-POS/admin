@@ -66,8 +66,6 @@ const ITEMS_PER_PAGE = 10;
 const OrderList: React.FC<OrderListProps> = ({
   orders,
   onViewDetail,
-  onStatusChange,
-  onPaymentStatusChange,
 }) => {
   const [page, setPage] = useState(1);
 
