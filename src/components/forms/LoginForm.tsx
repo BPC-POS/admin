@@ -73,7 +73,7 @@ const LoginForm: React.FC = () => {
         style={{borderRadius: 12}}
         onClick={handlClickHome}
       >
-        LOGIN
+        LOGIN test
       </Button>
 
       <div className="text-center text-gray-500 mt-4 mb-2">Or login with</div>
