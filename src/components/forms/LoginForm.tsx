@@ -15,16 +15,29 @@ import IconButton from "../ui/IconButton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  setLoading?: (isLoading: boolean) => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ setLoading }) => {
   const [showPassword, setShowPassword] = React.useState(false);
-  const Router  = useRouter();
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handlClickHome = () => {
-    Router.push('/admin/dashboard')
+  const handleClickHome = () => {
+    if (setLoading) setLoading(true);
+    
+    // Giả lập thời gian xử lý đăng nhập
+    setTimeout(() => {
+      // Đặt timeout để đảm bảo hiệu ứng fade out hoàn tất trước khi chuyển trang
+      setTimeout(() => {
+        if (setLoading) setLoading(false);
+      }, 700);
+      router.push('/admin/dashboard');
+    }, 1500);
   }
 
   return (
@@ -63,7 +76,7 @@ const LoginForm: React.FC = () => {
         </IconButton>
       </div>
       <div className="flex justify-end text-white text-sm mb-4 mt-3">
-        <a href="#" className="hover:underline" onClick={handlClickHome}>
+        <a href="#" className="hover:underline" onClick={handleClickHome}>
           Forgot password?
         </a>
       </div>
@@ -71,7 +84,7 @@ const LoginForm: React.FC = () => {
         fullWidth
         className="bg-black hover:bg-white hover:text-black p-3 font-poppins font-bold text-2xl"
         style={{borderRadius: 12}}
-        onClick={handlClickHome}
+        onClick={handleClickHome}
       >
         LOGIN
       </Button>
@@ -96,7 +109,7 @@ const LoginForm: React.FC = () => {
         </Button>
       </div>
       <div className="flex items-center justify-center space-x-2 mt-4">
-      <div className="text-center text-gray-20">{"Don't have an account?"}</div>
+        <div className="text-center text-gray-20">{"Don't have an account?"}</div>
         <Link href="/register" className="text-white hover:underline font-bold">
           Register
         </Link>

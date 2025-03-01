@@ -21,9 +21,6 @@ jobs:
           git checkout production
           git pull origin production
           sudo chown -R ubuntu:ubuntu /home/admin
-          rm -rf node_modules
-          rm package-lock.json 
-          npm cache clean --force
           sudo npm install
           sudo npm run build
           sudo pm2 reload admin

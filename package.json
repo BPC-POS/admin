@@ -16,6 +16,7 @@
     "@mui/lab": "^6.0.0-beta.21",
     "@mui/material": "^6.2.1",
     "@mui/x-date-pickers": "^7.23.3",
+    "@next/bundle-analyzer": "^15.2.0",
     "@prisma/client": "^6.1.0",
     "@radix-ui/react-tabs": "^1.1.2",
     "@tailwindcss/line-clamp": "^0.4.4",
