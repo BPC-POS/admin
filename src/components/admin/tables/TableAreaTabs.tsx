@@ -5,7 +5,11 @@ import {
   Tab,
   Badge,
   Chip,
+  IconButton,
+  Menu,
+  MenuItem
 } from '@mui/material';
+import { MoreVert } from '@mui/icons-material';
 import { TableArea, Table } from '@/types/table';
 
 interface TableAreaTabsProps {
@@ -13,6 +17,9 @@ interface TableAreaTabsProps {
   currentArea: string;
   onAreaChange: (area: string) => void;
   tables: Table[];
+  onEditArea: (area: TableArea) => void;
+  onDeleteArea: (id: number) => Promise<void>;
+  fetchAreasData: () => void;
 }
 
 const TableAreaTabs: React.FC<TableAreaTabsProps> = ({
@@ -20,9 +27,22 @@ const TableAreaTabs: React.FC<TableAreaTabsProps> = ({
   currentArea,
   onAreaChange,
   tables,
+  onEditArea,
+  onDeleteArea,
+  fetchAreasData
 }) => {
   const getTableCount = (areaId: string) => {
     return tables.filter(table => table.area === areaId).length;
+  };
+
+  const [anchorEl, setAnchorEl] = React.useState<{ [key: string]: HTMLElement | null }>({});
+  
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, areaId: string) => {
+    setAnchorEl({ ...anchorEl, [areaId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (areaId: string) => {
+    setAnchorEl({ ...anchorEl, [areaId]: null });
   };
 
   return (
@@ -81,22 +101,45 @@ const TableAreaTabs: React.FC<TableAreaTabsProps> = ({
         {areas.map((area) => (
           <Tab
             key={area.id}
-            label={
-              <Badge 
-                badgeContent={getTableCount(area.id)} 
-                color="primary"
-                showZero
-                sx={{
-                  '& .MuiBadge-badge': {
-                    fontFamily: 'Poppins, sans-serif',
-                    fontWeight: 600
-                  }
-                }}
-              >
-                {area.name}
-              </Badge>
-            }
             value={area.id}
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Badge 
+                  badgeContent={getTableCount(area.id)} 
+                  color="primary"
+                  showZero
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      fontFamily: 'Poppins, sans-serif',
+                      fontWeight: 600
+                    }
+                  }}
+                >
+                  {area.name}
+                </Badge>
+                <IconButton size="small" onClick={(e) => handleMenuOpen(e, area.id)}>
+                  <MoreVert fontSize="small" />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl[area.id]}
+                  open={Boolean(anchorEl[area.id])}
+                  onClose={() => handleMenuClose(area.id)}
+                >
+                  <MenuItem onClick={() => {
+                      handleMenuClose(area.id); 
+                      onEditArea(area);       
+                  }}>Chỉnh sửa</MenuItem>
+                  <MenuItem onClick={async () => { 
+                      handleMenuClose(area.id);
+                      try {
+                          await onDeleteArea(Number(area.id)); 
+                      } catch (error) {
+                          console.error("Error deleting area:", error);
+                      }
+                  }}>Xóa</MenuItem>
+                </Menu>
+              </Box>
+            }
           />
         ))}
       </Tabs>

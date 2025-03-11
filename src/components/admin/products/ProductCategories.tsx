@@ -1,3 +1,4 @@
+// ProductCategories.tsx - No significant changes needed, just ensure props are passed correctly
 import React, { useState } from 'react';
 import {
   Paper,
@@ -27,10 +28,12 @@ interface ProductCategoriesProps {
   categories: Category[];
   currentCategory: string;
   onCategoryChange: (categoryId: string) => void;
-  onAddCategory?: (category: Omit<Category, 'id'>) => void;
+  onAddCategory?: (categoryData: Omit<Category, 'id'>) => void;
   onEditCategory?: (id: string, category: Omit<Category, 'id'>) => void;
   onDeleteCategory?: (id: string) => void;
   onToggleCategory?: (id: string) => void;
+  isLoading?: boolean;
+  onCategoriesUpdated?: () => void;
 }
 
 const ProductCategories: React.FC<ProductCategoriesProps> = ({
@@ -41,6 +44,8 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
   onEditCategory,
   onDeleteCategory,
   onToggleCategory,
+  isLoading,
+  onCategoriesUpdated,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -76,11 +81,23 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
     handleMenuClose();
   };
 
-  const handleSubmit = (data: Omit<Category, 'id'>) => {
-    if (selectedCategory && onEditCategory) {
-      onEditCategory(selectedCategory.id, data);
-    } else if (onAddCategory) {
-      onAddCategory(data);
+  const handleCategoryCreatedNotification = () => {
+    if (onCategoriesUpdated) {
+      onCategoriesUpdated();
+    }
+  };
+
+  const handleCreateCategorySubmit = (formData: Omit<Category, 'id'>, editItem?: Category) => { // Nhận thêm editItem
+    if (editItem) {
+      // Trường hợp chỉnh sửa: gọi onEditCategory
+      if (onEditCategory && selectedCategory) { // Đảm bảo selectedCategory không null khi edit
+        onEditCategory(selectedCategory.id, formData);
+      }
+    } else {
+      // Trường hợp thêm mới: gọi onAddCategory
+      if (onAddCategory) {
+        onAddCategory(formData);
+      }
     }
     setIsModalOpen(false);
     setSelectedCategory(null);
@@ -182,8 +199,10 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
           setIsModalOpen(false);
           setSelectedCategory(null);
         }}
-        onSubmit={handleSubmit}
+        onSubmit={handleCreateCategorySubmit} 
         editItem={selectedCategory || undefined}
+        isLoading={isLoading} 
+        onCategoryCreated={handleCategoryCreatedNotification}
       />
     </>
   );

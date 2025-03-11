@@ -12,6 +12,19 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface Member {
+  id?: number;
+  email: string;
+  phone_number: string;
+  gender: number; 
+  day_of_birth: string;
+  name: string;
+  password?: string; 
+  status: number; 
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export enum UserRole {
   ADMIN = 'admin',
   STAFF = 'staff',

@@ -17,9 +17,10 @@ import { Category } from '@/types/product';
 interface CategoryModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<Category, 'id'>) => void;
+  onSubmit: (data: Omit<Category, 'id'>, editItem?: Category) => void;
   editItem?: Category;
-  isLoading?: boolean;
+  isLoading?: boolean; // isLoading prop from parent
+  onCategoryCreated?: () => void;
 }
 
 const initialFormState = {
@@ -33,7 +34,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   onClose,
   onSubmit,
   editItem,
-  isLoading,
+  isLoading, // isLoading prop from parent
 }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,7 +50,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
       setFormData(initialFormState);
     }
     setErrors({});
-  }, [editItem]);
+  }, [editItem, open]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -63,13 +64,14 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit(formData, editItem); 
+      onClose();
     }
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
       maxWidth="sm"
       fullWidth
@@ -122,11 +124,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>Hủy</Button>
-          <Button 
-            type="submit" 
+          <Button onClick={onClose} disabled={isLoading}>Hủy</Button>
+          <Button
+            type="submit"
             variant="contained"
-            disabled={isLoading}
+            disabled={isLoading} // Use isLoading prop from parent to disable button
           >
             {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
           </Button>
@@ -136,4 +138,4 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   );
 };
 
-export default CategoryModal; 
+export default CategoryModal;

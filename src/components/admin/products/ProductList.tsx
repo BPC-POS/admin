@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Grid, 
-  Typography, 
+import {
+  Grid,
+  Typography,
   Box,
   TextField,
   InputAdornment,
@@ -51,8 +51,8 @@ const statusFilters = [
 
 const ITEMS_PER_PAGE = 12;
 
-const ProductList: React.FC<ProductListProps> = ({ 
-  products, 
+const ProductList: React.FC<ProductListProps> = ({
+  products,
   currentCategory,
   isLoading,
   error,
@@ -64,7 +64,6 @@ const ProductList: React.FC<ProductListProps> = ({
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
 
-  // Lọc sản phẩm
   const filteredProducts = products
     .filter(product => {
       const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
@@ -91,7 +90,6 @@ const ProductList: React.FC<ProductListProps> = ({
       }
     });
 
-  // Phân trang
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (page - 1) * ITEMS_PER_PAGE,
@@ -113,7 +111,6 @@ const ProductList: React.FC<ProductListProps> = ({
 
   return (
     <div className="space-y-6 p-8 font-poppins">
-      {/* Filters */}
       <Box className="flex flex-wrap gap-6 mb-8 bg-white/50 backdrop-blur-lg p-6 rounded-xl shadow-lg">
         <TextField
           placeholder="Tìm kiếm sản phẩm..."
@@ -168,14 +165,12 @@ const ProductList: React.FC<ProductListProps> = ({
         </FormControl>
       </Box>
 
-      {/* Results summary */}
       <Box className="flex justify-between items-center mb-6 px-4">
         <Typography variant="body2" className="text-gray-600 font-poppins">
           Hiển thị {paginatedProducts.length} trên tổng số {filteredProducts.length} sản phẩm
         </Typography>
       </Box>
 
-      {/* Product grid */}
       {isLoading ? (
         <Box className="flex justify-center items-center h-[400px]">
           <CircularProgress />
@@ -205,7 +200,6 @@ const ProductList: React.FC<ProductListProps> = ({
         </Grid>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <Box className="flex justify-center mt-8">
           <Pagination

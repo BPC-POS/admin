@@ -44,6 +44,9 @@ interface FormState {
   sizes: Size[];
   toppings: Topping[];
   isAvailable: boolean;
+  sku: string; // Add sku to form state
+  stock_quantity: string; // Add stock_quantity to form state, initially string for input
+  meta: object; // Add meta to form state
 }
 
 const initialFormState: FormState = {
@@ -56,7 +59,10 @@ const initialFormState: FormState = {
   status: ProductStatus.ACTIVE,
   sizes: [{ name: '', price: 0, isDefault: true }],
   toppings: [],
-  isAvailable: true
+  isAvailable: true,
+  sku: '', // Initialize sku
+  stock_quantity: '', // Initialize stock_quantity
+  meta: {} // Initialize meta
 };
 
 const AddProductModal: React.FC<AddProductModalProps> = ({
@@ -87,7 +93,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           isDefault: s.isDefault || false
         })),
         toppings: editProduct.toppings || [],
-        isAvailable: editProduct.isAvailable
+        isAvailable: editProduct.isAvailable,
+        sku: editProduct.sku || '', // Set sku from editProduct or empty string
+        stock_quantity: editProduct.stock_quantity?.toString() || '', // Set stock_quantity from editProduct or empty string
+        meta: editProduct.meta || {} // Set meta from editProduct or empty object
       });
     } else {
       setFormData(initialFormState);
@@ -118,6 +127,15 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       newErrors.sizes = 'Phải có ít nhất một size mặc định';
     }
 
+    if (!formData.sku.trim()) {
+      newErrors.sku = 'Vui lòng nhập SKU sản phẩm';
+    }
+
+    if (!formData.stock_quantity || isNaN(Number(formData.stock_quantity)) || Number(formData.stock_quantity) < 0) {
+      newErrors.stock_quantity = 'Vui lòng nhập số lượng kho hợp lệ (>= 0)';
+    }
+
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,7 +157,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         isDefault: s.isDefault || false
       })),
       toppings: formData.toppings,
-      isAvailable: formData.isAvailable
+      isAvailable: formData.isAvailable,
+      sku: formData.sku, // Use sku from form
+      stock_quantity: Number(formData.stock_quantity), // Use stock_quantity from form
+      meta: formData.meta // Use meta from form
     };
 
     onSubmit(productData);
@@ -164,10 +185,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       ...prev,
       sizes: prev.sizes.map((size, i) => {
         if (i === index) {
-          return { 
-            ...size, 
+          return {
+            ...size,
             [field]: value,
-            isDefault: field === 'isDefault' ? Boolean(value) : size.isDefault 
+            isDefault: field === 'isDefault' ? Boolean(value) : size.isDefault
           };
         }
         if (field === 'isDefault' && value === true) {
@@ -179,18 +200,18 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
       fullWidth
       PaperProps={{
-        className: 'max-h-[90vh] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
+        className: 'max-h-[100vh] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
       }}
     >
       <form onSubmit={handleSubmit}>
         <DialogTitle className="flex justify-between items-center border-b bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white">
-          <Typography variant="h6" className="font-bold">
+          <Typography variant="h6" className="font-bold font-poppins">
             {editProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
           </Typography>
           <IconButton onClick={onClose} size="small" className="text-white">
@@ -205,7 +226,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </Alert>
           )}
 
-          <Grid container spacing={3} className="mt-0">
+          <Grid container spacing={3} className="mt-0 font-poppins">
             <Grid item xs={12} md={8}>
               <div className="space-y-4">
                 <TextField
@@ -267,7 +288,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   >
                     {Object.values(ProductStatus).map((status) => (
                       <MenuItem key={status} value={status}>
-                        {status === ProductStatus.ACTIVE ? 'Đang bán' : 
+                        {status === ProductStatus.ACTIVE ? 'Đang bán' :
                          status === ProductStatus.INACTIVE ? 'Ngừng bán' : status}
                       </MenuItem>
                     ))}
@@ -281,6 +302,52 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="bg-white/50 backdrop-blur-sm rounded-lg"
+                />
+
+                <div className="flex gap-4">
+                  <TextField
+                    fullWidth
+                    label="SKU"
+                    value={formData.sku}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    error={!!errors.sku}
+                    helperText={errors.sku}
+                    required
+                    className="bg-white/50 backdrop-blur-sm rounded-lg"
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Số lượng kho"
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                    error={!!errors.stock_quantity}
+                    helperText={errors.stock_quantity}
+                    required
+                    className="bg-white/50 backdrop-blur-sm rounded-lg"
+                  />
+                </div>
+
+                <TextField
+                  fullWidth
+                  label="Meta (JSON Object)"
+                  multiline
+                  rows={2}
+                  value={JSON.stringify(formData.meta)}
+                  onChange={(e) => {
+                    try {
+                      const parsedMeta = JSON.parse(e.target.value);
+                      setFormData({ ...formData, meta: parsedMeta });
+                    } catch (e) {
+                      console.error("Error parsing Meta JSON", e);
+                      setErrors(prevErrors => ({ ...prevErrors, meta: "Invalid JSON format" }));
+                      setFormData({ ...formData, meta: {} }); // Reset to empty object on parse error
+                    }
+                  }}
+                  error={!!errors.meta}
+                  helperText={errors.meta}
                   className="bg-white/50 backdrop-blur-sm rounded-lg"
                 />
               </div>
@@ -308,14 +375,14 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                       size="small"
                       startIcon={<Add />}
                       onClick={handleAddSize}
-                      className="text-blue-600"
+                      className="text-blue-600 "
                     >
                       Thêm size
                     </Button>
                   </div>
-                  
+
                   {formData.sizes.map((size, index) => (
-                    <Box key={index} className="flex gap-2 items-center mb-2">
+                    <Box key={index} className="flex gap-1 items-center mb-2">
                       <TextField
                         size="small"
                         label="Size"
@@ -338,8 +405,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                         className="cursor-pointer"
                       />
                       {formData.sizes.length > 1 && (
-                        <IconButton 
-                          size="small" 
+                        <IconButton
+                          size="small"
                           color="error"
                           onClick={() => handleRemoveSize(index)}
                         >
@@ -358,8 +425,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         </DialogContent>
 
         <DialogActions className="border-t p-4 bg-gradient-to-r ">
-          <Button 
-            onClick={onClose} 
+          <Button
+            onClick={onClose}
             className="mr-2 text-black hover:bg-white/20"
           >
             Hủy
@@ -368,7 +435,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             type="submit"
             variant="contained"
             loading={isLoading}
-            className="bg-white text-[#2C3E50] hover:bg-white/90"
+            className="bg-white text-[#2C3E50] hover:bg-white/90 font-poppins font-semibold "
           >
             {editProduct ? 'Cập nhật' : 'Thêm sản phẩm'}
           </LoadingButton>

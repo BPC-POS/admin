@@ -1,4 +1,6 @@
 export interface Table {
+  areaId: number;
+  meta: {};
   id: number;
   name: string;
   capacity: number;
@@ -38,3 +40,9 @@ export interface TableArea {
   description?: string;
   isActive: boolean;
 } 
+
+export interface CreateTableAreaDTO {
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
