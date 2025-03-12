@@ -56,6 +56,7 @@ const TableList: React.FC<TableListProps> = ({
   onDelete,
   onStatusChange,
 }) => {
+  console.log("Tables prop:", tables);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedTable, setSelectedTable] = React.useState<TableType | null>(null);
 
@@ -87,7 +88,7 @@ const TableList: React.FC<TableListProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
-                backgroundColor: areaColors[table.area as keyof typeof areaColors] || '#fff',
+                backgroundColor: areaColors[table.area.code as keyof typeof areaColors] || '#fff',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -136,7 +137,7 @@ const TableList: React.FC<TableListProps> = ({
                 }}>
                   <LocationOn fontSize="small" sx={{ mr: 1 }} />
                   <Typography variant="body2" sx={{ fontFamily: 'Poppins, sans-serif' }}>
-                    {table.area}
+                    {table.area.name}
                   </Typography>
                 </Box>
 

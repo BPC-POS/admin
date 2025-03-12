@@ -6,7 +6,6 @@ import {
   Button,
   Alert,
   Snackbar,
-  CircularProgress
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import ProductCategories from '@/components/admin/products/ProductCategories';
@@ -30,7 +29,7 @@ const ProductsPage = () => {
     severity: 'success' as 'success' | 'error',
   });
   const [productsLoading, setProductsLoading] = useState(false); 
-  const [productsError, setProductsError] = useState<string | null>(null); 
+  const [, setProductsError] = useState<string | null>(null); 
 
   const showSnackbar = useCallback((message: string, severity: 'success' | 'error') => {
     setSnackbar({

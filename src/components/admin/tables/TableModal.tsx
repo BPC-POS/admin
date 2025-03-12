@@ -52,7 +52,7 @@ const TableModal: React.FC<TableModalProps> = ({
       setFormData({
         name: editItem.name,
         capacity: editItem.capacity,
-        area: editItem.area,
+        area: editItem.area.id,
         isActive: editItem.isActive,
         note: editItem.note || '',
       });

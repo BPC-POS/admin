@@ -9,11 +9,10 @@ const LoadingPlaceholder = () => (
   </div>
 );
 
-// Lazy load login form
 const LoginForm = lazy(() => import("@/components/forms/LoginForm"));
 
 const LoginPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   return (
     <AuthLayout>

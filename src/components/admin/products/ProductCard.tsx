@@ -1,4 +1,4 @@
-import React, { JSX, SyntheticEvent, forwardRef } from 'react';
+import React, { SyntheticEvent, forwardRef } from 'react';
 import Image from 'next/image';
 import {
   Card,

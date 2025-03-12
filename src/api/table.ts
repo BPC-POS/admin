@@ -21,24 +21,30 @@ tableApi.interceptors.request.use(
   }
 );
 
-const createTable = async (tableData: { name: string; areaId: number; status: number; meta: object }): Promise<AxiosResponse> => {
-    try {
+const createTable = async (tableData: {
+  name: string;
+  capacity: number;
+  notes: string;
+  status: number;
+  area_id: number; 
+}): Promise<AxiosResponse> => {
+  try {
       const response: AxiosResponse = await tableApi.post('/tables', tableData);
       return response;
-    } catch (error: any) {
+  } catch (error: any) {
       console.error("Error creating table:", error);
       throw error;
-    }
+  }
 };
 
 const getTables = async (): Promise<AxiosResponse<Table[]>> => {
-    try {
+  try {
       const response: AxiosResponse<Table[]> = await tableApi.get('/tables');
       return response;
-    } catch (error: any) {
+  } catch (error: any) {
       console.error("Error fetching tables:", error);
       throw error;
-    }
+  }
 };
 
 const getTableById = async (tableId: number): Promise<AxiosResponse<Table>> => {
@@ -52,14 +58,21 @@ const getTableById = async (tableId: number): Promise<AxiosResponse<Table>> => {
     }
 };
 
-const updateTable = async (tableData: { id: number; name: string; areaId: number; status: number; meta: object }): Promise<AxiosResponse> => {
-    try {
-      const response: AxiosResponse = await tableApi.put(`/tables/${tableData.id}`, tableData);
-      return response;
-    } catch (error: any) {
-      console.error("Error updating table:", error);
-      throw error;
-    }
+const updateTable = async (tableData: {
+  id: number;
+  name: string;
+  capacity: number;
+  notes: string; 
+  status: number;
+  areaId: number; 
+}): Promise<AxiosResponse<Table>> => { 
+  try {
+    const response: AxiosResponse<Table> = await tableApi.patch(`/tables/${tableData.id}`, tableData); 
+    return response;
+  } catch (error: any) {
+    console.error("Error updating table:", error);
+    throw error;
+  }
 };
 
 const deleteTable = async (tableId: number): Promise<AxiosResponse> => {
