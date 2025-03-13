@@ -41,10 +41,16 @@ const statusLabels = {
   [TableStatus.MAINTENANCE]: 'Bảo trì',
 };
 
-const areaColors = {
-  'indoor': '#E8F5E9',
-  'outdoor': '#F3E5F5',
-  'vip': '#FFF3E0'
+enum TableArea {
+  INDOOR = 'INDOOR',
+  OUTDOOR = 'OUTDOOR',
+  VIP = 'VIP'
+}
+
+const areaColors: Record<TableArea, string> = {
+  [TableArea.INDOOR]: '#E8F5E9',
+  [TableArea.OUTDOOR]: '#F3E5F5',
+  [TableArea.VIP]: '#FFF3E0'
 };
 
 const TableListPOS: React.FC<TableListPOSProps> = ({
@@ -102,7 +108,7 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
-                backgroundColor: areaColors[table.area as keyof typeof areaColors] || '#fff',
+                backgroundColor: areaColors[table.area as unknown as keyof typeof areaColors] || '#fff',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -152,7 +158,7 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
                 }}>
                   <LocationOn fontSize="inherit" sx={{ mr: 0.5 }} />
                   <Typography variant="body2" sx={{ fontFamily: 'Poppins, sans-serif', fontSize: '0.8rem' }}>
-                    {table.area}
+                    {String(table.area)}
                   </Typography>
                 </Box>
 

@@ -12,9 +12,12 @@ import {
   MenuItem,
   Grid,
   IconButton,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { User, UserRole, CreateUserDTO, UpdateUserDTO, UserStatus } from '@/types/user';
+import { User, CreateUserDTO, UpdateUserDTO, UserStatus } from '@/types/user';
 
 interface UserModalProps {
   open: boolean;
@@ -25,13 +28,13 @@ interface UserModalProps {
 }
 
 const initialFormState: CreateUserDTO = {
-  username: '',
   email: '',
   password: '',
-  fullName: '',
-  phone: '',
-  role: UserRole.STAFF,
-  status: UserStatus.ACTIVE
+  name: '',
+  phone_number: '',
+  gender: 1,
+  day_of_birth: '', 
+  status: UserStatus.ACTIVE,
 };
 
 const UserModal: React.FC<UserModalProps> = ({
@@ -48,9 +51,11 @@ const UserModal: React.FC<UserModalProps> = ({
     if (editItem) {
       const updateData: UpdateUserDTO = {
         email: editItem.email,
-        fullName: editItem.fullName,
-        phone: editItem.phone || '',
-        role: editItem.role,
+        name: editItem.name,
+        phone_number: editItem.phone_number || '',
+        gender: editItem.gender,
+        day_of_birth: editItem.day_of_birth,
+        status: editItem.status
       };
       setFormData(updateData);
     } else {
@@ -61,12 +66,9 @@ const UserModal: React.FC<UserModalProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!editItem) {
       const createData = formData as CreateUserDTO;
-      if (!createData.username?.trim()) {
-        newErrors.username = 'Vui lòng nhập tên đăng nhập';
-      }
       if (!createData.password?.trim()) {
         newErrors.password = 'Vui lòng nhập mật khẩu';
       }
@@ -78,8 +80,16 @@ const UserModal: React.FC<UserModalProps> = ({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.fullName?.trim()) {
-      newErrors.fullName = 'Vui lòng nhập họ tên';
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Vui lòng nhập họ tên';
+    }
+
+    if (!formData.phone_number?.trim()) {
+      newErrors.phone_number = 'Vui lòng nhập số điện thoại';
+    }
+
+    if (!formData.day_of_birth?.trim()) {
+      newErrors.day_of_birth = 'Vui lòng chọn ngày sinh';
     }
 
     setErrors(newErrors);
@@ -93,9 +103,13 @@ const UserModal: React.FC<UserModalProps> = ({
     }
   };
 
+  const handleGenderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, gender: Number(event.target.value) });
+  };
+
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
       maxWidth="sm"
       fullWidth
@@ -107,7 +121,7 @@ const UserModal: React.FC<UserModalProps> = ({
       <form onSubmit={handleSubmit}>
         <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
           <span className="text-xl font-bold">
-            {editItem ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
+            {editItem ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
           </span>
           <IconButton onClick={onClose} size="small" className="text-white hover:text-gray-200">
             <Close />
@@ -116,20 +130,7 @@ const UserModal: React.FC<UserModalProps> = ({
 
         <DialogContent dividers className="p-6">
           <Grid container spacing={3}>
-            {!editItem && (
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Tên đăng nhập"
-                  value={(formData as CreateUserDTO).username}
-                  onChange={(e) => setFormData({ ...(formData as CreateUserDTO), username: e.target.value })}
-                  error={!!errors.username}
-                  helperText={errors.username}
-                  required
-                  className="font-poppins"
-                />
-              </Grid>
-            )}
+
 
             <Grid item xs={12}>
               <TextField
@@ -165,39 +166,69 @@ const UserModal: React.FC<UserModalProps> = ({
               <TextField
                 fullWidth
                 label="Họ và tên"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                error={!!errors.fullName}
-                helperText={errors.fullName}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                error={!!errors.name}
+                helperText={errors.name}
+                required
+                className="font-poppins"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Số điện thoại"
+                value={formData.phone_number}
+                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                error={!!errors.phone_number}
+                helperText={errors.phone_number}
+                required
+                className="font-poppins"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl component="fieldset">
+                <RadioGroup
+                  aria-label="gender"
+                  name="gender"
+                  value={String(formData.gender)}
+                  onChange={handleGenderChange}
+                  row
+                >
+                  <FormControlLabel value="1" control={<Radio />} label="Nam" className="font-poppins" />
+                  <FormControlLabel value="2" control={<Radio />} label="Nữ" className="font-poppins" />
+                  <FormControlLabel value="3" control={<Radio />} label="Khác" className="font-poppins" />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Ngày sinh"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.day_of_birth}
+                onChange={(e) => setFormData({ ...formData, day_of_birth: e.target.value })}
+                error={!!errors.day_of_birth}
+                helperText={errors.day_of_birth}
                 required
                 className="font-poppins"
               />
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Số điện thoại"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="font-poppins"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
               <FormControl fullWidth>
-                <InputLabel className="font-poppins">Vai trò</InputLabel>
+                <InputLabel className="font-poppins">Trạng thái</InputLabel>
                 <Select
-                  value={formData.role}
-                  label="Vai trò"
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                  value={formData.status}
+                  label="Trạng thái"
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as UserStatus })}
                   className="font-poppins"
                 >
-                  <MenuItem value={UserRole.ADMIN} className="font-poppins">Quản trị viên</MenuItem>
-                  <MenuItem value={UserRole.STAFF} className="font-poppins">Nhân viên</MenuItem>
-                  <MenuItem value={UserRole.CASHIER} className="font-poppins">Thu ngân</MenuItem>
-                  <MenuItem value={UserRole.WAITER} className="font-poppins">Phục vụ</MenuItem>
-                  <MenuItem value={UserRole.CUSTOMER} className="font-poppins">Khách hàng</MenuItem>
+                  <MenuItem value={UserStatus.ACTIVE} className="font-poppins">Hoạt động</MenuItem>
+                  <MenuItem value={UserStatus.INACTIVE} className="font-poppins">Không hoạt động</MenuItem>
+                  <MenuItem value={UserStatus.PENDING} className="font-poppins">Chờ duyệt</MenuItem>
+                  <MenuItem value={UserStatus.BANNED} className="font-poppins">Bị cấm</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -205,14 +236,14 @@ const UserModal: React.FC<UserModalProps> = ({
         </DialogContent>
 
         <DialogActions className="p-4">
-          <Button 
-            onClick={onClose} 
+          <Button
+            onClick={onClose}
             className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl"
           >
             Hủy bỏ
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             variant="contained"
             disabled={isLoading}
             className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"

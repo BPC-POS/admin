@@ -86,12 +86,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
         {(preview || currentImage) ? (
           <div className="relative w-full h-full min-h-[200px]">
-            <Image
-              src={preview || currentImage as string}
-              alt="Preview"
-              fill
-              className="object-cover"
-            />
+            {preview || currentImage ? (
+              <Image
+                src={preview || currentImage as string}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
+            ) : null}
             <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200">
               <div className="absolute top-2 right-2 flex gap-2">
                 <IconButton

@@ -20,6 +20,32 @@ productApi.interceptors.request.use(
   }
 );
 
+interface ProductData {
+  name: string;
+  description: string;
+  price: number;
+  stock_quantity: number;
+  sku: string;
+  status: number;
+  meta: object;
+  categories: number[];
+  attributes: {
+    attribute_id: number;
+    value: string;
+  }[];
+  variants: {
+    sku: string;
+    price: number;
+    stock_quantity: number;
+    status: number;
+    attributes: {
+      attribute_id: number;
+      value: string;
+    }[];
+  }[];
+}
+
+
 const getProducts = async (): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await productApi.get('/products');
@@ -30,15 +56,7 @@ const getProducts = async (): Promise<AxiosResponse> => {
   }
 };
 
-const createProduct = async (productData: {
-  name: string;
-  description: string;
-  price: number;
-  sku: string;
-  stock_quantity: number;
-  status: number;
-  meta: object;
-}): Promise<AxiosResponse> => {
+const createProduct = async (productData: ProductData): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await productApi.post('/products', productData);
     return response;

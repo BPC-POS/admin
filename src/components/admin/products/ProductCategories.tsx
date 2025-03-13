@@ -1,10 +1,8 @@
-// ProductCategories.tsx - No significant changes needed, just ensure props are passed correctly
 import React, { useState } from 'react';
 import {
   Paper,
   Tabs,
   Tab,
-  IconButton,
   Button,
   Menu,
   MenuItem,
@@ -143,13 +141,15 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
                   {!category.isActive && (
                     <VisibilityOff fontSize="small" className="text-gray-400" />
                   )}
-                  <IconButton
-                    size="small"
+                  <div // Thay IconButton bằng div
+                    className="ml-1 cursor-pointer" // Thêm class cursor-pointer để giống button hơn
                     onClick={(e) => handleMenuOpen(e, category)}
-                    className="ml-1"
+                    aria-label="Options" // Thêm aria-label cho accessibility
+                    tabIndex={0}       // Để div có thể focus bằng tab (nếu cần)
+                    role="button"      // Để div được nhận diện là button về mặt semantic
                   >
                     <MoreVert fontSize="small" />
-                  </IconButton>
+                  </div>
                 </div>
               }
               value={category.id}
@@ -199,9 +199,9 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
           setIsModalOpen(false);
           setSelectedCategory(null);
         }}
-        onSubmit={handleCreateCategorySubmit} 
+        onSubmit={handleCreateCategorySubmit}
         editItem={selectedCategory || undefined}
-        isLoading={isLoading} 
+        isLoading={isLoading}
         onCategoryCreated={handleCategoryCreatedNotification}
       />
     </>

@@ -41,4 +41,36 @@ const createMember = async (memberData: Omit<Member, 'id' | 'createdAt' | 'updat
   }
 };
 
-export { memberApi, getMembers, createMember };
+const getMemberById = async (id: number): Promise<AxiosResponse<Member>> => {
+  try {
+    const response: AxiosResponse<Member> = await memberApi.get(`/members/${id}`);
+    return response;
+  }
+  catch (error: any) {
+    console.error("Error fetching member:", error);
+    throw error;
+  }
+};
+
+const updateMember = async (id: number, memberData: any): Promise<AxiosResponse<Member>> => {
+  try {
+    const response: AxiosResponse<Member> = await memberApi.patch(`/members/${id}`, memberData);
+    return response;
+  } catch (error: any) {
+    console.error("Error updating member:", error);
+    throw error;
+  }
+}
+
+const deleteMember = async (id: number): Promise<AxiosResponse> => {
+  try {
+    const response: AxiosResponse<Member> = await memberApi.delete(`/members/${id}`);
+    return response;
+  }
+  catch (error: any) {
+    console.error("Error deleting member:", error);
+    throw error;
+  }
+};
+
+export { getMembers, createMember, getMemberById, updateMember, deleteMember };

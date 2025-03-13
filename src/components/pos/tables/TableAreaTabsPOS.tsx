@@ -5,12 +5,27 @@ import {
   Tab,
   Badge,
 } from '@mui/material';
-import { TableArea, Table } from '@/types/table';
+import { TableArea } from '@/types/table';
+
+interface Table {
+  areaId: number;
+  meta: {};
+  id: number;
+  name: string;
+  capacity: number;
+  status: number;
+  area: string; // Changed to TableArea
+  isActive: boolean;
+  qrCode?: string;
+  note?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface TableAreaTabsPOSProps {
   areas: TableArea[];
-  currentArea: string;
-  onAreaChange: (area: string) => void;
+  currentArea: 'all' | TableArea;
+  onAreaChange: (area: 'all' | TableArea) => void;
   tables: Table[];
 }
 

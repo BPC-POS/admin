@@ -57,7 +57,8 @@ const UserList: React.FC<UserListProps> = ({
     setSelectedUser(null);
   };
 
-  const getRoleLabel = (role: UserRole) => {
+  const getRoleLabel = (role: UserRole | undefined) => { // Modified to accept potentially undefined role
+    if (!role) return 'N/A'; // Handle case where role is undefined
     const labels: Record<UserRole, string> = {
       [UserRole.ADMIN]: 'Quản trị viên',
       [UserRole.STAFF]: 'Nhân viên',
@@ -103,7 +104,7 @@ const UserList: React.FC<UserListProps> = ({
               <TableCell className="font-poppins">Email</TableCell>
               <TableCell className="font-poppins">Vai trò</TableCell>
               <TableCell className="font-poppins">Trạng thái</TableCell>
-              <TableCell className="font-poppins">Đăng nhập lần cuối</TableCell>
+              {/* Removed Last Login Table Header - as per previous instructions */}
               <TableCell align="right" className="font-poppins">Thao tác</TableCell>
             </TableRow>
           </TableHead>
@@ -112,13 +113,13 @@ const UserList: React.FC<UserListProps> = ({
               <TableRow key={user.id}>
                 <TableCell>
                   <Box className="flex items-center gap-3">
-                    <Avatar src={user.avatar} alt={user.fullName}>
-                      {user.fullName.charAt(0)}
+                    <Avatar src={ undefined} alt={user.name}>
+                      {user.name && user.name.charAt(0).toUpperCase()}
                     </Avatar>
                     <div>
-                      <Typography variant="subtitle2" className="font-poppins">{user.fullName}</Typography>
+                      <Typography variant="subtitle2" className="font-poppins">{user.name}</Typography> 
                       <Typography variant="caption" color="text.secondary" className="font-poppins">
-                        {user.phone}
+                        {user.phone_number} 
                       </Typography>
                     </div>
                   </Box>
@@ -126,7 +127,7 @@ const UserList: React.FC<UserListProps> = ({
                 <TableCell className="font-poppins">{user.email}</TableCell>
                 <TableCell>
                   <Chip
-                    label={getRoleLabel(user.role)}
+                    label={getRoleLabel(undefined)}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -141,9 +142,7 @@ const UserList: React.FC<UserListProps> = ({
                     className="font-poppins"
                   />
                 </TableCell>
-                <TableCell className="font-poppins">
-                  {user.lastLogin ? formatDate(user.lastLogin) : 'Chưa đăng nhập'}
-                </TableCell>
+                {/* Removed Last Login Table Cell - as per previous instructions */}
                 <TableCell align="right">
                   <IconButton
                     size="small"

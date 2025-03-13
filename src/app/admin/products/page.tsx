@@ -162,13 +162,30 @@ const ProductsPage = () => {
   };
 
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    console.log(productData);
     try {
       setIsLoading(true);
       setError(null);
-      const response = await createProduct({
-        ...productData,
-        status: Number(productData.status)
-      });
+      const apiProductData = {
+        name: productData.name,
+        description: productData.description,
+        price: Number(productData.price),
+        stock_quantity: Number(productData.stock_quantity),
+        category_id: productData.category_id,
+        image_url: productData.image_url,
+        status: Number(productData.status),
+        sku: productData.name.toLowerCase().replace(/\s+/g, '-'),
+        meta: {},
+        categories: [Number(productData.category_id)],
+        attributes: [],
+        variants: productData.variants.map((variant: { status: string | number, stock_quantity: string | number, price: string | number }) => ({
+          ...variant,
+          status: Number(variant.status),
+          stock_quantity: Number(variant.stock_quantity),
+          price: Number(variant.price)
+        }))
+      };
+      const response = await createProduct(apiProductData);
       if (response.status === 201) {
         setIsProductModalOpen(false);
         showSnackbar('Thêm sản phẩm thành công', 'success');
@@ -181,6 +198,8 @@ const ProductsPage = () => {
       showSnackbar('Có lỗi xảy ra khi thêm sản phẩm', 'error');
       setError(apiError.response?.data?.message || apiError.message || 'Lỗi không xác định khi tạo sản phẩm');
       console.error("Error creating product:", apiError);
+      console.log("Error response data:", apiError.response?.data); // Thêm dòng này để log response data
+      console.log("Error response status:", apiError.response?.status); // Thêm dòng này để log status code (đã có trong log, nhưng để chắc chắn)
     } finally {
       setIsLoading(false);
     }
@@ -192,10 +211,16 @@ const ProductsPage = () => {
     try {
       setIsLoading(true);
       const updatedProduct: Product = {
+        ...editingProduct,
         ...productData,
         id: editingProduct.id,
         createdAt: editingProduct.createdAt,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        sku: productData.name.toLowerCase().replace(/\s+/g, '-'),
+        meta: editingProduct.meta,
+        stock_quantity: Number(productData.stock_quantity),
+        price: Number(productData.price),
+        status: Number(productData.status)
       };
 
       setProducts(prev =>

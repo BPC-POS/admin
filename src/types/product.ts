@@ -1,20 +1,60 @@
+export interface Attribute {
+    attribute_id: number;
+    value: string;
+}
+
+export interface VariantAttribute {
+    attribute_id: number;
+    value: string;
+}
+
+
+export interface Size {
+    name: string;
+    price: number;
+    isDefault?: boolean;
+}
+
+export const SizeValues: Size[] = [
+    { name: 'S', price: 0, isDefault: true },
+    { name: 'M', price: 0 },
+    { name: 'L', price: 0 }
+];
+
+export interface Topping {
+    id: number; 
+    name: string;
+    price: number;
+}
+
+export interface Variant {
+    sku: string;
+    price: number;
+    stock_quantity: number;
+    status: ProductStatus;
+    attributes: VariantAttribute[];
+}
+
 export interface Product {
+    [x: string]: any;
+    category: string;
     sku: string;
     stock_quantity: number;
-    meta: {};
+    meta: any; 
     id: number;
     name: string;
     price: number;
     originalPrice?: number;
     image: string;
-    category: string;
+    categories: number[]; 
     description: string;
     status: ProductStatus;
-    size: Size[];
     toppings?: Topping[];
     isAvailable: boolean;
     createdAt: Date;
     updatedAt: Date;
+    attributes: Attribute[]; 
+    variants: Variant[];   
 }
 
 export interface Category {
@@ -39,12 +79,12 @@ export interface Topping {
 }
 
 export enum ProductStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
-    SOLD_OUT = 'sold_out',
-    SEASONAL = 'seasonal',
-    NEW = 'new',
-    BEST_SELLER = 'best_seller'
+    ACTIVE = 1,
+    INACTIVE = 0,
+    SOLD_OUT = 2, 
+    SEASONAL = 3,
+    NEW = 4,
+    BEST_SELLER = 5
 }
 
 export interface CreateProductDTO {

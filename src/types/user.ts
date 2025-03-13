@@ -1,67 +1,79 @@
 export interface User {
   id: number;
-  username: string;
+  createdAt: string;
+  updatedAt: string;
   email: string;
-  fullName: string;
-  phone?: string;
-  avatar?: string;
-  role: UserRole;
-  status: UserStatus;
-  lastLogin?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  phone_number: string;
+  gender: gender;
+  day_of_birth: string;
+  name: string;
+  password?: string;
+  status: number;
 }
 
 export interface Member {
   id?: number;
+  name: string;
   email: string;
   phone_number: string;
-  gender: number; 
-  day_of_birth: string;
-  name: string;
-  password?: string; 
-  status: number; 
+  status: number;
   createdAt?: Date;
   updatedAt?: Date;
+  gender: gender;
+  day_of_birth: string;
+  password: string;
+  avatar?: string;
+  token?: string;
+  first_login?: boolean;
+  meta?: any;
 }
 
 export enum UserRole {
-  ADMIN = 'admin',
-  STAFF = 'staff',
-  CASHIER = 'cashier',
-  WAITER = 'waiter',
-  CUSTOMER = 'customer'
+  ADMIN = 1,     
+  STAFF = 2,     
+  CASHIER = 3,   
+  WAITER = 4,    
+  CUSTOMER = 5   
 }
 
 export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  BANNED = 'banned',
-  PENDING = 'pending'
+  ACTIVE = 1,    
+  INACTIVE = 2, 
+  BANNED = 3,    
+  PENDING = 4   
 }
 
 export interface CreateUserDTO {
-  username: string;
+  phone_number?: string;
+  status: UserStatus;
   email: string;
   password: string;
-  fullName: string;
-  phone?: string;
-  role: UserRole;
-  status: UserStatus;
+  name: string;
+  gender?: gender;
+  day_of_birth?: string;
+  role?: UserRole;
 }
 
 export interface UpdateUserDTO {
-  email?: string;
-  fullName?: string;
-  phone?: string;
+  email: string;
+  name: string;
+  phone_number: string;
+  gender: gender;
+  day_of_birth: string;
+  status: UserStatus;
   role?: UserRole;
-  status?: UserStatus;
 }
 
 export interface UserFilter {
   search?: string;
-  role?: UserRole;
-  status?: UserStatus;
+  role?: UserRole; 
+  status?: UserStatus; 
   startDate?: Date;
   endDate?: Date;
+}
+
+export enum gender {
+  man = 1,
+  girl = 2,
+  other = 3
 }

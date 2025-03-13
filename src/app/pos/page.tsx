@@ -10,7 +10,7 @@ import {
 import TableListPOS from '@/components/pos/tables/TableListPOS';
 import TableModalPOS from '@/components/pos/tables/TableModalPOS';
 import TableAreaTabsPOS from '@/components/pos/tables/TableAreaTabsPOS';
-import { Table, TableStatus } from '@/types/table';
+import { Table, TableArea, TableStatus } from '@/types/table';
 import mockTables from '@/mocks/mockTables';
 import mockAreas from '@/mocks/mockAreas';
 import { mockCategories } from '@/mocks/mockCategories';
@@ -24,7 +24,7 @@ import ProductModalPOS from '@/components/pos/products/ProductModalPOS';
 
 const PosPage = () => {
   const [tables, setTables] = useState<Table[]>(mockTables);
-  const [currentArea, setCurrentArea] = useState<string>('all');
+  const [currentArea, setCurrentArea] = useState<'all' | TableArea>('all');
   const [isEditTableModalOpen, setIsEditTableModalOpen] = useState(false);
   const [tableToEdit, setTableToEdit] = useState<Table | null>(null);
   const [isLoading, setIsLoading] = useState(false);

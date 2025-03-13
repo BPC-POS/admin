@@ -38,7 +38,7 @@ const ProductListPOS: React.FC<ProductListPOSProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, ] = useState<SortOption>('newest');
-  const [statusFilter, ] = useState('all');
+  const [statusFilter, ] = useState<'all' | Product['status']>('all');
   const [page, setPage] = useState(1);
 
   const filteredProducts = products

@@ -61,7 +61,7 @@ const ProductList: React.FC<ProductListProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | 'all'>('all');
   const [page, setPage] = useState(1);
 
   const filteredProducts = products
@@ -132,7 +132,7 @@ const ProductList: React.FC<ProductListProps> = ({
           <Select
             value={statusFilter}
             label="Trạng thái"
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => setStatusFilter(e.target.value as ProductStatus | 'all')}
             className="bg-white rounded-lg"
           >
             {statusFilters.map(option => (

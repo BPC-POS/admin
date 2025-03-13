@@ -78,7 +78,7 @@ const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
           </div>
 
           <Stack direction="row" spacing={0.5} className="flex-wrap gap-1">
-            {product.size.map((size) => (
+            {product.size.map((size: { name: React.Key | null | undefined; price: { toLocaleString: (arg0: string) => any; }; isDefault: any; }) => (
               <Chip
                 key={size.name}
                 label={`${size.name}: ${size.price.toLocaleString('vi-VN')}đ`}

@@ -1,27 +1,18 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Typography,
-  Box,
-  Chip,
-  FormHelperText,
-  Grid,
-  Alert,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Grid, Alert, SelectChangeEvent
 } from '@mui/material';
-import { Close, Add, Remove } from '@mui/icons-material';
-import ImageUpload from './ImageUpload';
-import { Category, Product, ProductStatus, Size, Topping } from '@/types/product';
+import { Close } from '@mui/icons-material';
+import { Category, Product, ProductStatus } from '@/types/product';
 import { LoadingButton } from '@mui/lab';
+
+// Import các component con
+import ProductInfo from './AddProduct/ProductInfo';
+import MetaInfo from './AddProduct/MetaInfo';
+import ProductAttributes from './AddProduct/ProductAttributes';
+import ProductVariants from './AddProduct/ProductVariants';
+import ProductImageUpload from './AddProduct/ProductImageUpload';
 
 interface AddProductModalProps {
   open: boolean;
@@ -33,70 +24,82 @@ interface AddProductModalProps {
   error?: string;
 }
 
-interface FormState {
-  name: string;
+interface VariantFormState {
+  sku: string;
   price: string;
-  originalPrice: string;
-  category: string;
-  description: string;
-  image: string;
+  stock_quantity: string;
   status: ProductStatus;
-  sizes: Size[];
-  toppings: Topping[];
-  isAvailable: boolean;
-  sku: string; // Add sku to form state
-  stock_quantity: string; // Add stock_quantity to form state, initially string for input
-  meta: object; // Add meta to form state
+  attributes: { attribute_id: string; value: string }[];
 }
+
+export interface FormState {
+  name: string;
+  description: string;
+  price: string;
+  stock_quantity: string;
+  sku: string;
+  status: ProductStatus;
+  meta: object;
+  categories: string[];
+  attributes: { attribute_id: string; value: string }[];
+  variants: VariantFormState[];
+  image: string;
+}
+
+const initialVariantFormState: VariantFormState = {
+  sku: '',
+  price: '',
+  stock_quantity: '',
+  status: ProductStatus.ACTIVE,
+  attributes: [{ attribute_id: '', value: '' }],
+};
 
 const initialFormState: FormState = {
   name: '',
-  price: '',
-  originalPrice: '',
-  category: '',
   description: '',
-  image: '',
+  price: '',
+  stock_quantity: '',
+  sku: '',
   status: ProductStatus.ACTIVE,
-  sizes: [{ name: '', price: 0, isDefault: true }],
-  toppings: [],
-  isAvailable: true,
-  sku: '', // Initialize sku
-  stock_quantity: '', // Initialize stock_quantity
-  meta: {} // Initialize meta
+  meta: {},
+  categories: [],
+  attributes: [{ attribute_id: '', value: '' }],
+  variants: [initialVariantFormState],
+  image: '',
 };
 
 const AddProductModal: React.FC<AddProductModalProps> = ({
-  open,
-  onClose,
-  onSubmit,
-  categories,
-  editProduct,
-  isLoading,
-  error
+  open, onClose, onSubmit, categories, editProduct, isLoading, error
 }) => {
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (editProduct) {
       setFormData({
         name: editProduct.name,
-        price: editProduct.price.toString(),
-        originalPrice: editProduct.originalPrice?.toString() || '',
-        category: editProduct.category,
         description: editProduct.description,
-        image: editProduct.image,
+        price: editProduct.price.toString(),
+        stock_quantity: editProduct.stock_quantity.toString(),
+        sku: editProduct.sku,
         status: editProduct.status,
-        sizes: editProduct.size.map(s => ({
-          ...s,
-          isDefault: s.isDefault || false
+        meta: editProduct.meta || {},
+        categories: editProduct.categories?.map(String) || [],
+        attributes: (editProduct.attributes || []).map(attr => ({
+          attribute_id: String(attr.attribute_id),
+          value: attr.value
         })),
-        toppings: editProduct.toppings || [],
-        isAvailable: editProduct.isAvailable,
-        sku: editProduct.sku || '', // Set sku from editProduct or empty string
-        stock_quantity: editProduct.stock_quantity?.toString() || '', // Set stock_quantity from editProduct or empty string
-        meta: editProduct.meta || {} // Set meta from editProduct or empty object
+        variants: (editProduct.variants || []).map(variant => ({
+          ...variant,
+          price: variant.price.toString(),
+          stock_quantity: variant.stock_quantity.toString(),
+          attributes: variant.attributes.map(attr => ({
+            attribute_id: String(attr.attribute_id),
+            value: attr.value
+          }))
+        })),
+        image: editProduct.image,
       });
     } else {
       setFormData(initialFormState);
@@ -106,36 +109,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Vui lòng nhập tên sản phẩm';
-    }
-
-    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
-      newErrors.price = 'Vui lòng nhập giá hợp lệ';
-    }
-
-    if (!formData.category) {
-      newErrors.category = 'Vui lòng chọn danh mục';
-    }
-
-    if (!formData.image && !imageFile && !editProduct) {
-      newErrors.image = 'Vui lòng chọn ảnh sản phẩm';
-    }
-
-    if (!formData.sizes.some(size => size.isDefault)) {
-      newErrors.sizes = 'Phải có ít nhất một size mặc định';
-    }
-
-    if (!formData.sku.trim()) {
-      newErrors.sku = 'Vui lòng nhập SKU sản phẩm';
-    }
-
-    if (!formData.stock_quantity || isNaN(Number(formData.stock_quantity)) || Number(formData.stock_quantity) < 0) {
-      newErrors.stock_quantity = 'Vui lòng nhập số lượng kho hợp lệ (>= 0)';
-    }
-
-
+    if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập tên sản phẩm';
+    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) newErrors.price = 'Vui lòng nhập giá hợp lệ';
+    if (!formData.stock_quantity || isNaN(Number(formData.stock_quantity)) || Number(formData.stock_quantity) < 0) newErrors.stock_quantity = 'Vui lòng nhập số lượng kho hợp lệ (>= 0)';
+    if (!formData.sku.trim()) newErrors.sku = 'Vui lòng nhập SKU sản phẩm';
+    if (!formData.categories.length) newErrors.categories = 'Vui lòng chọn ít nhất một danh mục';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -144,299 +122,198 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     e.preventDefault();
     if (!validateForm()) return;
 
+    const productCategories = formData.categories.map(Number);
+    const productAttributes = formData.attributes.map(attr => ({ attribute_id: Number(attr.attribute_id), value: attr.value }));
+    const productVariants = formData.variants.map(variant => ({
+      sku: variant.sku,
+      price: Number(variant.price),
+      stock_quantity: Number(variant.stock_quantity),
+      status: variant.status,
+      attributes: variant.attributes.map(attr => ({ attribute_id: Number(attr.attribute_id), value: attr.value }))
+    }));
+
     const productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = {
       name: formData.name,
-      price: Number(formData.price),
-      originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
-      category: formData.category,
       description: formData.description,
-      image: formData.image,
+      price: Number(formData.price),
+      stock_quantity: Number(formData.stock_quantity),
+      sku: formData.sku,
       status: formData.status,
-      size: formData.sizes.map(s => ({
-        ...s,
-        isDefault: s.isDefault || false
-      })),
-      toppings: formData.toppings,
-      isAvailable: formData.isAvailable,
-      sku: formData.sku, // Use sku from form
-      stock_quantity: Number(formData.stock_quantity), // Use stock_quantity from form
-      meta: formData.meta // Use meta from form
+      meta: formData.meta,
+      categories: productCategories,
+      attributes: productAttributes,
+      variants: productVariants,
+      image: '',
+      isAvailable: false
     };
 
     onSubmit(productData);
   };
 
-  const handleAddSize = () => {
+  const handleCategoryChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value as string[];
+    setFormData({ ...formData, categories: Array.isArray(value) ? value : [] });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleMetaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    try {
+      const parsedMeta = JSON.parse(e.target.value);
+      setFormData({ ...formData, meta: parsedMeta });
+    } catch (e) {
+      setErrors(prevErrors => ({ ...prevErrors, meta: "Invalid JSON format" }));
+      setFormData({ ...formData, meta: {} });
+    }
+  };
+  const handleAddAttribute = () => {
+    setFormData(prev => ({ ...prev, attributes: [...prev.attributes, { attribute_id: '', value: '' }] }));
+  };
+  const handleRemoveAttribute = (index: number) => {
+    setFormData(prev => ({ ...prev, attributes: prev.attributes.filter((_, i) => i !== index) }));
+  };
+  const handleAttributeChange = (index: number, field: 'attribute_id' | 'value', value: string) => {
     setFormData(prev => ({
       ...prev,
-      sizes: [...prev.sizes, { name: '', price: 0, isDefault: false }]
+      attributes: prev.attributes.map((attr, i) => i === index ? { ...attr, [field]: field === 'attribute_id' ? Number(value) : value } : attr)
     }));
   };
 
-  const handleRemoveSize = (index: number) => {
+  const handleAddVariant = () => {
+    setFormData(prev => ({ ...prev, variants: [...prev.variants, { ...initialVariantFormState }] }));
+  };
+  const handleRemoveVariant = (index: number) => {
+    setFormData(prev => ({ ...prev, variants: prev.variants.filter((_, i) => i !== index) }));
+  };
+  const handleVariantChange = (index: number, field: keyof VariantFormState, value: string | ProductStatus) => {
     setFormData(prev => ({
       ...prev,
-      sizes: prev.sizes.filter((_, i) => i !== index)
+      variants: prev.variants.map((variant, i) => i === index ? { ...variant, [field]: value } : variant)
+    }));
+  };
+  const handleVariantAttributeChange = (variantIndex: number, attributeIndex: number, field: 'attribute_id' | 'value', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((variant, vIndex) =>
+        vIndex === variantIndex
+          ? {
+              ...variant,
+              attributes: variant.attributes.map((attr, aIndex) =>
+                aIndex === attributeIndex ? { ...attr, [field]: field === 'attribute_id' ? Number(value) : value } : attr
+              ),
+            }
+          : variant
+      ),
+    }));
+  };
+  const handleAddVariantAttribute = (variantIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((variant, vIndex) =>
+        vIndex === variantIndex
+          ? { ...variant, attributes: [...variant.attributes, { attribute_id: '', value: '' }] }
+          : variant
+      ),
     }));
   };
 
-  const handleSizeChange = (index: number, field: keyof Size, value: string | number | boolean) => {
+  const handleRemoveVariantAttribute = (variantIndex: number, attributeIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      sizes: prev.sizes.map((size, i) => {
-        if (i === index) {
-          return {
-            ...size,
-            [field]: value,
-            isDefault: field === 'isDefault' ? Boolean(value) : size.isDefault
-          };
-        }
-        if (field === 'isDefault' && value === true) {
-          return { ...size, isDefault: false };
-        }
-        return size;
-      })
+      variants: prev.variants.map((variant, vIndex) =>
+        vIndex === variantIndex
+          ? {
+            ...variant,
+            attributes: variant.attributes.filter((_, aIndex) => aIndex !== attributeIndex),
+          }
+          : variant
+      ),
     }));
   };
+
+  const handleImageSelect = useCallback((file: File) => {
+    // No setImageFile here as it's handled in ProductImageUpload component
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.image;
+      return newErrors;
+    });
+    if (file) {
+      setFormData(prev => ({...prev, image: URL.createObjectURL(file)}))
+    }
+  }, [setErrors])
+
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
+      maxWidth="md"
       fullWidth
-      PaperProps={{
-        className: 'max-h-[100vh] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg font-poppins'
-      }}
+      PaperProps={{ className: 'max-h-[90vh] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg font-poppins' }}
     >
       <form onSubmit={handleSubmit}>
         <DialogTitle className="flex justify-between items-center border-b bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white">
-          <Typography variant="h6" className="font-bold font-poppins">
+          <div className="font-bold font-poppins text-lg">
             {editProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-          </Typography>
-          <IconButton onClick={onClose} size="small" className="text-white">
+          </div>
+          <div onClick={onClose} className="text-white cursor-pointer">
             <Close />
-          </IconButton>
+          </div>
         </DialogTitle>
 
         <DialogContent className="overflow-y-auto">
-          {error && (
-            <Alert severity="error" className="mb-4 mt-4 backdrop-blur-lg">
-              {error}
-            </Alert>
-          )}
+          {error && <Alert severity="error" className="mb-4 mt-4 backdrop-blur-lg">{error}</Alert>}
+          {errors.categories && <Alert severity="error" className="mb-4 mt-4 backdrop-blur-lg">{errors.categories}</Alert>}
 
-          <Grid container spacing={3} className="mt-0 font-poppins">
-            <Grid item xs={12} md={8}>
-              <div className="space-y-4">
-                <TextField
-                  fullWidth
-                  label="Tên sản phẩm"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  error={!!errors.name}
-                  helperText={errors.name}
-                  required
-                  className="bg-white/50 backdrop-blur-sm rounded-lg"
-                />
-
-                <div className="flex gap-4">
-                  <TextField
-                    fullWidth
-                    label="Giá"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    error={!!errors.price}
-                    helperText={errors.price}
-                    required
-                    className="bg-white/50 backdrop-blur-sm rounded-lg"
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Giá gốc (nếu có giảm giá)"
-                    type="number"
-                    value={formData.originalPrice}
-                    onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
-                    className="bg-white/50 backdrop-blur-sm rounded-lg"
-                  />
-                </div>
-
-                <FormControl fullWidth error={!!errors.category} required className="bg-white/90 backdrop-blur-sm rounded-lg">
-                  <InputLabel>Danh mục</InputLabel>
-                  <Select
-                    value={formData.category}
-                    label="Danh mục"
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category.id} value={category.id}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
-                </FormControl>
-
-                <FormControl fullWidth className="bg-white/50 backdrop-blur-sm rounded-lg">
-                  <InputLabel>Trạng thái</InputLabel>
-                  <Select
-                    value={formData.status}
-                    label="Trạng thái"
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as ProductStatus })}
-                  >
-                    {Object.values(ProductStatus).map((status) => (
-                      <MenuItem key={status} value={status}>
-                        {status === ProductStatus.ACTIVE ? 'Đang bán' :
-                         status === ProductStatus.INACTIVE ? 'Ngừng bán' : status}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <TextField
-                  fullWidth
-                  label="Mô tả"
-                  multiline
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-white/50 backdrop-blur-sm rounded-lg"
-                />
-
-                <div className="flex gap-4">
-                  <TextField
-                    fullWidth
-                    label="SKU"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    error={!!errors.sku}
-                    helperText={errors.sku}
-                    required
-                    className="bg-white/50 backdrop-blur-sm rounded-lg"
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Số lượng kho"
-                    type="number"
-                    value={formData.stock_quantity}
-                    onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                    error={!!errors.stock_quantity}
-                    helperText={errors.stock_quantity}
-                    required
-                    className="bg-white/50 backdrop-blur-sm rounded-lg"
-                  />
-                </div>
-
-                <TextField
-                  fullWidth
-                  label="Meta (JSON Object)"
-                  multiline
-                  rows={2}
-                  value={JSON.stringify(formData.meta)}
-                  onChange={(e) => {
-                    try {
-                      const parsedMeta = JSON.parse(e.target.value);
-                      setFormData({ ...formData, meta: parsedMeta });
-                    } catch (e) {
-                      console.error("Error parsing Meta JSON", e);
-                      setErrors(prevErrors => ({ ...prevErrors, meta: "Invalid JSON format" }));
-                      setFormData({ ...formData, meta: {} }); // Reset to empty object on parse error
-                    }
-                  }}
-                  error={!!errors.meta}
-                  helperText={errors.meta}
-                  className="bg-white/50 backdrop-blur-sm rounded-lg"
-                />
-              </div>
+          <Grid container spacing={2} className="mt-2 font-poppins">
+            <Grid item xs={12} md={8}> {/* Product Details Container */}
+              <ProductInfo
+                formData={formData}
+                errors={errors}
+                categories={categories}
+                handleInputChange={handleInputChange}
+                handleCategoryChange={handleCategoryChange} handleStatusChange={function (event: SelectChangeEvent<string>): void {
+                  throw new Error('Function not implemented.');
+                } }              />
+              <MetaInfo
+                formData={formData}
+                errors={errors}
+                handleMetaChange={handleMetaChange}
+              />
+              <ProductAttributes
+                formData={formData}
+                handleAddAttribute={handleAddAttribute}
+                handleRemoveAttribute={handleRemoveAttribute}
+                handleAttributeChange={handleAttributeChange}
+              />
+              <ProductVariants
+                formData={formData}
+                handleAddVariant={handleAddVariant}
+                handleRemoveVariant={handleRemoveVariant}
+                handleVariantChange={handleVariantChange}
+                handleVariantAttributeChange={handleVariantAttributeChange}
+                handleAddVariantAttribute={handleAddVariantAttribute}
+                handleRemoveVariantAttribute={handleRemoveVariantAttribute}
+              />
             </Grid>
 
-            <Grid item xs={12} md={4}>
-              <div className="space-y-4">
-                <ImageUpload
-                  onImageSelect={(file) => {
-                    setImageFile(file);
-                    setErrors(prev => {
-                      const newErrors = { ...prev };
-                      delete newErrors.image;
-                      return newErrors;
-                    });
-                  }}
-                  currentImage={formData.image}
-                  error={errors.image}
-                />
-
-                <Box className="bg-white/50 backdrop-blur-sm rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <Typography variant="subtitle2" className="font-semibold">Kích thước</Typography>
-                    <Button
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={handleAddSize}
-                      className="text-blue-600 "
-                    >
-                      Thêm size
-                    </Button>
-                  </div>
-
-                  {formData.sizes.map((size, index) => (
-                    <Box key={index} className="flex gap-1 items-center mb-2">
-                      <TextField
-                        size="small"
-                        label="Size"
-                        value={size.name}
-                        onChange={(e) => handleSizeChange(index, 'name', e.target.value)}
-                        className="w-20 bg-white/70"
-                      />
-                      <TextField
-                        size="small"
-                        label="Giá"
-                        type="number"
-                        value={size.price}
-                        onChange={(e) => handleSizeChange(index, 'price', Number(e.target.value))}
-                        className="bg-white/70"
-                      />
-                      <Chip
-                        label="Mặc định"
-                        color={size.isDefault ? 'primary' : 'default'}
-                        onClick={() => handleSizeChange(index, 'isDefault', !size.isDefault)}
-                        className="cursor-pointer"
-                      />
-                      {formData.sizes.length > 1 && (
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleRemoveSize(index)}
-                        >
-                          <Remove />
-                        </IconButton>
-                      )}
-                    </Box>
-                  ))}
-                  {errors.sizes && (
-                    <FormHelperText error>{errors.sizes}</FormHelperText>
-                  )}
-                </Box>
-              </div>
+            <Grid item xs={12} md={4}> {/* Product Image Container */}
+              <ProductImageUpload
+                formData={formData}
+                errors={errors}
+                setImageFile={setImageFile}
+                handleImageSelect={handleImageSelect}
+              />
             </Grid>
           </Grid>
         </DialogContent>
 
         <DialogActions className="border-t p-4 bg-gradient-to-r ">
-          <Button
-            onClick={onClose}
-            className="mr-2 text-black hover:bg-white/20"
-          >
-            Hủy
-          </Button>
-          <LoadingButton
-            type="submit"
-            variant="contained"
-            loading={isLoading}
-            className="bg-white text-[#2C3E50] hover:bg-white/90 font-poppins font-semibold "
-          >
+          <Button onClick={onClose} className="mr-2 text-black hover:bg-white/20">Hủy</Button>
+          <LoadingButton type="submit" variant="contained" loading={isLoading} className="bg-white text-[#2C3E50] hover:bg-white/90 font-poppins font-semibold ">
             {editProduct ? 'Cập nhật' : 'Thêm sản phẩm'}
           </LoadingButton>
         </DialogActions>
