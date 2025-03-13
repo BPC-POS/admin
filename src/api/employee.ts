@@ -60,6 +60,7 @@ const getEmployeeById = async (id: number): Promise<AxiosResponse> => {
 
 const updateEmployeeById = async (id: number, employeeData: any): Promise<AxiosResponse> => {
   try {
+    console.log("Updating employee:", id, employeeData);
     const response: AxiosResponse = await employeeApi.patch(`/employees/${id}`, { 
       name: employeeData.name,
       email: employeeData.email,

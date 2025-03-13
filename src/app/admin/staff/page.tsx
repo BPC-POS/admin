@@ -17,7 +17,6 @@ import LeaveRequests from '@/components/admin/staff/LeaveRequests';
 import PayrollManagement from '@/components/admin/staff/PayrollManagement';
 import StaffModal from '@/components/admin/staff/StaffModal';
 import { Staff} from '@/types/staff';
-// import mockStaff from '@/mocks/mockStaff'; // Xóa import mockStaff
 import { createEmployee, getEmployees, updateEmployeeById, deleteEmployeeById } from '@/api/employee';
 
 interface TabPanelProps {
@@ -34,7 +33,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 
 const StaffPage = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [staff, setStaff] = useState<Staff[]>([]); // Khởi tạo staff là array rỗng
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +52,6 @@ const StaffPage = () => {
     try {
       const response = await getEmployees();
       setStaff(response.data);
-      console.log("Fetched employees:", response.data);
     } catch (error: any) {
       console.error("Error fetching employees:", error);
       setSnackbar({
@@ -103,16 +101,17 @@ const StaffPage = () => {
   };
 
   const handleEditStaff = async (id: number, data: Partial<Staff>) => {
+    console.log("Editing staff:", id, data);
     try {
       setIsLoading(true);
-      const response = await updateEmployeeById(id, data); // Gọi API updateEmployeeById
-      if (response.status === 200) { // Kiểm tra status code thành công (200 OK)
+      const response = await updateEmployeeById(id, data);
+      if (response.status === 200) { 
         setSnackbar({
           open: true,
           message: 'Cập nhật thông tin nhân viên thành công',
           severity: 'success',
         });
-        fetchEmployees(); // Gọi lại fetchEmployees để cập nhật danh sách
+        fetchEmployees();
         setIsModalOpen(false);
         setEditingStaff(undefined);
       } else {
