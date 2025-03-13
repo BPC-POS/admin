@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,9 +12,13 @@ import {
   MenuItem,
   Grid,
   IconButton,
+  Typography,
+  Autocomplete,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Staff, StaffPosition, Department } from '@/types/staff';
+import { Staff, StaffPosition, StaffStatus } from '@/types/staff';
+import { Member } from '@/types/user';
+import { getMembers } from '@/api/member';
 
 interface StaffModalProps {
   open: boolean;
@@ -25,14 +29,12 @@ interface StaffModalProps {
 }
 
 const initialFormState: Partial<Staff> = {
-  position: StaffPosition.WAITER,
-  department: Department.SERVICE,
-  salary: {
-    base: 0,
-    hourly: 0,
-    allowance: 0,
-  },
-  startDate: new Date(),
+  name: '',
+  email: '',
+  phone_number: '',
+  role_id: undefined,
+  status: StaffStatus.ACTIVE,
+  member_id: undefined,
 };
 
 const StaffModal: React.FC<StaffModalProps> = ({
@@ -42,35 +44,59 @@ const StaffModal: React.FC<StaffModalProps> = ({
   editItem,
   isLoading,
 }) => {
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState<Partial<Staff>>(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [members, setMembers] = useState<Member[]>([]); 
+  const [memberSearchValue, setMemberSearchValue] = useState<string>('');
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null); 
 
   useEffect(() => {
     if (editItem) {
       setFormData(editItem);
+      setSelectedMember(editItem.member || null); 
     } else {
       setFormData(initialFormState);
+      setSelectedMember(null); 
     }
     setErrors({});
   }, [editItem]);
 
+  const fetchMembersData = useCallback(async () => {
+    try {
+      const response = await getMembers();
+      setMembers(response.data);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+          }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      fetchMembersData();
+    }
+  }, [open, fetchMembersData]);
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.fullName?.trim()) {
-      newErrors.fullName = 'Họ và tên không được để trống';
+
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Tên không được để trống';
     }
-    if (!formData.userId) {
-      newErrors.userId = 'ID người dùng không được để trống';
+    if (!formData.email?.trim()) {
+      newErrors.email = 'Email không được để trống';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email không hợp lệ';
     }
-    if (!formData.position) {
-      newErrors.position = 'Vị trí không được để trống';
+    if (!formData.phone_number?.trim()) {
+      newErrors.phone_number = 'Số điện thoại không được để trống';
+    } else if (!/^\d{10,11}$/.test(formData.phone_number.replace(/[-\s]/g, ''))) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ (10-11 chữ số)';
     }
-    if (!formData.department) {
-      newErrors.department = 'Bộ phận không được để trống';
+    if (formData.role_id === undefined) {
+      newErrors.role_id = 'Vị trí không được để trống';
     }
-    if (!formData.salary?.base) {
-      newErrors.salary = 'Lương cơ bản không được để trống';
+    if (selectedMember === null && !editItem) { 
+      newErrors.member_id = 'Member không được để trống';
     }
 
     setErrors(newErrors);
@@ -80,7 +106,10 @@ const StaffModal: React.FC<StaffModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit({
+        ...formData,
+        member_id: selectedMember?.id, 
+      });
     }
   };
 
@@ -95,19 +124,22 @@ const StaffModal: React.FC<StaffModalProps> = ({
     return labels[position];
   };
 
-  const getDepartmentLabel = (department: Department) => {
-    const labels: Record<Department, string> = {
-      [Department.COFFEE_BAR]: 'Quầy pha chế',
-      [Department.KITCHEN]: 'Nhà bếp',
-      [Department.SERVICE]: 'Phục vụ',
-      [Department.CASHIER]: 'Thu ngân',
+  const getStatusLabel = (status: StaffStatus) => {
+    const labels: Record<StaffStatus, string> = {
+      [StaffStatus.ACTIVE]: 'Hoạt động',
+      [StaffStatus.INACTIVE]: 'Không hoạt động',
     };
-    return labels[department];
+    return labels[status];
+  };
+
+  const handleMemberChange = (event: React.SyntheticEvent<Element, Event>, value: Member | null) => {
+    setSelectedMember(value);
+    setFormData({ ...formData, member_id: value?.id }); 
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
       maxWidth="md"
       fullWidth
@@ -117,9 +149,9 @@ const StaffModal: React.FC<StaffModalProps> = ({
       }}
     >
       <form onSubmit={handleSubmit}>
-      <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
+        <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
           <span className="text-xl font-bold">
-            {editItem ? 'Chỉnh sửa thông tin nhân viên' : 'Thêm nhân viên mới'}
+            {editItem ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên'}
           </span>
           <IconButton onClick={onClose} size="small" className="text-white hover:text-gray-200">
             <Close />
@@ -131,11 +163,11 @@ const StaffModal: React.FC<StaffModalProps> = ({
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Họ và tên"
-                value={formData.fullName || ''}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                error={!!errors.fullName}
-                helperText={errors.fullName}
+                label="Tên nhân viên"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                error={!!errors.name}
+                helperText={errors.name}
                 required
                 className="font-poppins"
               />
@@ -144,141 +176,108 @@ const StaffModal: React.FC<StaffModalProps> = ({
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="ID người dùng"
-                type="number"
-                value={formData.userId || ''}
-                onChange={(e) => setFormData({ ...formData, userId: Number(e.target.value) })}
-                error={!!errors.userId}
-                helperText={errors.userId}
-                required
+                label="Email"
+                type="email"
+                value={formData.email || ''}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                error={!!errors.email}
+                helperText={errors.email}
                 className="font-poppins"
+                required
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth required error={!!errors.position}>
-                <InputLabel className="font-poppins">Vị trí</InputLabel>
+              <TextField
+                fullWidth
+                label="Số điện thoại"
+                value={formData.phone_number || ''}
+                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                error={!!errors.phone_number}
+                helperText={errors.phone_number}
+                className="font-poppins"
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required error={!!errors.role_id}>
+                <InputLabel id="role-id-label" className="font-poppins">Vị trí</InputLabel>
                 <Select
-                  value={formData.position || ''}
+                  labelId="role-id-label"
+                  id="role-id-select"
+                  value={formData.role_id === undefined ? '' : formData.role_id}
                   label="Vị trí"
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    position: e.target.value as StaffPosition 
-                  })}
+                  onChange={(e) => setFormData({ ...formData, role_id: e.target.value as StaffPosition })}
                   className="font-poppins"
                 >
                   {Object.values(StaffPosition).map((position) => (
                     <MenuItem key={position} value={position} className="font-poppins">
-                      {getPositionLabel(position)}
+                      {getPositionLabel(position as StaffPosition)}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+              {errors.role_id && <Typography variant="caption" color="error" className="font-poppins">{errors.role_id}</Typography>}
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth required error={!!errors.department}>
-                <InputLabel className="font-poppins">Bộ phận</InputLabel>
+              <FormControl fullWidth required error={!!errors.status}>
+                <InputLabel id="status-label" className="font-poppins">Trạng thái</InputLabel>
                 <Select
-                  value={formData.department || ''}
-                  label="Bộ phận"
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    department: e.target.value as Department 
-                  })}
+                  labelId="status-label"
+                  id="status-select"
+                  value={formData.status === undefined ? '' : formData.status}
+                  label="Trạng thái"
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as StaffStatus })}
                   className="font-poppins"
                 >
-                  {Object.values(Department).map((dept) => (
-                    <MenuItem key={dept} value={dept} className="font-poppins">
-                      {getDepartmentLabel(dept)}
+                  {Object.values(StaffStatus).map((status) => (
+                    <MenuItem key={status} value={status} className="font-poppins">
+                      {getStatusLabel(status as StaffStatus)}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+              {errors.status && <Typography variant="caption" color="error" className="font-poppins">{errors.status}</Typography>}
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Ngày vào làm"
-                type="date"
-                value={formData.startDate?.toISOString().split('T')[0] || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  startDate: new Date(e.target.value) 
-                })}
-                InputLabelProps={{ shrink: true }}
-                required
-                className="font-poppins"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Lương cơ bản"
-                type="number"
-                value={formData.salary?.base || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  salary: { 
-                    base: Number(e.target.value),
-                    hourly: formData.salary?.hourly || 0,
-                    allowance: formData.salary?.allowance || 0
-                  } 
-                })}
-                error={!!errors.salary}
-                helperText={errors.salary}
-                required
-                className="font-poppins"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Lương theo giờ"
-                type="number"
-                value={formData.salary?.hourly || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  salary: { 
-                    base: formData.salary?.base || 0,
-                    hourly: Number(e.target.value),
-                    allowance: formData.salary?.allowance || 0
-                  } 
-                })}
-                className="font-poppins"
-              />
-            </Grid> 
-
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Phụ cấp"
-                type="number"
-                value={formData.salary?.allowance || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  salary: { 
-                    base: formData.salary?.base || 0,
-                    hourly: formData.salary?.hourly || 0,
-                    allowance: Number(e.target.value)
-                  } 
-                })}
-                className="font-poppins"
-              />
+              <FormControl fullWidth required error={!!errors.member_id}>
+                <Autocomplete
+                  id="member-autocomplete"
+                  options={members}
+                  getOptionLabel={(option) => option.email || ''} // Display email in autocomplete
+                  value={selectedMember}
+                  onChange={handleMemberChange}
+                  inputValue={memberSearchValue}
+                  onInputChange={(event, newInputValue) => {
+                    setMemberSearchValue(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Member (Email)"
+                      error={!!errors.member_id}
+                      helperText={errors.member_id}
+                      required
+                      className="font-poppins"
+                    />
+                  )}
+                />
+              </FormControl>
+              {errors.member_id && <Typography variant="caption" color="error" className="font-poppins">{errors.member_id}</Typography>}
             </Grid>
           </Grid>
         </DialogContent>
 
         <DialogActions className="p-4">
-          <Button 
+          <Button
             onClick={onClose}
             className="font-poppins bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl"
-            >Hủy</Button>
-          <Button 
-            type="submit" 
+          >Hủy</Button>
+          <Button
+            type="submit"
             variant="contained"
             disabled={isLoading}
             className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-6 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"

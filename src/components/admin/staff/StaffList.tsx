@@ -31,11 +31,12 @@ import { formatDate, formatCurrency } from '@/utils/format';
 interface StaffListProps {
   staff: Staff[];
   onEdit: (staff: Staff) => void;
+  onDelete: (staff: Staff) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
+const StaffList: React.FC<StaffListProps> = ({ staff, onEdit, onDelete }) => {
   const [page, setPage] = useState(1);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
@@ -95,10 +96,10 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
               <TableRow key={staffMember.id}>
                 <TableCell>
                   <Box className="flex items-center gap-3">
-                    <Avatar>{staffMember.fullName[0]}</Avatar>
+                    <Avatar>{staffMember.name[0]}</Avatar>
                     <div>
                       <Typography variant="subtitle2" className="font-poppins">
-                        {staffMember.fullName}
+                        {staffMember.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" className="font-poppins">
                         ID: {staffMember.userId}
@@ -108,15 +109,14 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={getPositionLabel(staffMember.position)}
+                    label={getPositionLabel(staffMember.position || StaffPosition.WAITER)}
                     color="primary"
                     variant="outlined"
                     className="font-poppins"
                   />
                 </TableCell>
-                <TableCell className="font-poppins">{getDepartmentLabel(staffMember.department)}</TableCell>
+                <TableCell className="font-poppins">{getDepartmentLabel(staffMember.department || Department.SERVICE)}</TableCell>
                 <TableCell className="font-poppins">{formatDate(staffMember.startDate)}</TableCell>
-                <TableCell className="font-poppins">{formatCurrency(staffMember.salary.base)}</TableCell>
                 <TableCell align="right">
                   <IconButton
                     size="small"
@@ -173,6 +173,16 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit }) => {
             <Payments fontSize="small" />
           </ListItemIcon>
           <ListItemText>Xem bảng lương</ListItemText>
+        </MenuItem>
+        <MenuItem className="font-poppins"
+        onClick={() => {
+          if (selectedStaff) onDelete(selectedStaff);
+          handleMenuClose();
+        }}>
+          <ListItemIcon>
+            <Schedule fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Xóa</ListItemText>
         </MenuItem>
       </Menu>
     </Box>

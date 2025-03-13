@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -11,14 +13,17 @@ export const formatNumber = (number: number): string => {
   return new Intl.NumberFormat('vi-VN').format(number);
 };
 
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(date));
+export const formatDate = (date: any): string => { 
+  try {
+    const parsedDate = moment(date);
+    if (!parsedDate.isValid()) {
+      throw new Error('Invalid Date');
+    }
+    return parsedDate.format('DD/MM/YYYY HH:mm');
+  } catch (error) {
+    console.error("Lỗi trong formatDate:", error);
+    return 'Invalid Date'; 
+  }
 };
 
 export const formatPhoneNumber = (phone: string): string => {
@@ -28,4 +33,4 @@ export const formatPhoneNumber = (phone: string): string => {
     return `${match[1]} ${match[2]} ${match[3]}`;
   }
   return phone;
-}; 
+};

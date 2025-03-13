@@ -68,7 +68,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
 }) => {
   const [selectedStaff, setSelectedStaff] = useState<number>(0);
 
-  const availableStaff = staff.filter(s => !assignedStaff.includes(s.id));
+  const availableStaff = staff.filter(s => s.id !== undefined && !assignedStaff.includes(s.id));
 
   return (
     <Dialog 
@@ -101,7 +101,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
                 <MenuItem value={0} className="font-poppins">-- Chọn nhân viên --</MenuItem>
                 {availableStaff.map(s => (
                   <MenuItem key={s.id} value={s.id} className="font-poppins">
-                    {s.fullName}
+                    {s.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -128,7 +128,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
               return (
                 <ListItem key={staffId} divider className="font-poppins">
                   <ListItemText
-                    primary={staffMember?.fullName}
+                    primary={staffMember?.name}
                     secondary={`ID: ${staffMember?.userId}`}
                   />
                   <ListItemSecondaryAction>
@@ -278,12 +278,12 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
                             return (
                               <Tooltip 
                                 key={staffId} 
-                                title={staffMember?.fullName}
+                                title={staffMember?.name}
                               >
                                 <Avatar 
                                   sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
                                 >
-                                  {staffMember?.fullName[0]}
+                                  {staffMember?.name[0]}
                                 </Avatar>
                               </Tooltip>
                             );

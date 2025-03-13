@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import {
   Box,
   Typography,
@@ -17,7 +17,7 @@ import LeaveRequests from '@/components/admin/staff/LeaveRequests';
 import PayrollManagement from '@/components/admin/staff/PayrollManagement';
 import StaffModal from '@/components/admin/staff/StaffModal';
 import { Staff} from '@/types/staff';
-import mockStaff from '@/mocks/mockStaff';  
+// import mockStaff from '@/mocks/mockStaff'; // Xóa import mockStaff
 import { createEmployee, getEmployees, updateEmployeeById, deleteEmployeeById } from '@/api/employee';
 
 interface TabPanelProps {
@@ -33,8 +33,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 );
 
 const StaffPage = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [staff, setStaff] = useState<Staff[]>(mockStaff);
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const [staff, setStaff] = useState<Staff[]>([]); // Khởi tạo staff là array rỗng
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -48,22 +48,50 @@ const StaffPage = () => {
     setActiveTab(newValue);
   };
 
-  const handleAddStaff = async (data: Omit<Staff, 'id'>) => {
+  const fetchEmployees = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      // TODO: API call
-      const newStaff = {
-        ...data,
-        id: Date.now(),
-      };
-      setStaff(prev => [...prev, newStaff]);
-      setIsModalOpen(false);
+      const response = await getEmployees();
+      setStaff(response.data);
+      console.log("Fetched employees:", response.data);
+    } catch (error: any) {
+      console.error("Error fetching employees:", error);
       setSnackbar({
         open: true,
-        message: 'Thêm nhân viên thành công',
-        severity: 'success',
+        message: 'Lỗi khi tải danh sách nhân viên',
+        severity: 'error',
       });
-    } catch {
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []); 
+
+  const handleAddStaff = async (data: Omit<Staff, 'id'>) => {
+    console.log("Adding staff:", data);
+    try {
+      setIsLoading(true);
+      const response = await createEmployee(data); 
+      if (response.status === 201) { 
+        setSnackbar({
+          open: true,
+          message: 'Thêm nhân viên thành công',
+          severity: 'success',
+        });
+        fetchEmployees();
+        setIsModalOpen(false);
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'Có lỗi xảy ra khi thêm nhân viên',
+          severity: 'error',
+        });
+      }
+    } catch (error: any) {
+      console.error("Error creating employee:", error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi thêm nhân viên',
@@ -77,22 +105,25 @@ const StaffPage = () => {
   const handleEditStaff = async (id: number, data: Partial<Staff>) => {
     try {
       setIsLoading(true);
-      // TODO: API call
-      setStaff(prev =>
-        prev.map(item =>
-          item.id === id
-            ? { ...item, ...data }
-            : item
-        )
-      );
-      setIsModalOpen(false);
-      setEditingStaff(undefined);
-      setSnackbar({
-        open: true,
-        message: 'Cập nhật thông tin nhân viên thành công',
-        severity: 'success',
-      });
-    } catch {
+      const response = await updateEmployeeById(id, data); // Gọi API updateEmployeeById
+      if (response.status === 200) { // Kiểm tra status code thành công (200 OK)
+        setSnackbar({
+          open: true,
+          message: 'Cập nhật thông tin nhân viên thành công',
+          severity: 'success',
+        });
+        fetchEmployees(); // Gọi lại fetchEmployees để cập nhật danh sách
+        setIsModalOpen(false);
+        setEditingStaff(undefined);
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'Có lỗi xảy ra khi cập nhật thông tin nhân viên',
+          severity: 'error',
+        });
+      }
+    } catch (error: any) {
+      console.error("Error updating employee:", error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật thông tin nhân viên',
@@ -101,6 +132,39 @@ const StaffPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDeleteStaff = async (staff: Staff) => {
+    try {
+      if (!staff.id) {
+        throw new Error('Staff ID is undefined');
+      }
+        setIsLoading(true);
+        const response = await deleteEmployeeById(staff.id);
+        if (response.status === 200) {
+          setSnackbar({
+            open: true,
+            message: 'Xóa nhân viên thành công',
+            severity: 'success',
+          });
+          fetchEmployees();
+        } else {
+          setSnackbar({
+            open: true,
+            message: 'Có lỗi xảy ra khi xóa nhân viên',
+            severity: 'error',
+          });
+        }
+      } catch (error: any) {
+        console.error("Error deleting employee:", error);
+        setSnackbar({
+          open: true,
+          message: 'Có lỗi xảy ra khi xóa nhân viên',
+          severity: 'error',
+        });
+      } finally {
+        setIsLoading(false);
+      }
   };
 
   return (
@@ -146,6 +210,7 @@ const StaffPage = () => {
               setEditingStaff(staff);
               setIsModalOpen(true);
             }}
+            onDelete={handleDeleteStaff}
           />
         </TabPanel>
 
@@ -169,7 +234,7 @@ const StaffPage = () => {
           setEditingStaff(undefined);
         }}
         onSubmit={(data) => {
-          if (editingStaff) {
+          if (editingStaff && typeof editingStaff.id === 'number') {
             handleEditStaff(editingStaff.id, data);
           } else {
             handleAddStaff(data as Omit<Staff, 'id'>);
