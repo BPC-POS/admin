@@ -18,7 +18,7 @@ import PayrollManagement from '@/components/admin/staff/PayrollManagement';
 import StaffModal from '@/components/admin/staff/StaffModal';
 import { Staff} from '@/types/staff';
 import mockStaff from '@/mocks/mockStaff';  
-
+import { createEmployee, getEmployees, updateEmployeeById, deleteEmployeeById } from '@/api/employee';
 
 interface TabPanelProps {
   children?: React.ReactNode;

@@ -49,28 +49,26 @@ const getMemberById = async (id: number): Promise<AxiosResponse<Member>> => {
   catch (error: any) {
     console.error("Error fetching member:", error);
     throw error;
-  }
+  } 
 };
 
-const updateMember = async (id: number, memberData: any): Promise<AxiosResponse<Member>> => {
+const updateMember = async (id: number, memberData: Partial<Member>): Promise<AxiosResponse<Member>> => {
   try {
-    const response: AxiosResponse<Member> = await memberApi.patch(`/members/${id}`, memberData);
+    const response: AxiosResponse<Member> = await memberApi.put(`/members/${id}`, memberData);
     return response;
   } catch (error: any) {
     console.error("Error updating member:", error);
     throw error;
   }
-}
+};
 
-const deleteMember = async (id: number): Promise<AxiosResponse> => {
+const deleteMember = async (id: number): Promise<void> => {
   try {
-    const response: AxiosResponse<Member> = await memberApi.delete(`/members/${id}`);
-    return response;
-  }
-  catch (error: any) {
+    await memberApi.delete(`/members/${id}`);
+  } catch (error: any) {
     console.error("Error deleting member:", error);
     throw error;
   }
 };
 
-export { getMembers, createMember, getMemberById, updateMember, deleteMember };
+export { memberApi, getMembers, createMember, getMemberById, updateMember, deleteMember };
