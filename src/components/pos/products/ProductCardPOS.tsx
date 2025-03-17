@@ -18,6 +18,18 @@ interface ProductCardPOSProps {
   onProductClick: (product: Product) => void;
 }
 
+const mapApiStatusToProductStatus = (status: number): ProductStatus => {
+  switch (status) {
+    case 1: return ProductStatus.ACTIVE;
+    case 0: return ProductStatus.INACTIVE;
+    case 2: return ProductStatus.SOLD_OUT;
+    case 3: return ProductStatus.SEASONAL;
+    case 4: return ProductStatus.NEW;
+    case 5: return ProductStatus.BEST_SELLER;
+    default: return ProductStatus.ACTIVE;
+  }
+};
+
 const statusColors = {
   [ProductStatus.ACTIVE]: 'success',
   [ProductStatus.INACTIVE]: 'error',
@@ -37,6 +49,10 @@ const statusLabels = {
 };
 
 const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
+  const productStatus = typeof product.status === 'number' 
+    ? mapApiStatusToProductStatus(product.status) 
+    : product.status;
+
   return (
     <Card
       className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden"
@@ -52,8 +68,8 @@ const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
         />
         <div className="absolute top-2 right-2">
           <Chip
-            label={statusLabels[product.status]}
-            color={statusColors[product.status]}
+            label={statusLabels[productStatus]}
+            color={statusColors[productStatus]}
             size="small"
             className="shadow-lg font-poppins font-medium"
           />
@@ -78,10 +94,10 @@ const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
           </div>
 
           <Stack direction="row" spacing={0.5} className="flex-wrap gap-1">
-            {product.size.map((size: { name: React.Key | null | undefined; price: { toLocaleString: (arg0: string) => any; }; isDefault: any; }) => (
+            {product.size && product.size.map((size: { name: React.Key | null | undefined; price: number; isDefault: boolean; }) => (
               <Chip
                 key={size.name}
-                label={`${size.name}: ${size.price.toLocaleString('vi-VN')}đ`}
+                label={`${size.name ? `${size.name}: ` : ''}${size.price.toLocaleString('vi-VN')}đ`}
                 size="small"
                 variant={size.isDefault ? "filled" : "outlined"}
                 className="font-poppins shadow-sm text-xs"

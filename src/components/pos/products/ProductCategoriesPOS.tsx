@@ -9,6 +9,7 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
+  Button,
 } from '@mui/material';
 import {
   MoreVert,
@@ -16,6 +17,7 @@ import {
   Delete,
   Visibility,
   VisibilityOff,
+  Add,
 } from '@mui/icons-material';
 import { Category } from '@/types/product';
 import CategoryModalPOS from './CategoryModalPOS';
@@ -28,6 +30,7 @@ interface ProductCategoriesPOSProps {
   onEditCategory?: (id: string, category: Omit<Category, 'id'>) => void;
   onDeleteCategory?: (id: string) => void;
   onToggleCategory?: (id: string) => void;
+  isLoading?: boolean;
 }
 
 const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
@@ -38,6 +41,7 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
   onEditCategory,
   onDeleteCategory,
   onToggleCategory,
+  isLoading = false,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -83,10 +87,27 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
     setSelectedCategory(null);
   };
 
+  const handleOpenAddModal = () => {
+    setSelectedCategory(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <Paper className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
-        <Box className="flex justify-between items-center">
+        <Box className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold font-poppins">Danh mục sản phẩm</h2>
+          {onAddCategory && (
+            <Button 
+              startIcon={<Add />} 
+              variant="contained" 
+              onClick={handleOpenAddModal}
+              disabled={isLoading}
+              className="font-poppins"
+            >
+              Thêm danh mục
+            </Button>
+          )}
         </Box>
         <Tabs
           value={currentCategory}
@@ -169,6 +190,7 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
         }}
         onSubmit={handleSubmit}
         editItem={selectedCategory || undefined}
+        isLoading={isLoading}
       />
     </>
   );

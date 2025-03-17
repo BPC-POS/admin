@@ -101,7 +101,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       label={option.label}
                       color={option.color}
                       variant={order.status === option.value ? 'filled' : 'outlined'}
-                      onClick={() => onStatusChange(order.id, option.value)}
+                      onClick={() => onStatusChange(Number(order.id), option.value)}
                       className="font-poppins cursor-pointer transition-all hover:shadow-md"
                     />
                   ))}
@@ -119,7 +119,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       label={option.label}
                       color={option.color}
                       variant={order.paymentStatus === option.value ? 'filled' : 'outlined'}
-                      onClick={() => onPaymentStatusChange(order.id, option.value)}
+                      onClick={() => onPaymentStatusChange(Number(order.id), option.value)}
                       className="font-poppins cursor-pointer transition-all hover:shadow-md"
                     />
                   ))}

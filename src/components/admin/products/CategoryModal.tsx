@@ -19,7 +19,7 @@ interface CategoryModalProps {
   onClose: () => void;
   onSubmit: (data: Omit<Category, 'id'>, editItem?: Category) => void;
   editItem?: Category;
-  isLoading?: boolean; // isLoading prop from parent
+  isLoading?: boolean; 
   onCategoryCreated?: () => void;
 }
 
@@ -34,7 +34,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   onClose,
   onSubmit,
   editItem,
-  isLoading, // isLoading prop from parent
+  isLoading, 
 }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -128,7 +128,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           <Button
             type="submit"
             variant="contained"
-            disabled={isLoading} // Use isLoading prop from parent to disable button
+            disabled={isLoading} 
           >
             {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
           </Button>

@@ -19,6 +19,18 @@ import StaffModal from '@/components/admin/staff/StaffModal';
 import { Staff} from '@/types/staff';
 import { createEmployee, getEmployees, updateEmployeeById, deleteEmployeeById } from '@/api/employee';
 
+// Define a type for API errors
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+  status?: number;
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -52,8 +64,9 @@ const StaffPage = () => {
     try {
       const response = await getEmployees();
       setStaff(response.data);
-    } catch (error: any) {
-      console.error("Error fetching employees:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error fetching employees:", apiError);
       setSnackbar({
         open: true,
         message: 'Lỗi khi tải danh sách nhân viên',
@@ -88,8 +101,9 @@ const StaffPage = () => {
           severity: 'error',
         });
       }
-    } catch (error: any) {
-      console.error("Error creating employee:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error creating employee:", apiError);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi thêm nhân viên',
@@ -104,7 +118,19 @@ const StaffPage = () => {
     console.log("Editing staff:", id, data);
     try {
       setIsLoading(true);
-      const response = await updateEmployeeById(id, data);
+      // Type assertion to Staff with all required fields having fallback values
+      const staffData = {
+        name: data.name || '',
+        email: data.email || '',
+        phone_number: data.phone_number || '',
+        role_id: data.role_id,
+        status: data.status,
+        member_id: data.member_id,
+        shifts: data.shifts,
+        ...data
+      } as Staff;
+      
+      const response = await updateEmployeeById(id, staffData);
       if (response.status === 200) { 
         setSnackbar({
           open: true,
@@ -121,8 +147,9 @@ const StaffPage = () => {
           severity: 'error',
         });
       }
-    } catch (error: any) {
-      console.error("Error updating employee:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating employee:", apiError);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật thông tin nhân viên',
@@ -154,8 +181,9 @@ const StaffPage = () => {
             severity: 'error',
           });
         }
-      } catch (error: any) {
-        console.error("Error deleting employee:", error);
+      } catch (error: unknown) {
+        const apiError = error as ApiError;
+        console.error("Error deleting employee:", apiError);
         setSnackbar({
           open: true,
           message: 'Có lỗi xảy ra khi xóa nhân viên',

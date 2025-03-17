@@ -10,6 +10,7 @@ import {
   Switch,
   Grid,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { Category } from '@/types/product';
@@ -33,7 +34,7 @@ const CategoryModalPOS: React.FC<CategoryModalPOSProps> = ({
   onClose,
   onSubmit,
   editItem,
-  isLoading,
+  isLoading = false,
 }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,7 +50,7 @@ const CategoryModalPOS: React.FC<CategoryModalPOSProps> = ({
       setFormData(initialFormState);
     }
     setErrors({});
-  }, [editItem]);
+  }, [editItem, open]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -77,7 +78,7 @@ const CategoryModalPOS: React.FC<CategoryModalPOSProps> = ({
       <form onSubmit={handleSubmit}>
         <DialogTitle className="flex justify-between items-center">
           {editItem ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size="small" disabled={isLoading}>
             <Close />
           </IconButton>
         </DialogTitle>
@@ -128,7 +129,7 @@ const CategoryModalPOS: React.FC<CategoryModalPOSProps> = ({
             variant="contained"
             disabled={isLoading}
           >
-            {isLoading ? 'Đang xử lý...' : editItem ? 'Cập nhật' : 'Thêm'}
+            {isLoading ? <CircularProgress size={20} /> : editItem ? 'Cập nhật' : 'Thêm'}
           </Button>
         </DialogActions>
       </form>

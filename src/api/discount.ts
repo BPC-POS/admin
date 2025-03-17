@@ -25,7 +25,7 @@ const getDiscounts = async (): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await discountApi.get('/discounts');
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching discounts:", error);
     throw error;
   }
@@ -33,6 +33,7 @@ const getDiscounts = async (): Promise<AxiosResponse> => {
 
 const createDiscount = async (discountData: Discount): Promise<AxiosResponse> => {
     try {
+        console.log(discountData);
         const response: AxiosResponse = await discountApi.post('/discounts', {
         code: discountData.code,
         description: discountData.description,
@@ -42,7 +43,7 @@ const createDiscount = async (discountData: Discount): Promise<AxiosResponse> =>
         status: discountData.status,
         });
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error creating discount:", error);
         throw error;
     }
@@ -52,15 +53,16 @@ const getDiscountByCode = async (code: string): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await discountApi.get(`/discounts/${code}`);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching discount:", error);
     throw error;
   }
 };
 
-const updateDiscount = async (code: string, discountData: Discount): Promise<AxiosResponse> => {
+const updateDiscount = async (id: number, discountData: Discount): Promise<AxiosResponse> => {
     try {
-        const response: AxiosResponse = await discountApi.put(`/discounts/${code}`, {
+        console.log(discountData);
+        const response: AxiosResponse = await discountApi.patch(`/discounts/${id}`, {
         code: discountData.code,
         description: discountData.description,
         discount_percentage: discountData.discount_percentage,
@@ -70,23 +72,21 @@ const updateDiscount = async (code: string, discountData: Discount): Promise<Axi
         });
         return response;
     }
-    catch (error: any) {
+    catch (error: unknown) {
         console.error("Error updating discount:", error);
         throw error;
     }
 };
 
 
-const deleteDiscount = async (code: string): Promise<AxiosResponse> => {
+const deleteDiscount = async (id: number): Promise<AxiosResponse> => { 
     try {
-        const response: AxiosResponse = await discountApi.delete(`/discounts/${code}`);
+        const response: AxiosResponse = await discountApi.delete(`/discounts/${id}`); 
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error deleting discount:", error);
         throw error;
     }
 };
 
 export { discountApi, getDiscounts, createDiscount, getDiscountByCode, updateDiscount, deleteDiscount };
-
-

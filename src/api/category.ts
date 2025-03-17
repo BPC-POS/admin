@@ -25,7 +25,7 @@ const getCategories = async (): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await categoryApi.get('/product-categories');
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching categories:", error);
     throw error;
   }
@@ -40,7 +40,7 @@ const createCategory = async (categoryData: Omit<Category, 'id' | 'image'>): Pro
       status: categoryData.isActive ? 1 : 0, 
     });
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating category:", error);
     throw error;
   }
@@ -50,7 +50,7 @@ const getCategorybyId = async (): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await categoryApi.get('/product-categories');
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching category:", error);
     throw error;
   }
@@ -60,7 +60,7 @@ const deleteCategoryById = async (id: number): Promise<AxiosResponse> => {
   try {
     const response: AxiosResponse = await categoryApi.delete(`/product-categories/${id}`);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting category:", error);
     throw error;
   }

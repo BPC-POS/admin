@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Grid } from '@mui/material';
+import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Grid, Divider, Tooltip, Card, CardContent } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { ProductStatus } from '@/types/product';
+import { FormState } from '@/types/product';
 
 interface ProductVariantsProps {
-  formData: any; // Use FormState interface if available
+  formData: FormState;
   handleAddVariant: () => void;
   handleRemoveVariant: (index: number) => void;
   handleVariantChange: (index: number, field: 'sku' | 'price' | 'stock_quantity' | 'status', value: string | ProductStatus) => void;
@@ -15,74 +16,163 @@ interface ProductVariantsProps {
 }
 
 const ProductVariants: React.FC<ProductVariantsProps> = ({
-  formData, handleAddVariant, handleRemoveVariant, handleVariantChange, handleVariantAttributeChange, handleAddVariantAttribute, handleRemoveVariantAttribute
+  formData, 
+  handleAddVariant, 
+  handleRemoveVariant, 
+  handleVariantChange, 
+  handleVariantAttributeChange, 
+  handleAddVariantAttribute, 
+  handleRemoveVariantAttribute
 }) => {
   return (
-    <Grid item xs={12}>
-      <Box className="bg-white/50 backdrop-blur-sm rounded-lg p-2 mt-2">
-        <div className="flex justify-between items-center mb-2">
-          <div className="font-semibold">Biến thể (Sizes)</div>
-          <div className="text-blue-600 cursor-pointer" onClick={handleAddVariant}>Thêm biến thể</div>
-        </div>
-        {formData.variants.map((variant: { sku: unknown; price: unknown; stock_quantity: unknown; status: unknown; attributes: any[]; }, index: number) => (
-          <Box key={index} className="mb-2 p-2 border rounded">
-            <div className="font-semibold mb-1">Biến thể {index + 1}</div>
-            <div className="flex gap-2 mb-1">
-              <TextField
-                size="small" label="SKU biến thể" value={variant.sku}
-                onChange={(e) => handleVariantChange(index, 'sku', e.target.value)} className="flex-1 bg-white/70"
-              />
-              <TextField
-                size="small" label="Giá biến thể" type="number" value={variant.price}
-                onChange={(e) => handleVariantChange(index, 'price', e.target.value)} className="flex-1 bg-white/70"
-              />
-              <TextField
-                size="small" label="Số lượng kho" type="number" value={variant.stock_quantity}
-                onChange={(e) => handleVariantChange(index, 'stock_quantity', e.target.value)} className="flex-1 bg-white/70"
-              />
-              <FormControl size="small" className="flex-1 bg-white/70">
-                <InputLabel>Trạng thái</InputLabel>
-                <Select
-                  value={formData.status} label="Trạng thái"
-                  onChange={(e) => formData({ ...formData, status: Number(e.target.value) as ProductStatus })} // Ép kiểu sang number và sau đó sang ProductStatus
-                  name="status"
+    <div className="w-full">
+      {formData.variants.map((variant, index) => (
+        <Card key={index} className="mb-4 border border-gray-200 shadow-sm overflow-hidden">
+          <CardContent className="p-0">
+            <div className="bg-gray-50 p-3 flex justify-between items-center border-b">
+              <Typography variant="subtitle1" className="font-medium text-gray-800">
+                Biến thể {index + 1}
+              </Typography>
+              <Tooltip title="Xóa biến thể">
+                <IconButton 
+                  onClick={() => handleRemoveVariant(index)} 
+                  className="text-red-500 hover:bg-red-50"
+                  size="small"
                 >
-                  {Object.values(ProductStatus).map((status) => (
-                    <MenuItem key={status} value={status}> {/* Giá trị value là số từ enum */}
-                      {status === ProductStatus.ACTIVE ? 'Đang bán' :
-                      status === ProductStatus.INACTIVE ? 'Ngừng bán' :
-                      status === ProductStatus.SOLD_OUT ? 'Hết hàng' :
-                      status === ProductStatus.SEASONAL ? 'Theo mùa' :
-                      status === ProductStatus.NEW ? 'Mới' :
-                      status === ProductStatus.BEST_SELLER ? 'Bán chạy nhất' :
-                      String(status) // Fallback nếu có status mới chưa được xử lý tên
-                      }
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {formData.variants.length > 1 && index !== 0 && (
-                <div onClick={() => handleRemoveVariant(index)} className="cursor-pointer text-red-500"><RemoveIcon /></div>
-              )}
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </div>
-
-            <Box className="ml-2">
-              <div className="flex justify-between items-center mb-1">
-                <div className="font-semibold">Thuộc tính biến thể (Size)</div>
-              </div>
-              {variant.attributes.map((attribute, attributeIndex) => (
-                <Box key={attributeIndex} className="flex gap-2 items-center mb-1 ml-2">
+            
+            <div className="p-4">
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
-                    size="small" label="Giá trị Size" value={attribute.value}
-                    onChange={(e) => handleVariantAttributeChange(index, attributeIndex, 'value', e.target.value)} className="flex-1 bg-white/70"
+                    fullWidth
+                    size="small" 
+                    label="SKU biến thể" 
+                    value={variant.sku}
+                    onChange={(e) => handleVariantChange(index, 'sku', e.target.value)} 
+                    InputProps={{
+                      className: "bg-white rounded-lg"
+                    }}
                   />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small" 
+                    label="Giá biến thể" 
+                    type="number" 
+                    value={variant.price}
+                    onChange={(e) => handleVariantChange(index, 'price', e.target.value)} 
+                    InputProps={{
+                      className: "bg-white rounded-lg",
+                      startAdornment: <span className="text-gray-500 mr-2">₫</span>
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small" 
+                    label="Số lượng kho" 
+                    type="number" 
+                    value={variant.stock_quantity}
+                    onChange={(e) => handleVariantChange(index, 'stock_quantity', e.target.value)} 
+                    InputProps={{
+                      className: "bg-white rounded-lg"
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Trạng thái</InputLabel>
+                    <Select
+                      value={String(variant.status)} 
+                      label="Trạng thái"
+                      onChange={(e) => handleVariantChange(index, 'status', Number(e.target.value) as ProductStatus)}
+                      className="bg-white rounded-lg"
+                    >
+                      {Object.values(ProductStatus).map((status) => (
+                        <MenuItem key={status} value={status}>
+                          {status === ProductStatus.ACTIVE ? 'Đang bán' :
+                          status === ProductStatus.INACTIVE ? 'Ngừng bán' :
+                          status === ProductStatus.SOLD_OUT ? 'Hết hàng' :
+                          status === ProductStatus.SEASONAL ? 'Theo mùa' :
+                          status === ProductStatus.NEW ? 'Mới' :
+                          status === ProductStatus.BEST_SELLER ? 'Bán chạy nhất' :
+                          String(status)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              <Divider className="my-4" />
+              
+              <Typography variant="subtitle2" className="font-medium mb-3 text-gray-700">
+                Thuộc tính biến thể
+              </Typography>
+              
+              {variant.attributes.map((attribute, attributeIndex) => (
+                <Box key={attributeIndex} className="flex gap-3 items-center mb-3">
+                  <TextField
+                    size="small"
+                    label="ID thuộc tính"
+                    value={String(attribute.attribute_id)}
+                    onChange={(e) => handleVariantAttributeChange(index, attributeIndex, 'attribute_id', e.target.value)}
+                    className="w-1/3"
+                    InputProps={{
+                      className: "bg-white rounded-lg"
+                    }}
+                  />
+                  <TextField
+                    size="small" 
+                    label="Giá trị" 
+                    value={attribute.value}
+                    onChange={(e) => handleVariantAttributeChange(index, attributeIndex, 'value', e.target.value)} 
+                    className="flex-1"
+                    InputProps={{
+                      className: "bg-white rounded-lg"
+                    }}
+                  />
+                  <Tooltip title="Xóa thuộc tính">
+                    <IconButton 
+                      onClick={() => handleRemoveVariantAttribute(index, attributeIndex)} 
+                      className="text-red-500 hover:bg-red-50"
+                      size="small"
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               ))}
-            </Box>
-          </Box>
-        ))}
-      </Box>
-    </Grid>
+              
+              <Button 
+                startIcon={<AddIcon />} 
+                onClick={() => handleAddVariantAttribute(index)}
+                variant="outlined"
+                className="mt-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+                size="small"
+              >
+                Thêm thuộc tính
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+      
+      <Button 
+        startIcon={<AddIcon />} 
+        onClick={handleAddVariant}
+        variant="contained"
+        className="mt-2 bg-blue-600 hover:bg-blue-700"
+      >
+        Thêm biến thể
+      </Button>
+    </div>
   );
 };
 

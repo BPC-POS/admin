@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -14,58 +14,112 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  CircularProgress,
 } from "@mui/material";
 import Image from "next/image";
-import { Product, Size } from "@/types/product";
+import { Product } from "@/types/product";
 import { Add, Remove } from "@mui/icons-material";
+import { OrderItem } from "@/types/order";
+import { getProductById } from "@/api/product";
+
+interface ProductVariant {
+  id: number;
+  sku: string;
+  price: number;
+  stock_quantity: number;
+  status: number;
+  attributes: {
+    attribute_id: number;
+    value: string;
+  }[];
+}
 
 interface ProductModalPOSProps {
   open: boolean;
   onClose: () => void;
   product: Product | null;
-  onAddToCart: (product: Product, size: Size, quantity: number) => void;
+  onAddToOrder: (items: OrderItem[]) => void;
 }
 
 const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
   open,
   onClose,
   product,
-  onAddToCart,
+  onAddToOrder,
 }) => {
-  const [selectedSize, setSelectedSize] = useState<Size | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [sizeError, setSizeError] = useState<string | null>(null);
+  const [variantError, setVariantError] = useState<string | null>(null);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  React.useEffect(() => {
-    if (product && product.size.length > 0) {
-      const defaultSize = product.size.find((size) => size.isDefault);
-      setSelectedSize(defaultSize || product.size[0]);
-    } else {
-      setSelectedSize(null);
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (product && product.id) {
+        setIsLoading(true);
+        try {
+          const response = await getProductById(product.id);
+          if (response.status === 200 && response.data.variants) {
+            setVariants(response.data.variants);
+            // Set default variant if available
+            if (response.data.variants.length > 0) {
+              setSelectedVariant(response.data.variants[0]);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching product variants:", error);
+          setVariantError("Không thể tải thông tin variant");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    if (open && product) {
+      fetchProductDetails();
     }
-    setQuantity(1);
-    setSizeError(null);
-  }, [product]);
+
+    return () => {
+      setSelectedVariant(null);
+      setQuantity(1);
+      setVariantError(null);
+    };
+  }, [product, open]);
 
   if (!product) {
     return null;
   }
 
-  const handleSizeChange = (event: SelectChangeEvent) => {
-    const chosenSize = product.size.find(
-      (size) => size.name === event.target.value
-    );
-    setSelectedSize(chosenSize || null);
-    setSizeError(chosenSize ? null : "Vui lòng chọn size");
+  const handleVariantChange = (event: SelectChangeEvent) => {
+    const variantId = Number(event.target.value);
+    const chosenVariant = variants.find(v => v.id === variantId);
+    setSelectedVariant(chosenVariant || null);
+    setVariantError(chosenVariant ? null : "Vui lòng chọn phiên bản");
   };
 
-  const handleAddToCartClick = () => {
-    if (!selectedSize) {
-      setSizeError("Vui lòng chọn size");
+  const getVariantDisplayName = (variant: ProductVariant) => {
+    const sizeAttribute = variant.attributes.find(attr => attr.attribute_id === 1);
+    return `${sizeAttribute ? sizeAttribute.value : ''} ${variant.sku} - ${variant.price.toLocaleString("vi-VN")}đ`.trim();
+  };
+
+  const handleAddToOrderClick = () => {
+    if (!selectedVariant) {
+      setVariantError("Vui lòng chọn phiên bản");
       return;
     }
-    onAddToCart(product, selectedSize, quantity);
-    onClose(); // Close modal after adding to cart
+
+    const orderItem: OrderItem = {
+      id: Date.now(),
+      productId: product.id,
+      variantId: selectedVariant.id,
+      productName: product.name,
+      price: selectedVariant.price,
+      quantity: quantity,
+      total: selectedVariant.price * quantity,
+    };
+
+    onAddToOrder([orderItem]);
+    onClose();
   };
 
   const handleIncreaseQuantity = () => {
@@ -125,28 +179,36 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
                     {product.description}
                   </Typography>
 
-                  {product.size && product.size.length > 0 && (
-                    <FormControl fullWidth margin="normal" error={!!sizeError}>
-                      <InputLabel id="size-select-label">Size</InputLabel>
+                  {isLoading ? (
+                    <Box display="flex" justifyContent="center" p={2}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : variants.length > 0 ? (
+                    <FormControl fullWidth margin="normal" error={!!variantError}>
+                      <InputLabel id="variant-select-label">Phiên bản</InputLabel>
                       <Select
-                        labelId="size-select-label"
-                        id="size-select"
-                        value={selectedSize ? selectedSize.name : ""}
-                        label="Size"
-                        onChange={handleSizeChange}
+                        labelId="variant-select-label"
+                        id="variant-select"
+                        value={selectedVariant ? String(selectedVariant.id) : ""}
+                        label="Phiên bản"
+                        onChange={handleVariantChange}
                       >
-                        {product.size.map((size) => (
-                          <MenuItem key={size.name} value={size.name}>
-                            {size.name} - {size.price.toLocaleString("vi-VN")}đ
+                        {variants.map((variant) => (
+                          <MenuItem key={variant.id} value={variant.id}>
+                            {getVariantDisplayName(variant)}
                           </MenuItem>
                         ))}
                       </Select>
-                      {sizeError && (
+                      {variantError && (
                         <Typography variant="caption" color="error">
-                          {sizeError}
+                          {variantError}
                         </Typography>
                       )}
                     </FormControl>
+                  ) : (
+                    <Typography color="error" variant="body2">
+                      Không có phiên bản nào cho sản phẩm này
+                    </Typography>
                   )}
                 </Box>
 
@@ -182,6 +244,12 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
                     </Box>
                   </Box>
 
+                  {selectedVariant && (
+                    <Typography variant="subtitle1" className="mb-4 font-poppins text-right">
+                      Tổng: {(selectedVariant.price * quantity).toLocaleString("vi-VN")}đ
+                    </Typography>
+                  )}
+
                   <Box
                     sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}
                   >
@@ -189,8 +257,8 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={handleAddToCartClick}
-                      disabled={!selectedSize}
+                      onClick={handleAddToOrderClick}
+                      disabled={!selectedVariant || isLoading}
                       style={{background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)'}}
                       className='font-poppins font-semibold'
                     >

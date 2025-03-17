@@ -26,7 +26,6 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import { User, UserRole, UserStatus } from '@/types/user';
-import { formatDate } from '@/utils/format';
 
 interface UserListProps {
   users: User[];

@@ -85,20 +85,22 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
     }
   };
 
-  const handleCreateCategorySubmit = (formData: Omit<Category, 'id'>, editItem?: Category) => { // Nhận thêm editItem
+  const handleCreateCategorySubmit = (formData: Omit<Category, 'id'>, editItem?: Category) => { 
     if (editItem) {
-      // Trường hợp chỉnh sửa: gọi onEditCategory
-      if (onEditCategory && selectedCategory) { // Đảm bảo selectedCategory không null khi edit
+      if (onEditCategory && selectedCategory) { 
         onEditCategory(selectedCategory.id, formData);
       }
     } else {
-      // Trường hợp thêm mới: gọi onAddCategory
       if (onAddCategory) {
         onAddCategory(formData);
       }
     }
     setIsModalOpen(false);
     setSelectedCategory(null);
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    onCategoryChange(categoryId);
   };
 
   return (
@@ -120,7 +122,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
         </Box>
         <Tabs
           value={currentCategory}
-          onChange={(_, value) => onCategoryChange(value)}
+          onChange={(_, value) => handleCategoryChange(value)}
           variant="scrollable"
           scrollButtons="auto"
           className="font-poppins"
@@ -141,12 +143,12 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
                   {!category.isActive && (
                     <VisibilityOff fontSize="small" className="text-gray-400" />
                   )}
-                  <div // Thay IconButton bằng div
-                    className="ml-1 cursor-pointer" // Thêm class cursor-pointer để giống button hơn
+                  <div 
+                    className="ml-1 cursor-pointer"
                     onClick={(e) => handleMenuOpen(e, category)}
-                    aria-label="Options" // Thêm aria-label cho accessibility
-                    tabIndex={0}       // Để div có thể focus bằng tab (nếu cần)
-                    role="button"      // Để div được nhận diện là button về mặt semantic
+                    aria-label="Options"
+                    tabIndex={0}       
+                    role="button"   
                   >
                     <MoreVert fontSize="small" />
                   </div>

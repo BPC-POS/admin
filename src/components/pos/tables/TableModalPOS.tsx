@@ -15,11 +15,19 @@ import {
 } from '@mui/icons-material';
 import { Table as TableType, TableStatus } from '@/types/table';
 
+// Interface để tương thích với dữ liệu API
+interface ApiTableType extends Omit<TableType, 'area' | 'areaId'> {
+  area?: string | { name: string };
+  areaId: number;
+  note?: string;
+  notes?: string;
+}
+
 interface TableModalPOSProps {
   open: boolean;
   onClose: () => void;
-  table: TableType | null;
-  onConfirm: (table: TableType) => void;
+  table: ApiTableType | null;
+  onConfirm: (table: ApiTableType) => void;
 }
 
 const statusColors = {
@@ -38,56 +46,107 @@ const statusLabels = {
   [TableStatus.MAINTENANCE]: 'Bảo trì',
 };
 
-const areaColors = {
-  'indoor': '#E8F5E9',
-  'outdoor': '#F3E5F5',
-  'vip': '#FFF3E0'
+// Hỗ trợ nhiều loại khu vực
+const getAreaBackground = (area: string | { name?: string } | undefined): string => {
+  if (!area) return '#f1f3f5'; // Màu mặc định
+  
+  const areaString = typeof area === 'object' ? (area.name || '') : String(area);
+  
+  // Map khu vực sang màu
+  const areaColors: Record<string, string> = {
+    'INDOOR': '#E8F5E9',
+    'indoor': '#E8F5E9',
+    'Trong nhà': '#E8F5E9',
+    'OUTDOOR': '#F3E5F5',
+    'outdoor': '#F3E5F5',
+    'Ngoài trời': '#F3E5F5',
+    'VIP': '#FFF3E0',
+    'vip': '#FFF3E0',
+    'Phòng VIP': '#FFF3E0'
+  };
+  
+  return areaColors[areaString] || '#f1f3f5';
 };
 
+// Hiển thị tên khu vực
+const getAreaName = (table: ApiTableType): string => {
+  if (table.area) {
+    if (typeof table.area === 'object' && table.area.name) {
+      return table.area.name;
+    }
+    return String(table.area);
+  }
+  return 'Chưa xác định';
+};
 
 const TableModalPOS: React.FC<TableModalPOSProps> = ({ open, onClose, table, onConfirm }) => {
   if (!table) {
-    return null; // Don't render modal if no table is selected
+    return null;
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
       <Box sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 400,
+        width: { xs: '90%', sm: 450 },
+        maxHeight: '90vh',
         bgcolor: 'background.paper',
-        boxShadow: 24,
-        p: 4,
-        borderRadius: 2,
+        borderRadius: 3,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        p: { xs: 2, sm: 4 },
+        position: 'relative',
+        overflow: 'auto',
       }}>
-        <Typography variant="h6" component="h2" gutterBottom className='font-poppins font-semibold text-black text-center mb-5'>
+        <Typography 
+          variant="h5" 
+          component="h2" 
+          sx={{
+            textAlign: 'center',
+            mb: 3,
+            fontFamily: 'Poppins, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '1.25rem', sm: '1.5rem' },
+            background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.5px'
+          }}
+        >
           XÁC NHẬN CHỌN BÀN
         </Typography>
 
         <Card
+          elevation={0}
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            position: 'relative',
-            backgroundColor: areaColors[table.area as keyof typeof areaColors] || '#fff',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            mb: 2,
+            backgroundColor: getAreaBackground(table.area),
+            borderRadius: 2,
+            mb: 3,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            },
           }}
         >
-          <CardContent sx={{ p: 2, flex: 1 }}>
+          <CardContent sx={{ p: 2.5 }}>
             <Typography
-              variant="subtitle1"
+              variant="h6"
               component="div"
               sx={{
+                fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
-                fontSize: '1rem'
+                fontSize: '1.1rem',
+                mb: 2,
+                color: '#2C3E50'
               }}
             >
               {table.name}
@@ -95,64 +154,117 @@ const TableModalPOS: React.FC<TableModalPOSProps> = ({ open, onClose, table, onC
 
             <Box sx={{
               display: 'flex',
-              alignItems: 'center',
-              mb: 1,
-              color: 'rgba(0,0,0,0.7)'
+              flexDirection: 'column',
+              gap: 1.5
             }}>
-              <LocationOn fontSize="inherit" sx={{ mr: 0.5 }} />
-              <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
-                {table.area}
-              </Typography>
-            </Box>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: 'rgba(0,0,0,0.75)'
+              }}>
+                <LocationOn sx={{ fontSize: '1.2rem', mr: 1 }} />
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  {getAreaName(table)}
+                </Typography>
+              </Box>
 
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mb: 1.5,
-              color: 'rgba(0,0,0,0.7)'
-            }}>
-              <People fontSize="inherit" sx={{ mr: 0.5 }} />
-              <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
-                {table.capacity} người
-              </Typography>
-            </Box>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: 'rgba(0,0,0,0.75)'
+              }}>
+                <People sx={{ fontSize: '1.2rem', mr: 1 }} />
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  {table.capacity} người
+                </Typography>
+              </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-              <Chip
-                label={statusLabels[table.status]}
-                color={statusColors[table.status]}
-                size="small"
-                sx={{
-                  fontWeight: 500,
-                  px: 0.8,
-                  fontSize: '0.8rem'
-                }}
-              />
-            </Box>
+              <Box sx={{ mt: 0.5 }}>
+                <Chip
+                  label={statusLabels[table.status]}
+                  color={statusColors[table.status]}
+                  sx={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '0.85rem',
+                    px: 1,
+                    height: 28
+                  }}
+                />
+              </Box>
 
-            {table.note && (
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 1.5,
-                  color: 'rgba(0,0,0,0.6)',
-                  fontStyle: 'italic',
-                  fontSize: '0.8rem'
-                }}
-              >
-                {table.note}
-              </Typography>
-            )}
+              {(table.note || table.notes) && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: 'Poppins, sans-serif',
+                    color: 'rgba(0,0,0,0.6)',
+                    fontStyle: 'italic',
+                    fontSize: '0.9rem',
+                    mt: 1,
+                    px: 1,
+                    py: 0.5,
+                    backgroundColor: 'rgba(0,0,0,0.03)',
+                    borderRadius: 1,
+                    borderLeft: '3px solid rgba(0,0,0,0.1)'
+                  }}
+                >
+                  {table.note || table.notes}
+                </Typography>
+              )}
+            </Box>
           </CardContent>
         </Card>
 
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={onClose}
-          className='font-poppins font-semibold'>Huỷ</Button>
-          <Button variant="contained" color="primary" onClick={() => onConfirm(table)} 
-          className='font-poppins font-semibold'
-          style={{background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)'}}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          gap: 2,
+          mt: 3 
+        }}>
+          <Button 
+            onClick={onClose}
+            sx={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 500,
+              px: 3,
+              borderRadius: 2,
+              color: '#2C3E50',
+              '&:hover': {
+                backgroundColor: 'rgba(44, 62, 80, 0.05)'
+              }
+            }}
+          >
+            Huỷ
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={() => onConfirm(table)}
+            sx={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 500,
+              px: 3,
+              borderRadius: 2,
+              background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)',
+              boxShadow: '0 4px 12px rgba(52, 152, 219, 0.2)',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)',
+                boxShadow: '0 6px 16px rgba(52, 152, 219, 0.3)',
+              }
+            }}
+          >
             Xác nhận chọn bàn
           </Button>
         </Box>

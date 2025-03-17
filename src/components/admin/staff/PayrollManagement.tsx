@@ -69,19 +69,17 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
   };
 
   // Mock data - replace with actual data from API
-  const payrollRecords: PayrollRecord[] = staff.map(member => ({
-    id: member.id,
-    staffId: member.id,
+  const payrollRecords: PayrollRecord[] = staff.filter(member => member.id !== undefined).map(member => ({
+    id: member.id!,
+    staffId: member.id!,
     month: selectedMonth,
     year: selectedYear,
     workingDays: 22,
     totalHours: 176,
     overtime: 8,
-    baseSalary: member.salary.base,
-    allowance: member.salary.allowance,
     bonus: 500000,
     deductions: 0,
-    netSalary: member.salary.base + member.salary.allowance + 500000,
+    netSalary: 6500000,
     status: PayrollStatus.DRAFT,
   }));
 
@@ -164,8 +162,6 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
                     ({record.totalHours} giờ)
                   </Typography>
                 </TableCell>
-                <TableCell align="right" className="font-poppins">{formatCurrency(record.baseSalary)}</TableCell>
-                <TableCell align="right" className="font-poppins">{formatCurrency(record.allowance)}</TableCell>
                 <TableCell align="right" className="font-poppins">{formatCurrency(record.bonus)}</TableCell>
                 <TableCell align="right" className="font-poppins">{formatCurrency(record.deductions)}</TableCell>
                 <TableCell align="right" className="font-poppins">
@@ -238,8 +234,6 @@ const PayrollManagement: React.FC<PayrollManagementProps> = ({ staff }) => {
               <Grid item xs={12} md={6}>
                 <Typography variant="subtitle2" className="font-poppins">Chi tiết lương</Typography>
                 <Box className="mt-2 space-y-2">
-                  <Typography className="font-poppins">Lương cơ bản: {formatCurrency(selectedPayroll.baseSalary)}</Typography>
-                  <Typography className="font-poppins">Phụ cấp: {formatCurrency(selectedPayroll.allowance)}</Typography>
                   <Typography className="font-poppins">Thưởng: {formatCurrency(selectedPayroll.bonus)}</Typography>
                   <Typography className="font-poppins">Khấu trừ: {formatCurrency(selectedPayroll.deductions)}</Typography>
                   <Typography color="primary" fontWeight="bold" className="font-poppins">

@@ -1,6 +1,6 @@
 export interface Table {
   areaId: number;
-  meta: {};
+  meta: Record<string, unknown>;
   id: number;
   name: string;
   capacity: number;

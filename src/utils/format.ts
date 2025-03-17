@@ -13,7 +13,7 @@ export const formatNumber = (number: number): string => {
   return new Intl.NumberFormat('vi-VN').format(number);
 };
 
-export const formatDate = (date: any): string => { 
+export const formatDate = (date: string | Date | number): string => { 
   try {
     const parsedDate = moment(date);
     if (!parsedDate.isValid()) {

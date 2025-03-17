@@ -30,7 +30,7 @@ const ITEMS_PER_PAGE = 12;
 const ProductListPOS: React.FC<ProductListPOSProps> = ({
   products,
   currentCategory,
-  isLoading,
+  isLoading = false,
   error,
   onEdit,
   onDelete,
@@ -38,15 +38,13 @@ const ProductListPOS: React.FC<ProductListPOSProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, ] = useState<SortOption>('newest');
-  const [statusFilter, ] = useState<'all' | Product['status']>('all');
   const [page, setPage] = useState(1);
 
   const filteredProducts = products
     .filter(product => {
       const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
-      return matchesCategory && matchesSearch && matchesStatus;
+      return matchesCategory && matchesSearch;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -88,7 +86,7 @@ const ProductListPOS: React.FC<ProductListPOSProps> = ({
   }
 
   return (
-    <div className=" font-poppins">
+    <div className="font-poppins">
       <Box className="flex flex-wrap gap-6 mb-8 bg-white/50 backdrop-blur-lg p-3 rounded-xl shadow-lg">
         <TextField
           placeholder="Tìm kiếm sản phẩm..."
@@ -104,7 +102,6 @@ const ProductListPOS: React.FC<ProductListPOSProps> = ({
             className: "bg-white rounded-lg"
           }}
         />
-
       </Box>
 
       <Box className="flex justify-between items-center mb-2 px-4">
@@ -135,7 +132,8 @@ const ProductListPOS: React.FC<ProductListPOSProps> = ({
                   product={product}
                   onEdit={() => onEdit?.(product)}
                   onDelete={() => onDelete?.(product.id)}
-                  onProductClick={onProductClick}/>
+                  onProductClick={onProductClick}
+                />
               </div>
             </Grid>
           ))}

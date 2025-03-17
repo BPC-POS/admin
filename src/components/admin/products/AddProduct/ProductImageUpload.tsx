@@ -1,25 +1,39 @@
-import React from 'react';
-import { Grid } from '@mui/material';
+import React, { useCallback } from 'react';
+import {  Typography } from '@mui/material';
 import ImageUpload from '../ImageUpload';
+import { FormState } from '@/types/product';
 
 interface ProductImageUploadProps {
-  formData: any; // Use FormState interface if available
-  errors: any;    // Use Record<string, string> if available
-  setImageFile: React.Dispatch<React.SetStateAction<File | null>>;
-  handleImageSelect: (file: File) => void;
+  formData: FormState; 
+  errors: Record<string, string>;
+  onFileSelect: (file: File | null) => void;
 }
 
-const ProductImageUpload: React.FC<ProductImageUploadProps> = ({ formData, errors, setImageFile, handleImageSelect }) => {
+const ProductImageUpload: React.FC<ProductImageUploadProps> = ({ formData, errors, onFileSelect }) => {
+  const handleFileChange = useCallback((file: File | null) => {
+    onFileSelect(file);
+  }, [onFileSelect]);
+
   return (
-    <Grid item xs={12} md={4}>
-      <div className="space-y-4">
-        <ImageUpload
-          onImageSelect={(file) => file && handleImageSelect(file)}
-          currentImage={formData.image || undefined}
-          error={errors.image}
-        />
-      </div>
-    </Grid>
+    <div className="space-y-4">
+      <Typography variant="body2" className="text-gray-600 mb-2">
+        Hình ảnh sản phẩm sẽ được hiển thị trên trang sản phẩm và trong kết quả tìm kiếm.
+      </Typography>
+      
+      <ImageUpload
+        onImageSelect={handleFileChange}
+        currentImage={formData.image || undefined}
+        error={errors.image}
+      />
+      
+      {!formData.image && (
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+          <Typography variant="caption" className="text-blue-700">
+            Gợi ý: Hình ảnh sản phẩm chất lượng cao sẽ giúp tăng tỷ lệ chuyển đổi và giảm tỷ lệ hoàn trả.
+          </Typography>
+        </div>
+      )}
+    </div>
   );
 };
 

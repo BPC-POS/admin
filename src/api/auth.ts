@@ -14,7 +14,7 @@ const signIn = async (email: string, password: string): Promise<AxiosResponse> =
       password: password,
     });
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Login error:", error);
     throw error;
   }

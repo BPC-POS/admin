@@ -21,7 +21,7 @@ couponApi.interceptors.request.use(
   }
 );
 
-const getCoupon = async (code: string): Promise<Coupon> => {
+const getCoupon = async (): Promise<Coupon> => {
   try {
     const response: AxiosResponse = await couponApi.get(`/coupons/`);
     return response.data;

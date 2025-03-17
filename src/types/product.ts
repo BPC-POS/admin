@@ -8,6 +8,28 @@ export interface VariantAttribute {
     value: string;
 }
 
+export interface VariantFormState {
+    id?: number;
+    sku: string;
+    price: string;
+    stock_quantity: string;
+    status: ProductStatus;
+    attributes: { id?: number; attribute_id: string; value: string }[];
+}
+
+export interface FormState {
+    name: string;
+    description: string;
+    price: string;
+    stock_quantity: string;
+    sku: string;
+    status: ProductStatus;
+    meta: object;
+    categories: string[];
+    attributes: { attribute_id: string; value: string }[];
+    variants: VariantFormState[];
+    image: string;
+}
 
 export interface Size {
     name: string;
@@ -35,12 +57,24 @@ export interface Variant {
     attributes: VariantAttribute[];
 }
 
+export interface ProductMeta {
+    image_url?: string;
+    image_id?: string;
+    extension?: string;
+    recipes?: {
+        ingredients: string;
+        instructions: string;
+    };
+    [key: string]: unknown;
+}
+
 export interface Product {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [x: string]: any;
     category: string;
     sku: string;
     stock_quantity: number;
-    meta: any; 
+    meta: ProductMeta; 
     id: number;
     name: string;
     price: number;
@@ -63,6 +97,18 @@ export interface Category {
     description?: string;
     image?: string;
     isActive: boolean;
+}
+
+export interface ProductCategory {
+    id: number | string;
+    name: string;
+    description?: string;
+    label?: string;    // Một số API có thể trả về label thay vì name
+    status?: number;   // Status từ API (1: active, 0: inactive)
+    isActive?: boolean;// Boolean biểu thị trạng thái hoạt động
+    parent_id?: number | null; // ID của danh mục cha (nếu có)
+    image_url?: string;
+    meta?: ProductMeta;        // Thông tin metadata khác
 }
 
 export interface Size {

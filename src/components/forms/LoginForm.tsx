@@ -41,7 +41,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ setLoading }) => {
       const token = response.data.token;
       localStorage.setItem('authToken', token);
       router.push('/admin/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
       setLoginError('Login failed. Please check your email and password.');
     } finally {

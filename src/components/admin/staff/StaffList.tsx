@@ -26,7 +26,7 @@ import {
   Payments,
 } from '@mui/icons-material';
 import { Staff, StaffPosition, Department } from '@/types/staff';
-import { formatDate, formatCurrency } from '@/utils/format';
+import { formatDate } from '@/utils/format';
 
 interface StaffListProps {
   staff: Staff[];
@@ -116,7 +116,7 @@ const StaffList: React.FC<StaffListProps> = ({ staff, onEdit, onDelete }) => {
                   />
                 </TableCell>
                 <TableCell className="font-poppins">{getDepartmentLabel(staffMember.department || Department.SERVICE)}</TableCell>
-                <TableCell className="font-poppins">{formatDate(staffMember.startDate)}</TableCell>
+                <TableCell className="font-poppins">{formatDate(staffMember.startDate || new Date())}</TableCell>
                 <TableCell align="right">
                   <IconButton
                     size="small"

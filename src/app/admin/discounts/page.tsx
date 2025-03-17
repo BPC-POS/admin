@@ -7,6 +7,16 @@ import DiscountDetailModal from '@/components/admin/discounts/DiscountDetailModa
 import { Discount, CreateDiscountDTO } from '@/types/discount';
 import { getDiscounts, createDiscount, updateDiscount, deleteDiscount } from '@/api/discount';
 
+// Define a type for API errors
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const DiscountPage = () => {
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,9 +39,10 @@ const DiscountPage = () => {
       } else {
         setDiscounts([]); // Handle empty response data if needed
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi khi fetch discounts:", error);
-      setSnackbar({ open: true, message: error?.response?.data?.message || 'Lỗi khi tải danh sách Discounts.', severity: 'error' });
+      const apiError = error as ApiError;
+      setSnackbar({ open: true, message: apiError?.response?.data?.message || 'Lỗi khi tải danh sách Discounts.', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -45,31 +56,39 @@ const DiscountPage = () => {
     setLoading(true);
     try {
       if (editingDiscount) {
-        await updateDiscount(editingDiscount.code, data);
+        await updateDiscount(editingDiscount.id, {
+          ...data,
+          discount_percentage: data.discount_percentage ?? null
+        });
       } else {
-        await createDiscount(data);
+        await createDiscount({
+          ...data,
+          discount_percentage: data.discount_percentage ?? null
+        }); 
       }
       fetchDiscounts();
       setSnackbar({ open: true, message: 'Thao tác thành công!', severity: 'success' });
       setIsModalOpen(false);
       setEditingDiscount(undefined);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi khi thêm/sửa discount:", error);
-      setSnackbar({ open: true, message: error?.response?.data?.message || 'Có lỗi xảy ra khi thêm/sửa Discount.', severity: 'error' });
+      const apiError = error as ApiError;
+      setSnackbar({ open: true, message: apiError?.response?.data?.message || 'Có lỗi xảy ra khi thêm/sửa Discount.', severity: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteDiscount = async (code: string) => {
+  const handleDeleteDiscount = async (id: number) => {
     setLoading(true);
     try {
-      await deleteDiscount(code);
+      await deleteDiscount(id);
       fetchDiscounts();
       setSnackbar({ open: true, message: 'Xóa discount thành công!', severity: 'success' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi khi xóa discount:", error);
-      setSnackbar({ open: true, message: error?.response?.data?.message || 'Có lỗi xảy ra khi xóa Discount.', severity: 'error' });
+      const apiError = error as ApiError;
+      setSnackbar({ open: true, message: apiError?.response?.data?.message || 'Có lỗi xảy ra khi xóa Discount.', severity: 'error' });
     } finally {
       setLoading(false);
     }

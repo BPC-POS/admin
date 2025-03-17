@@ -53,7 +53,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
   useEffect(() => {
     if (editItem) {
       setFormData(editItem);
-      setSelectedMember(editItem.member || null); 
+      setSelectedMember((editItem.member as unknown as Member) || null); 
     } else {
       setFormData(initialFormState);
       setSelectedMember(null); 

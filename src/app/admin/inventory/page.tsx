@@ -16,7 +16,6 @@ import InventoryModal from '@/components/admin/inventory/InventoryModal';
 import TransactionHistory from '@/components/admin/inventory/TransactionHistory';
 import { InventoryItem } from '@/types/inventory';
 import mockInventory from '@/mocks/mockInventory';
-import { createInventory, updateInventory, deleteInventoryById, getInventory } from '@/api/inventory';
 
 interface TabPanelProps {
   children?: React.ReactNode;

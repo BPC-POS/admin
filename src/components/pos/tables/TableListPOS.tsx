@@ -16,13 +16,20 @@ import {
   LocationOn,
 } from '@mui/icons-material';
 import { Table as TableType, TableStatus } from '@/types/table';
-import TableModalPOS from './TableModalPOS'; // Import TableModalPOS component
+import TableModalPOS from './TableModalPOS';
+// Interface để tương thích với dữ liệu API
+interface ApiTableType extends Omit<TableType, 'area' | 'areaId'> {
+  area?: string | { name: string };
+  areaId: number;
+  note?: string;
+  notes?: string;
+}
 
 interface TableListPOSProps {
-  tables: TableType[];
-  onEdit: (table: TableType) => void;
+  tables: ApiTableType[];
+  onEdit: (table: ApiTableType) => void;
   onStatusChange: (id: number, status: TableStatus) => void;
-  onTableSelect: (table: TableType) => void; // Add onTableSelect prop to handle table selection
+  onTableSelect: (table: ApiTableType) => void;
 }
 
 const statusColors = {
@@ -41,29 +48,52 @@ const statusLabels = {
   [TableStatus.MAINTENANCE]: 'Bảo trì',
 };
 
-enum TableArea {
-  INDOOR = 'INDOOR',
-  OUTDOOR = 'OUTDOOR',
-  VIP = 'VIP'
-}
+// Hỗ trợ nhiều loại khu vực
+const getAreaBackground = (area: string | { name?: string } | undefined): string => {
+  if (!area) return '#f1f3f5'; // Màu mặc định
+  
+  const areaString = typeof area === 'object' ? (area.name || '') : String(area);
+  
+  // Map khu vực sang màu
+  const areaColors: Record<string, string> = {
+    'INDOOR': '#E8F5E9',
+    'indoor': '#E8F5E9',
+    'Trong nhà': '#E8F5E9',
+    'OUTDOOR': '#F3E5F5',
+    'outdoor': '#F3E5F5',
+    'Ngoài trời': '#F3E5F5',
+    'VIP': '#FFF3E0',
+    'vip': '#FFF3E0',
+    'Phòng VIP': '#FFF3E0'
+  };
+  
+  return areaColors[areaString] || '#f1f3f5';
+};
 
-const areaColors: Record<TableArea, string> = {
-  [TableArea.INDOOR]: '#E8F5E9',
-  [TableArea.OUTDOOR]: '#F3E5F5',
-  [TableArea.VIP]: '#FFF3E0'
+// Hiển thị tên khu vực
+const getAreaName = (table: ApiTableType): string => {
+  if (table.area) {
+    if (typeof table.area === 'object' && table.area.name) {
+      return table.area.name;
+    }
+    return String(table.area);
+  }
+  return 'Chưa xác định';
 };
 
 const TableListPOS: React.FC<TableListPOSProps> = ({
   tables,
   onStatusChange,
-  onTableSelect, // Get onTableSelect from props
+  onTableSelect,
+  onEdit,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedTableForMenu, setSelectedTableForMenu] = React.useState<TableType | null>(null);
-  const [isTableModalOpen, setIsTableModalOpen] = useState(false); // State to control modal visibility
-  const [selectedTableForModal, setSelectedTableForModal] = useState<TableType | null>(null); // State to store table for modal
+  const [selectedTableForMenu, setSelectedTableForMenu] = React.useState<ApiTableType | null>(null);
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [selectedTableForModal, setSelectedTableForModal] = useState<ApiTableType | null>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, table: TableType) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, table: ApiTableType) => {
+    event.stopPropagation(); // Ngăn sự kiện click truyền đến Card
     setAnchorEl(event.currentTarget);
     setSelectedTableForMenu(table);
   };
@@ -80,7 +110,7 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
     }
   };
 
-  const handleOpenTableModal = (table: TableType) => {
+  const handleOpenTableModal = (table: ApiTableType) => {
     setSelectedTableForModal(table);
     setIsTableModalOpen(true);
   };
@@ -90,49 +120,66 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
     setSelectedTableForModal(null);
   };
 
-  const handleConfirmTableSelect = (table: TableType) => {
+  const handleConfirmTableSelect = (table: ApiTableType) => {
+    if (table.areaId === undefined) {
+      console.warn('Table has no areaId:', table);
+      table.areaId = 0;
+    }
     onTableSelect(table); 
     handleCloseTableModal();
   };
 
+  const handleEditTable = (e: React.MouseEvent, table: ApiTableType) => {
+    e.stopPropagation(); // Ngăn sự kiện click truyền đến Card
+    onEdit(table);
+  };
 
   return (
-    <Box sx={{ flexGrow: 1, p: 1 }}>
-      <Grid container spacing={2}>
+    <Box sx={{ flexGrow: 1, p: { xs: 1, sm: 2, md: 3 } }}>
+      <Grid container spacing={{ xs: 1, sm: 2, md: 2.5 }} columns={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
         {tables.map((table) => (
-          <Grid item xs={12} sm={6} md={3} lg={1.5} xl={1.5} key={table.id}>
+          <Grid item xs={6} sm={4} md={3} lg={2} xl={1.5} key={table.id}>
             <Card
-              onClick={() => handleOpenTableModal(table)} // Open modal when Card is clicked
+              onClick={() => handleOpenTableModal(table)}
               sx={{
-                height: '90%',
+                height: '100%',
+                minHeight: 180,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
-                backgroundColor: areaColors[table.area as unknown as keyof typeof areaColors] || '#fff',
-                transition: 'all 0.3s ease',
+                backgroundColor: getAreaBackground(table.area),
+                transition: 'all 0.2s ease-in-out',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                 },
-                borderRadius: '12px',
+                borderRadius: '16px',
                 overflow: 'hidden',
-                cursor: 'pointer', // Indicate card is clickable
+                cursor: 'pointer',
               }}
             >
-              <CardContent sx={{ p: 2, flex: 1 }}>
+              <CardContent sx={{ 
+                p: 2, 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column',
+                gap: 1.5 
+              }}>
                 <Box sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
-                  mb: 1.5
                 }}>
                   <Typography
-                    variant="subtitle1"
+                    variant="h6"
                     component="div"
                     sx={{
                       fontFamily: 'Poppins, sans-serif',
                       fontWeight: 600,
-                      fontSize: '0.9rem'
+                      fontSize: '1rem',
+                      color: '#2C3E50',
+                      lineHeight: 1.2,
+                      mb: 0.5
                     }}
                   >
                     {table.name}
@@ -141,8 +188,12 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
                     size="small"
                     onClick={(e) => handleMenuOpen(e, table)}
                     sx={{
+                      mt: -0.5,
+                      mr: -1,
+                      color: 'rgba(0,0,0,0.5)',
                       '&:hover': {
-                        backgroundColor: 'rgba(0,0,0,0.04)'
+                        backgroundColor: 'rgba(0,0,0,0.04)',
+                        color: 'rgba(0,0,0,0.8)'
                       }
                     }}
                   >
@@ -153,54 +204,83 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  mb: 1,
-                  color: 'rgba(0,0,0,0.7)'
+                  color: 'rgba(0,0,0,0.7)',
+                  gap: 0.5
                 }}>
-                  <LocationOn fontSize="inherit" sx={{ mr: 0.5 }} />
-                  <Typography variant="body2" sx={{ fontFamily: 'Poppins, sans-serif', fontSize: '0.8rem' }}>
-                    {String(table.area)}
+                  <LocationOn sx={{ fontSize: '1rem' }} />
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {getAreaName(table)}
                   </Typography>
                 </Box>
 
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  mb: 1.5,
-                  color: 'rgba(0,0,0,0.7)'
+                  color: 'rgba(0,0,0,0.7)',
+                  gap: 0.5
                 }}>
-                  <People fontSize="inherit" sx={{ mr: 0.5 }} />
-                  <Typography variant="body2" sx={{ fontFamily: 'Poppins, sans-serif', fontSize: '0.8rem' }}>
+                  <People sx={{ fontSize: '1rem' }} />
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '0.85rem',
+                      fontWeight: 500
+                    }}
+                  >
                     {table.capacity} người
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                <Box sx={{ mt: 'auto' }}>
                   <Chip
                     label={statusLabels[table.status]}
                     color={statusColors[table.status]}
                     size="small"
-                    onClick={(e) => handleMenuOpen(e, table)}
                     sx={{
                       fontFamily: 'Poppins, sans-serif',
                       fontWeight: 500,
-                      px: 0.8,
-                      fontSize: '0.75rem'
+                      fontSize: '0.75rem',
+                      height: '24px',
+                      '& .MuiChip-label': {
+                        px: 1
+                      }
                     }}
                   />
                 </Box>
 
-                {table.note && (
+                {(table.note || table.notes) && (
                   <Typography
                     variant="body2"
                     sx={{
-                      mb: 1.5,
+                      mt: 1,
                       fontFamily: 'Poppins, sans-serif',
                       color: 'rgba(0,0,0,0.6)',
                       fontStyle: 'italic',
-                      fontSize: '0.8rem'
+                      fontSize: '0.75rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      lineHeight: 1.3,
+                      backgroundColor: 'rgba(0,0,0,0.03)',
+                      borderRadius: 1,
+                      p: 1,
+                      borderLeft: '2px solid rgba(0,0,0,0.1)'
                     }}
                   >
-                    {table.note}
+                    {table.note || table.notes}
                   </Typography>
                 )}
               </CardContent>
@@ -217,10 +297,40 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
           sx: {
             mt: 1,
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            borderRadius: '12px'
+            borderRadius: '12px',
+            minWidth: 200
           }
         }}
       >
+        <MenuItem 
+          onClick={(e) => selectedTableForMenu && handleEditTable(e, selectedTableForMenu)}
+          sx={{
+            fontFamily: 'Poppins, sans-serif',
+            py: 1.5,
+            px: 2,
+            fontSize: '0.9rem',
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.04)'
+            }
+          }}
+        >
+          Chỉnh sửa thông tin
+        </MenuItem>
+        
+        <MenuItem 
+          disabled
+          sx={{
+            fontFamily: 'Poppins, sans-serif',
+            py: 1,
+            px: 2,
+            fontSize: '0.9rem',
+            color: 'rgba(0,0,0,0.7)',
+            fontWeight: 600
+          }}
+        >
+          Thay đổi trạng thái:
+        </MenuItem>
+        
         {Object.values(TableStatus).map((status) => (
           <MenuItem
             key={status}
@@ -228,10 +338,21 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
             selected={selectedTableForMenu?.status === status}
             sx={{
               fontFamily: 'Poppins, sans-serif',
-              py: 1,
-              fontSize: '0.85rem',
+              py: 1.5,
+              px: 2,
+              fontSize: '0.9rem',
+              pl: 3,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
               '&:hover': {
                 backgroundColor: 'rgba(0,0,0,0.04)'
+              },
+              '&.Mui-selected': {
+                backgroundColor: 'rgba(0,0,0,0.08)',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.12)'
+                }
               }
             }}
           >
@@ -240,10 +361,14 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
               color={statusColors[status]}
               size="small"
               sx={{
-                mr: 2,
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 500,
-                fontSize: '0.75rem'
+                fontSize: '0.75rem',
+                height: '24px',
+                minWidth: '80px',
+                '& .MuiChip-label': {
+                  px: 1
+                }
               }}
             />
             {statusLabels[status]}
@@ -251,11 +376,10 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
         ))}
       </Menu>
 
-      {/* Render TableModalPOS component */}
       <TableModalPOS
         open={isTableModalOpen}
         onClose={handleCloseTableModal}
-        table={selectedTableForModal}
+        table={selectedTableForModal as ApiTableType} 
         onConfirm={handleConfirmTableSelect}
       />
     </Box>

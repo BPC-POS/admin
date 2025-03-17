@@ -74,7 +74,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
                   edge="end"
                   aria-label="remove"
                   onClick={() => {
-                    onUpdateQuantity(item.productId, -1); 
+                    onUpdateQuantity(Number(item.productId), -1); 
                   }}
                   disabled={item.quantity <= 1}
                 >
@@ -84,7 +84,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
                   edge="end"
                   aria-label="add"
                   onClick={() => {
-                    onUpdateQuantity(item.productId, 1);
+                    onUpdateQuantity(Number(item.productId), 1);
                   }}
                 >
                   <Add />
@@ -92,7 +92,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
                 <IconButton
                   edge="end"
                   aria-label="delete"
-                  onClick={() => onRemoveItem(item.productId)}
+                  onClick={() => onRemoveItem(Number(item.productId))}
                 >
                   <Delete />
                 </IconButton>

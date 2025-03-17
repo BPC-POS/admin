@@ -25,7 +25,7 @@ export interface Member {
   avatar?: string;
   token?: string;
   first_login?: boolean;
-  meta?: any;
+  meta?: Record<string, unknown>;
 }
 
 export enum UserRole {

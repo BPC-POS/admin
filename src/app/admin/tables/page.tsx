@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Box, Typography, Button, Alert, Snackbar, Paper } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import TableList from "@/components/admin/tables/TableList";
@@ -27,6 +27,18 @@ import {
   deleteTableArea,
 } from "@/api/table";
 
+// Define a type for API errors
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+  status?: number;
+}
+
 const TablesPage = () => {
   const [tables, setTables] = useState<Table[]>([]);
   const [areas, setAreas] = useState<TableArea[]>([]);
@@ -42,11 +54,11 @@ const TablesPage = () => {
     severity: "success" as "success" | "error",
   });
 
-  const fetchTablesData = async () => {
+  const fetchTablesData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await getTables();
-      const mappedTables = response.data.map((table: any) => ({
+      const mappedTables = response.data.map((table: Table) => ({
         ...table,
         status:
           (typeof table.status === 'number' && table.status in numericStatusToTableStatus)
@@ -54,31 +66,33 @@ const TablesPage = () => {
             : TableStatus.AVAILABLE,
       }));
       setTables(mappedTables);
-    } catch (error: any) {
-      console.error("Error fetching tables:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error fetching tables:", apiError);
       showSnackbar("Lỗi tải dữ liệu bàn", "error");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAreasData = async () => {
+  const fetchAreasData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await getTableAreas();
       setAreas(response.data);
-    } catch (error: any) {
-      console.error("Error fetching areas:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error fetching areas:", apiError);
       showSnackbar("Lỗi tải dữ liệu khu vực", "error");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTablesData();
     fetchAreasData();
-  }, []);
+  }, [fetchTablesData, fetchAreasData]);
 
   const handleAddTable = async (data: CreateTableDTO) => {
     try {
@@ -95,8 +109,9 @@ const TablesPage = () => {
       setIsModalOpen(false);
       showSnackbar("Thêm bàn thành công", "success");
       fetchTablesData();
-    } catch (error: any) {
-      console.error("Error adding table:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error adding table:", apiError);
       showSnackbar("Có lỗi xảy ra khi thêm bàn", "error");
     } finally {
       setIsLoading(false);
@@ -122,8 +137,9 @@ const TablesPage = () => {
       setEditingTable(undefined);
       showSnackbar("Cập nhật bàn thành công", "success");
       fetchTablesData();
-    } catch (error: any) {
-      console.error("Error updating table:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating table:", apiError);
       showSnackbar("Có lỗi xảy ra khi cập nhật bàn", "error");
     } finally {
       setIsLoading(false);
@@ -138,8 +154,9 @@ const TablesPage = () => {
       await deleteTable(id);
       showSnackbar("Xóa bàn thành công", "success");
       fetchTablesData();
-    } catch (error: any) {
-      console.error("Error deleting table:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error deleting table:", apiError);
       showSnackbar("Có lỗi xảy ra khi xóa bàn", "error");
     } finally {
       setIsLoading(false);
@@ -167,8 +184,9 @@ const TablesPage = () => {
         showSnackbar('Không tìm thấy bàn để cập nhật trạng thái', 'error');
       }
 
-    } catch (error: any) {
-      console.error("Error updating table status:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating table status:", apiError);
       showSnackbar('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
     } finally {
       setIsLoading(false);
@@ -187,8 +205,9 @@ const TablesPage = () => {
       setIsAreaModalOpen(false);
       showSnackbar("Thêm khu vực thành công", "success");
       fetchAreasData();
-    } catch (error: any) {
-      console.error("Error adding area:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error adding area:", apiError);
       showSnackbar("Có lỗi xảy ra khi thêm khu vực", "error");
     } finally {
       setIsLoading(false);
@@ -208,8 +227,9 @@ const TablesPage = () => {
       await deleteTableArea(areaId);
       showSnackbar("Xóa khu vực thành công", "success");
       await fetchAreasData();
-    } catch (error: any) {
-      console.error("Lỗi xóa khu vực:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Lỗi xóa khu vực:", apiError);
       showSnackbar("Có lỗi xảy ra khi xóa khu vực", "error");
     } finally {
       setIsLoading(false);
@@ -234,8 +254,9 @@ const TablesPage = () => {
       setEditingArea(undefined);
       showSnackbar("Cập nhật khu vực thành công", "success");
       fetchAreasData();
-    } catch (error: any) {
-      console.error("Error updating area:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating area:", apiError);
       showSnackbar("Có lỗi xảy ra khi cập nhật khu vực", "error");
     } finally {
       setIsLoading(false);

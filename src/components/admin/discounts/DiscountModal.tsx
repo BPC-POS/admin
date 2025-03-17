@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
-import { Discount, CreateDiscountDTO } from '@/types/discount';
+import { Discount, CreateDiscountDTO, DiscountStatus } from '@/types/discount';
 
 interface DiscountModalProps {
   open: boolean;
@@ -11,29 +11,36 @@ interface DiscountModalProps {
 
 const DiscountModal: React.FC<DiscountModalProps> = ({ open, onClose, onSubmit, editItem }) => {
   const [formData, setFormData] = useState<CreateDiscountDTO>({
+    id: 0,
     code: '',
     discount_percentage: 0,
     start_date: new Date(),
     end_date: new Date(),
-    status: true,
-    description: '', // Thêm description vào form
+    status: DiscountStatus.ACTIVE,
+    description: '', 
   });
 
   useEffect(() => {
     if (editItem) {
       setFormData({
+        id: editItem.id,
         code: editItem.code,
         discount_percentage: editItem.discount_percentage,
-        start_date: editItem.start_date,
-        end_date: editItem.end_date,
+        start_date: editItem.start_date ? new Date(editItem.start_date) : new Date(),
+        end_date: editItem.end_date ? new Date(editItem.end_date) : new Date(),
         status: editItem.status,
-        description: editItem.description, // Điền description khi edit
+        description: editItem.description, 
       });
     }
   }, [editItem]);
 
   const handleChange = <K extends keyof CreateDiscountDTO>(key: K, value: CreateDiscountDTO[K]) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => {
+      if (key === 'discount_percentage') {
+        console.log('discount_percentage changed to:', value); 
+      }
+      return ({ ...prev, [key]: value });
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

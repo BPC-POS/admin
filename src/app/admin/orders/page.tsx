@@ -54,8 +54,8 @@ const OrdersPage = () => {
     if (filter.search) {
       const searchLower = filter.search.toLowerCase();
       const matchesSearch = 
-        order.orderNumber.toLowerCase().includes(searchLower) ||
-        order.customerName.toLowerCase().includes(searchLower) ||
+        order.orderNumber?.toLowerCase().includes(searchLower) ||
+        order.customerName?.toLowerCase().includes(searchLower) ||
         order.customerPhone?.includes(filter.search);
       if (!matchesSearch) return false;
     }

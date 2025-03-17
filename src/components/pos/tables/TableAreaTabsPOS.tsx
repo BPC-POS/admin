@@ -7,26 +7,38 @@ import {
 } from '@mui/material';
 import { TableArea } from '@/types/table';
 
-interface Table {
-  areaId: number;
-  meta: {};
+// Define status enum for tables
+enum TableStatus {
+  AVAILABLE = 0,
+  OCCUPIED = 1,
+  RESERVED = 2,
+  CLEANING = 3,
+  INACTIVE = 4
+}
+
+// Interface để tương thích với dữ liệu API
+interface ApiTable {
   id: number;
   name: string;
   capacity: number;
-  status: number;
-  area: string; // Changed to TableArea
+  status: TableStatus | number;
+  area?: string | { id: number | string; name?: string };
+  area_id?: number;
+  areaId?: number;
   isActive: boolean;
   qrCode?: string;
   note?: string;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  meta?: Record<string, unknown>;
 }
 
 interface TableAreaTabsPOSProps {
   areas: TableArea[];
-  currentArea: 'all' | TableArea;
-  onAreaChange: (area: 'all' | TableArea) => void;
-  tables: Table[];
+  currentArea: string;
+  onAreaChange: (area: string) => void;
+  tables: ApiTable[];
 }
 
 const TableAreaTabsPOS: React.FC<TableAreaTabsPOSProps> = ({
@@ -36,7 +48,12 @@ const TableAreaTabsPOS: React.FC<TableAreaTabsPOSProps> = ({
   tables,
 }) => {
   const getTableCount = (areaId: string) => {
-    return tables.filter(table => table.area === areaId).length;
+    return tables.filter(table => 
+      String(table.area_id) === areaId || 
+      String(table.areaId) === areaId || 
+      (typeof table.area === 'object' && String(table.area.id) === areaId) || 
+      String(table.area) === areaId
+    ).length;
   };
 
   return (
@@ -97,7 +114,7 @@ const TableAreaTabsPOS: React.FC<TableAreaTabsPOSProps> = ({
             key={area.id}
             label={
               <Badge 
-                badgeContent={getTableCount(area.id)} 
+                badgeContent={getTableCount(String(area.id))} 
                 color="primary"
                 showZero
                 sx={{
@@ -110,7 +127,7 @@ const TableAreaTabsPOS: React.FC<TableAreaTabsPOSProps> = ({
                 {area.name}
               </Badge>
             }
-            value={area.id}
+            value={String(area.id)}
           />
         ))}
       </Tabs>

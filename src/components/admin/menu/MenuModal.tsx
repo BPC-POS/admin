@@ -240,11 +240,10 @@ const MenuModal: React.FC<MenuModalProps> = ({
                     const imageUrl = URL.createObjectURL(file);
                     handleChange('image', imageUrl);
                   } else {
-                    handleChange('image', ''); // Handle case when no file is selected (remove image)
+                    handleChange('image', ''); 
                   }
                 }}
                 error={undefined}
-                isLoading={isLoading}
               />
             </Grid>
 

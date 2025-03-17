@@ -25,7 +25,7 @@ const getMembers = async (): Promise<AxiosResponse<Member[]>> => {
   try {
     const response: AxiosResponse<Member[]> = await memberApi.get("/members");
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching members:", error);
     throw error;
   }
@@ -35,7 +35,7 @@ const createMember = async (memberData: Omit<Member, 'id' | 'createdAt' | 'updat
   try {
     const response: AxiosResponse<Member> = await memberApi.post("/members", memberData);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating member:", error);
     throw error;
   }
@@ -46,7 +46,7 @@ const getMemberById = async (id: number): Promise<AxiosResponse<Member>> => {
     const response: AxiosResponse<Member> = await memberApi.get(`/members/${id}`);
     return response;
   }
-  catch (error: any) {
+  catch (error: unknown) {
     console.error("Error fetching member:", error);
     throw error;
   } 
@@ -56,7 +56,7 @@ const updateMember = async (id: number, memberData: Partial<Member>): Promise<Ax
   try {
     const response: AxiosResponse<Member> = await memberApi.put(`/members/${id}`, memberData);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating member:", error);
     throw error;
   }
@@ -65,7 +65,7 @@ const updateMember = async (id: number, memberData: Partial<Member>): Promise<Ax
 const deleteMember = async (id: number): Promise<void> => {
   try {
     await memberApi.delete(`/members/${id}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting member:", error);
     throw error;
   }

@@ -1,9 +1,19 @@
 import React from 'react';
 import { Grid, TextField } from '@mui/material';
 
+interface FormData {
+  meta: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+interface FormErrors {
+  meta?: string;
+  [key: string]: string | undefined;
+}
+
 interface MetaInfoProps {
-  formData: any; // Use FormState interface if available
-  errors: any;    // Use Record<string, string> if available
+  formData: FormData;
+  errors: FormErrors;   
   handleMetaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 

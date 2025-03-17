@@ -31,7 +31,7 @@ const createTable = async (tableData: {
   try {
       const response: AxiosResponse = await tableApi.post('/tables', tableData);
       return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
       console.error("Error creating table:", error);
       throw error;
   }
@@ -41,7 +41,7 @@ const getTables = async (): Promise<AxiosResponse<Table[]>> => {
   try {
       const response: AxiosResponse<Table[]> = await tableApi.get('/tables');
       return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
       console.error("Error fetching tables:", error);
       throw error;
   }
@@ -52,7 +52,7 @@ const getTableById = async (tableId: number): Promise<AxiosResponse<Table>> => {
         const response: AxiosResponse<Table> = await tableApi.get(`/tables/${tableId}`);
         return response;
         }
-    catch (error: any) {
+    catch (error: unknown) {
         console.error(`Error fetching table with ID ${tableId}:`, error);
         throw error;
     }
@@ -69,7 +69,7 @@ const updateTable = async (tableData: {
   try {
     const response: AxiosResponse<Table> = await tableApi.patch(`/tables/${tableData.id}`, tableData); 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating table:", error);
     throw error;
   }
@@ -79,7 +79,7 @@ const deleteTable = async (tableId: number): Promise<AxiosResponse> => {
     try {
       const response: AxiosResponse = await tableApi.delete(`/tables/${tableId}`);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error deleting table with ID ${tableId}:`, error);
       throw error;
     }
@@ -89,7 +89,7 @@ const getTableAreas = async (): Promise<AxiosResponse<TableArea[]>> => {
   try {
     const response: AxiosResponse<TableArea[]> = await tableApi.get('/table-area');
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching table areas:", error);
     throw error;
   }
@@ -99,7 +99,7 @@ const createTableArea = async (areaData: { name: string }): Promise<AxiosRespons
   try {
     const response: AxiosResponse = await tableApi.post('/table-area', areaData);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating table area:", error);
     throw error;
   }
@@ -109,7 +109,7 @@ const updateTableArea = async (areaData: { id: number; name: string }): Promise<
   try {
       const response: AxiosResponse = await tableApi.patch(`/table-area/${areaData.id}`, { name: areaData.name });
       return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
       console.error("Error updating table area:", error);
       throw error;
   }
@@ -119,7 +119,7 @@ const deleteTableArea = async (areaId: number): Promise<AxiosResponse> => {
   try {
       const response: AxiosResponse = await tableApi.delete(`/table-area/${areaId}`);
       return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
       console.error(`Error deleting table area with ID ${areaId}:`, error);
       throw error;
   }

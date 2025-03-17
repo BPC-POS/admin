@@ -21,7 +21,7 @@ import InfoIcon from '@mui/icons-material/Info';
 interface DiscountListProps {
   discounts: Discount[];
   onEdit: (discount: Discount) => void;
-  onDelete: (code: string) => void;
+  onDelete: (id: number) => void;
   onViewDetail: (discount: Discount) => void;
   loading: boolean;
 }
@@ -82,7 +82,7 @@ const DiscountList: React.FC<DiscountListProps> = ({
                       </Button>
                     </Tooltip>
                     <Tooltip title="Xóa">
-                      <Button onClick={() => onDelete(discount.code)} variant="outlined" color="secondary" className="mr-2">
+                      <Button onClick={() => onDelete(discount.id)} variant="outlined" color="secondary" className="mr-2">
                         <DeleteIcon sx={{ border: 'none' }} />
                       </Button>
                     </Tooltip>

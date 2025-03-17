@@ -7,14 +7,15 @@ export interface Staff {
   phone_number: string; 
   role_id?: StaffPosition | null; 
   status?: StaffStatus;     
-  meta?: any;        
+  meta?: Record<string, unknown>;        
   member_id?: number;   
   shifts?: number[];   
-  member?: any;       
+  member?: Record<string, unknown>;       
   position?: StaffPosition; 
   department?: Department; 
   startDate?: string | Date;
   userId?: string | number; 
+  leaves?: LeaveRequest[];
 }
 
 
@@ -115,8 +116,7 @@ export interface PayrollRecord {
   workingDays: number;
   totalHours: number;
   overtime: number;
-  baseSalary: number;
-  allowance: number;
+
   bonus: number;
   deductions: number;
   netSalary: number;

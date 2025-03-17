@@ -7,6 +7,15 @@ import CouponDetailModal from '@/components/admin/coupons/CouponDetailModal';
 import { Coupon, CreateCouponDTO, CouponStatus } from '@/types/coupon';
 import { getCoupon, createCoupon, updateCoupon, deleteCoupon } from '@/api/coupon';
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const CouponPage = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,7 +32,7 @@ const CouponPage = () => {
   const fetchCoupons = async () => {
     setLoading(true);
     try {
-      const response = await getCoupon('all');
+      const response = await getCoupon();
       setCoupons(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Lỗi khi fetch coupons:", error);
@@ -66,9 +75,10 @@ const CouponPage = () => {
       setSnackbar({ open: true, message: 'Thao tác thành công!', severity: 'success' });
       setIsModalOpen(false);
       setEditingCoupon(undefined);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi khi thêm/sửa coupon:", error);
-      setSnackbar({ open: true, message: `Lỗi: ${error?.response?.data?.message || 'Có lỗi xảy ra.'}`, severity: 'error' });
+      const apiError = error as ApiError;
+      setSnackbar({ open: true, message: `Lỗi: ${apiError?.response?.data?.message || 'Có lỗi xảy ra.'}`, severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -80,9 +90,10 @@ const CouponPage = () => {
       await deleteCoupon(id); 
       fetchCoupons();
       setSnackbar({ open: true, message: 'Xóa coupon thành công!', severity: 'success' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi khi xóa coupon:", error);
-      setSnackbar({ open: true, message: `Lỗi: ${error?.response?.data?.message || 'Có lỗi xảy ra.'}`, severity: 'error' });
+      const apiError = error as ApiError;
+      setSnackbar({ open: true, message: `Lỗi: ${apiError?.response?.data?.message || 'Có lỗi xảy ra.'}`, severity: 'error' });
     } finally {
       setLoading(false);
     }

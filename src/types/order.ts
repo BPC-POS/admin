@@ -1,26 +1,35 @@
 export interface Order {
-  id: number;
-  orderNumber: string;
-  customerName: string;
+  id: number | string;
+  orderNumber?: string;
+  customerName?: string;
   customerPhone?: string;
-  tableId?: number;
+  tableId?: number | string;
+  tableName?: string;
   items: OrderItem[];
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
+  status: OrderStatus | string;
+  paymentStatus?: PaymentStatus;
   paymentMethod?: PaymentMethod;
   totalAmount: number;
   note?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface OrderItem {
-  id: number;
-  productId: number;
+  id?: number;
+  productId: number | string;
   productName: string;
+  variantId?: number | string;
+  variantName?: string;
   quantity: number;
   price: number;
+  total?: number;
   note?: string;
+  toppings?: Array<{
+    id: number | string;
+    name: string;
+    price: number;
+  }>;
 }
 
 export enum OrderStatus {

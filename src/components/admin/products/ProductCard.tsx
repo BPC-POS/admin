@@ -13,9 +13,8 @@ import {
   Alert as MuiAlert,
   CircularProgress
 } from '@mui/material';
-import { Edit, Delete, Circle } from '@mui/icons-material';
+import { Edit, Delete,  } from '@mui/icons-material';
 import { Product, ProductStatus } from '@/types/product';
-import { deleteProductById } from '@/api/product';
 import { AlertProps, AlertColor } from '@mui/material/Alert';
 
 interface ProductCardProps {
@@ -29,8 +28,8 @@ const statusColors: { [key in ProductStatus]: AlertColor } = {
   [ProductStatus.INACTIVE]: 'error',
   [ProductStatus.SOLD_OUT]: 'warning',
   [ProductStatus.SEASONAL]: 'info',
-  [ProductStatus.NEW]: 'primary' as AlertColor, // Explicitly cast to AlertColor
-  [ProductStatus.BEST_SELLER]: 'secondary' as AlertColor // Explicitly cast to AlertColor
+  [ProductStatus.NEW]: 'primary' as AlertColor,
+  [ProductStatus.BEST_SELLER]: 'secondary' as AlertColor
 } as const;
 
 const statusLabels = {
@@ -43,7 +42,7 @@ const statusLabels = {
 };
 
 interface AlertForwardRefProps extends AlertProps {
-  severity: AlertColor; // Use AlertColor directly here
+  severity: AlertColor; 
 }
 
 const Alert = forwardRef<HTMLDivElement, AlertForwardRefProps>(
@@ -52,16 +51,33 @@ const Alert = forwardRef<HTMLDivElement, AlertForwardRefProps>(
   }
 );
 
+const getImageUrl = (product: Product): string => {
+  try {
+    if (product.meta && typeof product.meta === 'object' && product.meta.image_id) {
+      const imageId = product.meta.image_id;
+      return `https://bpc-pos.s3.ap-southeast-1.amazonaws.com/${imageId}`;
+    }
+    
+    if (product.image) {
+      return product.image;
+    }
+    
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmMWYxZjEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYWFhYWFhIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+  } catch (error) {
+    console.error('Error getting image URL:', error);
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmMWYxZjEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYWFhYWFhIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+  }
+};
+
 const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
-  // Safely access product.size and use find only if it exists and is an array
   const defaultSize = Array.isArray(product.size) ? product.size.find(s => s.isDefault) : undefined;
   const basePrice = defaultSize ? defaultSize.price : product.price;
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success'); // Use AlertColor here
-  const [isDeleting, setIsDeleting] = React.useState(false); // Loading state for delete
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
+  const [isDeleting, setIsDeleting] = React.useState(false); 
 
-  const showSnackbar = (message: string, severity: AlertColor) => { // Use AlertColor here
+  const showSnackbar = (message: string, severity: AlertColor) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -76,21 +92,19 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
 
   const handleDeleteProduct = async () => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) {
-      return; // User cancelled deletion
+      return; 
     }
 
-    setIsDeleting(true); // Start loading
+    setIsDeleting(true); 
     try {
-      await deleteProductById(product.id);
-      showSnackbar(`Sản phẩm "${product.name}" đã được xóa thành công.`, 'success');
       if (onDelete) {
-        onDelete(product.id); // Notify parent component to update product list
+        onDelete(product.id);
       }
-    } catch (error: any) {
-      console.error("Error deleting product:", error);
+    } catch (error: unknown) {
+      console.error("Error starting delete process:", error);
       showSnackbar(`Lỗi khi xóa sản phẩm "${product.name}". Vui lòng thử lại.`, 'error');
     } finally {
-      setIsDeleting(false); // End loading
+      setIsDeleting(false);
     }
   };
 
@@ -98,11 +112,16 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
     <Card className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden">
       <Box className="relative w-full pt-[100%] group">
         <Image
-          src={product.image}
+          src={getImageUrl(product)}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => {
+            console.error('Lỗi tải ảnh:', getImageUrl(product));
+            // @ts-expect-error - Cần để truy cập e.target.src
+            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmMWYxZjEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYWFhYWFhIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+          }}
         />
         <div className="absolute top-3 right-3">
           <Chip
@@ -120,14 +139,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
               <Typography variant="h6" className="font-poppins font-bold line-clamp-2 text-gray-800">
                 {product.name}
               </Typography>
-              <div className="flex items-center gap-2 mt-1">
-                <Circle
-                  className={`w-2 h-2 ${product.isAvailable ? 'text-green-500' : 'text-red-500'}`}
-                />
-                <Typography variant="caption" className="font-poppins text-gray-600">
-                  {product.isAvailable ? 'Còn hàng' : 'Hết hàng'}
-                </Typography>
-              </div>
+             
             </div>
             <div className="flex gap-2">
               <Tooltip title="Chỉnh sửa">
@@ -135,7 +147,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
                   size="small"
                   className="bg-blue-50 hover:bg-blue-100 text-blue-600"
                   onClick={() => onEdit?.(product)}
-                  disabled={isDeleting} // Disable edit button during deletion
+                  disabled={isDeleting} 
                 >
                   <Edit />
                 </IconButton>
@@ -145,15 +157,14 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
                   size="small"
                   className="bg-red-50 hover:bg-red-100 text-red-600"
                   onClick={handleDeleteProduct}
-                  disabled={isDeleting} // Disable delete button during deletion
+                  disabled={isDeleting} 
                 >
-                  {isDeleting ? <CircularProgress size={24} color="inherit" /> : <Delete />} {/* Loading indicator */}
+                  {isDeleting ? <CircularProgress size={24} color="inherit" /> : <Delete />} 
                 </IconButton>
               </Tooltip>
             </div>
           </div>
 
-          {/* Conditionally render sizes only if product.size is an array */}
           {Array.isArray(product.size) && (
             <Stack direction="row" spacing={1} className="flex-wrap gap-2">
               {product.size.map((size) => (

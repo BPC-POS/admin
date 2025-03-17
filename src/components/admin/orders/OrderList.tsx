@@ -124,16 +124,16 @@ const OrderList: React.FC<OrderListProps> = ({
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30">
                   <Chip
-                    label={statusLabels[order.status]}
-                    color={statusColors[order.status]}
+                    label={statusLabels[order.status as OrderStatus]}
+                    color={statusColors[order.status as OrderStatus]}
                     size="small"
                     className="font-poppins"
                   />
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30">
                   <Chip
-                    label={paymentStatusLabels[order.paymentStatus]}
-                    color={paymentStatusColors[order.paymentStatus]}
+                    label={paymentStatusLabels[order.paymentStatus as PaymentStatus]}
+                    color={paymentStatusColors[order.paymentStatus as PaymentStatus]}
                     size="small"
                     className="font-poppins"
                   />

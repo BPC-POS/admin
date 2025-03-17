@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -13,8 +13,20 @@ import { Add } from '@mui/icons-material';
 import UserList from '@/components/admin/users/UserList';
 import UserModal from '@/components/admin/users/UserModal';
 import UserFilter from '@/components/admin/users/UserFilter';
-import { User, UserStatus, UserRole, UserFilter as UserFilterType } from '@/types/user'; // Import UserRole
-import { getMembers, createMember, getMemberById, updateMember, deleteMember } from '@/api/member';
+import { User, UserStatus, UserFilter as UserFilterType } from '@/types/user';
+import { getMembers, createMember, updateMember, deleteMember } from '@/api/member';
+
+// Define a type for API errors
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+  status?: number;
+}
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -28,42 +40,43 @@ const UsersPage = () => {
     severity: 'success' as 'success' | 'error',
   });
 
-  useEffect(() => {
-    const fetchMembers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getMembers();
-        const mappedUsers: User[] = response.data.map(member => ({
-          id: member.id || 0,
-          name: member.name,
-          email: member.email,
-          phone_number: member.phone_number,
-          status: Number(member.status),
-          createdAt: member.createdAt?.toString() || '',
-          updatedAt: member.updatedAt?.toString() || '',
-          gender: Number(member.gender) || 0,
-          day_of_birth: member.day_of_birth,
-          password: member.password,
-          avatar: member.avatar || '',
-          token: member.token || '',
-          first_login: member.first_login || false,
-          meta: member.meta || {}
-        }));
-        setUsers(mappedUsers);
-      } catch (error: any) {
-        console.error("Error fetching members:", error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải dữ liệu người dùng. Vui lòng thử lại sau.',
-          severity: 'error',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMembers();
+  const fetchMembers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await getMembers();
+      const mappedUsers: User[] = response.data.map(member => ({
+        id: member.id || 0,
+        name: member.name,
+        email: member.email,
+        phone_number: member.phone_number,
+        status: Number(member.status),
+        createdAt: member.createdAt?.toString() || '',
+        updatedAt: member.updatedAt?.toString() || '',
+        gender: Number(member.gender) || 0,
+        day_of_birth: member.day_of_birth,
+        password: member.password,
+        avatar: member.avatar || '',
+        token: member.token || '',
+        first_login: member.first_login || false,
+        meta: member.meta || {}
+      }));
+      setUsers(mappedUsers);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error fetching members:", apiError);
+      setSnackbar({
+        open: true,
+        message: 'Không thể tải dữ liệu người dùng. Vui lòng thử lại sau.',
+        severity: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const handleAddUser = async (data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
@@ -95,8 +108,9 @@ const UsersPage = () => {
         message: 'Thêm người dùng thành công',
         severity: 'success',
       });
-    } catch (error: any) {
-      console.error("Error creating member:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error creating member:", apiError);
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi thêm người dùng',
@@ -119,8 +133,7 @@ const UsersPage = () => {
         day_of_birth: data.day_of_birth || '',
         ...(data.password && { password: data.password }),
       };
-      const response = await updateMember(id, memberData); // Call API updateMember
-      const updatedUser = response.data; // Get the updated user data from the API response
+      const response = await updateMember(id, memberData); 
       const mappedUser: User = {
         id: response.data.id || 0,
         name: response.data.name,
@@ -146,8 +159,9 @@ const UsersPage = () => {
         message: 'Cập nhật người dùng thành công',
         severity: 'success',
       });
-    } catch (error: any) {
-      console.error("Error updating user:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating user:", apiError);
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi cập nhật người dùng',
@@ -170,8 +184,9 @@ const UsersPage = () => {
         message: 'Xóa người dùng thành công',
         severity: 'success',
       });
-    } catch (error: any) {
-      console.error("Error deleting user:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error deleting user:", apiError);
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi xóa người dùng',
@@ -207,8 +222,9 @@ const UsersPage = () => {
         message: 'Cập nhật trạng thái thành công',
         severity: 'success',
       });
-    } catch (error: any) {
-      console.error("Error updating status:", error);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error updating status:", apiError);
       setSnackbar({
         open: true,
         message: 'Đã xảy ra lỗi khi cập nhật trạng thái',

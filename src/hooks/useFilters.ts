@@ -16,7 +16,7 @@ export function useFilteredProducts(
       .filter(product => {
         const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' || (product.status as unknown as string) === statusFilter;
         return matchesCategory && matchesSearch && matchesStatus;
       })
       .sort((a, b) => {
@@ -33,8 +33,7 @@ export function useFilteredProducts(
   }, [products, currentCategory, searchQuery, sortBy, statusFilter]);
 }
 
-// Custom hook cho phân trang
-export function usePagination(items: any[], itemsPerPage: number) {
+export function usePagination<T>(items: T[], itemsPerPage: number) {
   const [page, setPage] = useState(1);
   
   const totalPages = Math.ceil(items.length / itemsPerPage);

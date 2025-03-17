@@ -30,7 +30,7 @@ const getInventory = async (): Promise<AxiosResponse<Inventory[]>> => {
     try {
         const response: AxiosResponse<Inventory[]> = await inventoryApi.get('/inventory');
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error fetching inventory:", error);
         throw error;
     }
@@ -40,7 +40,7 @@ const createInventory = async (inventoryData: Inventory): Promise<AxiosResponse<
     try {
         const response: AxiosResponse<Inventory> = await inventoryApi.post('/inventory', inventoryData);
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error creating inventory:", error);
         throw error;
     }
@@ -50,7 +50,7 @@ const updateInventory = async (id: number, inventoryData: Partial<Inventory>): P
     try {
         const response: AxiosResponse<Inventory> = await inventoryApi.put(`/inventory/${id}`, inventoryData);
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error updating inventory:", error);
         throw error;
     }
@@ -60,7 +60,7 @@ const deleteInventoryById = async (id: number): Promise<AxiosResponse<Inventory>
     try {
         const response: AxiosResponse<Inventory> = await inventoryApi.delete(`/inventory/${id}`);
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error deleting inventory:", error);
         throw error;
     }

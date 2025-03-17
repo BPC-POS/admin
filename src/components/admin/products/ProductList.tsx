@@ -19,7 +19,7 @@ import { Product, ProductStatus } from '@/types/product';
 
 interface ProductListProps {
   products: Product[];
-  currentCategory: string;
+  currentCategory: string; 
   isLoading?: boolean;
   error?: string;
   onEdit?: (product: Product) => void;
@@ -64,31 +64,19 @@ const ProductList: React.FC<ProductListProps> = ({
   const [statusFilter, setStatusFilter] = useState<ProductStatus | 'all'>('all');
   const [page, setPage] = useState(1);
 
+  React.useEffect(() => {
+  }, [currentCategory, products]);
+
   const filteredProducts = products
     .filter(product => {
-      const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
+      const matchesCategory = currentCategory === 'all' || (
+        Array.isArray(product.categories) && product.categories.includes(Number(currentCategory))
+      );
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
       return matchesCategory && matchesSearch && matchesStatus;
     })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name_asc':
-          return a.name.localeCompare(b.name);
-        case 'name_desc':
-          return b.name.localeCompare(a.name);
-        case 'price_asc':
-          return a.price - b.price;
-        case 'price_desc':
-          return b.price - a.price;
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        default:
-          return 0;
-      }
-    });
+
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
