@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react'; // Import useEffect
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -18,8 +18,8 @@ import PayrollManagement from '@/components/admin/staff/PayrollManagement';
 import StaffModal from '@/components/admin/staff/StaffModal';
 import { Staff} from '@/types/staff';
 import { createEmployee, getEmployees, updateEmployeeById, deleteEmployeeById } from '@/api/employee';
+import { getRole } from '@/api/role';
 
-// Define a type for API errors
 interface ApiError {
   response?: {
     data?: {
@@ -118,7 +118,6 @@ const StaffPage = () => {
     console.log("Editing staff:", id, data);
     try {
       setIsLoading(true);
-      // Type assertion to Staff with all required fields having fallback values
       const staffData = {
         name: data.name || '',
         email: data.email || '',

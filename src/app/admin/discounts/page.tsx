@@ -7,7 +7,6 @@ import DiscountDetailModal from '@/components/admin/discounts/DiscountDetailModa
 import { Discount, CreateDiscountDTO } from '@/types/discount';
 import { getDiscounts, createDiscount, updateDiscount, deleteDiscount } from '@/api/discount';
 
-// Define a type for API errors
 interface ApiError {
   response?: {
     data?: {
@@ -37,7 +36,7 @@ const DiscountPage = () => {
       if (response && response.data) {
         setDiscounts(response.data);
       } else {
-        setDiscounts([]); // Handle empty response data if needed
+        setDiscounts([]); 
       }
     } catch (error: unknown) {
       console.error("Lỗi khi fetch discounts:", error);

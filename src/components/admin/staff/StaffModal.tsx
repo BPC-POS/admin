@@ -16,9 +16,10 @@ import {
   Autocomplete,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Staff, StaffPosition, StaffStatus } from '@/types/staff';
+import { Staff, StaffStatus } from '@/types/staff'; // StaffPosition đã được loại bỏ
 import { Member } from '@/types/user';
 import { getMembers } from '@/api/member';
+import { getRole } from '@/api/role'; // Import getRole API
 
 interface StaffModalProps {
   open: boolean;
@@ -32,7 +33,7 @@ const initialFormState: Partial<Staff> = {
   name: '',
   email: '',
   phone_number: '',
-  role_id: undefined,
+  role_id: undefined, // role_id bây giờ là number hoặc undefined
   status: StaffStatus.ACTIVE,
   member_id: undefined,
 };
@@ -46,17 +47,21 @@ const StaffModal: React.FC<StaffModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<Staff>>(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [members, setMembers] = useState<Member[]>([]); 
+  const [members, setMembers] = useState<Member[]>([]);
   const [memberSearchValue, setMemberSearchValue] = useState<string>('');
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null); 
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [roles, setRoles] = useState<any[]>([]); // State để lưu trữ danh sách roles từ API
 
   useEffect(() => {
     if (editItem) {
-      setFormData(editItem);
-      setSelectedMember((editItem.member as unknown as Member) || null); 
+      setFormData({
+        ...editItem,
+        role_id: editItem.role_id // Đảm bảo role_id được set đúng type
+      });
+      setSelectedMember((editItem.member as unknown as Member) || null);
     } else {
       setFormData(initialFormState);
-      setSelectedMember(null); 
+      setSelectedMember(null);
     }
     setErrors({});
   }, [editItem]);
@@ -67,14 +72,24 @@ const StaffModal: React.FC<StaffModalProps> = ({
       setMembers(response.data);
     } catch (error) {
       console.error("Error fetching members:", error);
-          }
+    }
+  }, []);
+
+  const fetchRolesData = useCallback(async () => { // Hàm fetch roles
+    try {
+      const response = await getRole();
+      setRoles(response.data);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
   }, []);
 
   useEffect(() => {
     if (open) {
       fetchMembersData();
+      fetchRolesData(); // Gọi fetch roles khi modal mở
     }
-  }, [open, fetchMembersData]);
+  }, [open, fetchMembersData, fetchRolesData]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -95,7 +110,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
     if (formData.role_id === undefined) {
       newErrors.role_id = 'Vị trí không được để trống';
     }
-    if (selectedMember === null && !editItem) { 
+    if (selectedMember === null && !editItem) {
       newErrors.member_id = 'Member không được để trống';
     }
 
@@ -108,20 +123,9 @@ const StaffModal: React.FC<StaffModalProps> = ({
     if (validateForm()) {
       onSubmit({
         ...formData,
-        member_id: selectedMember?.id, 
+        member_id: selectedMember?.id,
       });
     }
-  };
-
-  const getPositionLabel = (position: StaffPosition) => {
-    const labels: Record<StaffPosition, string> = {
-      [StaffPosition.MANAGER]: 'Quản lý',
-      [StaffPosition.SUPERVISOR]: 'Giám sát',
-      [StaffPosition.BARISTA]: 'Pha chế',
-      [StaffPosition.WAITER]: 'Phục vụ',
-      [StaffPosition.CASHIER]: 'Thu ngân',
-    };
-    return labels[position];
   };
 
   const getStatusLabel = (status: StaffStatus) => {
@@ -134,7 +138,7 @@ const StaffModal: React.FC<StaffModalProps> = ({
 
   const handleMemberChange = (event: React.SyntheticEvent<Element, Event>, value: Member | null) => {
     setSelectedMember(value);
-    setFormData({ ...formData, member_id: value?.id }); 
+    setFormData({ ...formData, member_id: value?.id });
   };
 
   return (
@@ -208,12 +212,12 @@ const StaffModal: React.FC<StaffModalProps> = ({
                   id="role-id-select"
                   value={formData.role_id === undefined ? '' : formData.role_id}
                   label="Vị trí"
-                  onChange={(e) => setFormData({ ...formData, role_id: e.target.value as StaffPosition })}
+                  onChange={(e) => setFormData({ ...formData, role_id: Number(e.target.value) })} // Lưu role_id là number
                   className="font-poppins"
                 >
-                  {Object.values(StaffPosition).map((position) => (
-                    <MenuItem key={position} value={position} className="font-poppins">
-                      {getPositionLabel(position as StaffPosition)}
+                  {roles.map((role) => ( // Map qua danh sách roles từ API
+                    <MenuItem key={role.id} value={role.id} className="font-poppins">
+                      {role.name} {/* Hiển thị role.name */}
                     </MenuItem>
                   ))}
                 </Select>

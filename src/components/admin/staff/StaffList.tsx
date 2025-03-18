@@ -1,32 +1,7 @@
-import React, { useState } from 'react';
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Chip,
-  Avatar,
-  Typography,
-  Box,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Pagination,
-} from '@mui/material';
-import {
-  Edit,
-  MoreVert,
-  Schedule,
-  RequestPage,
-  Payments,
-} from '@mui/icons-material';
-import { Staff, StaffPosition, Department } from '@/types/staff';
-import { formatDate } from '@/utils/format';
+import React from 'react';
+import { Staff, StaffStatus } from '@/types/staff';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 
 interface StaffListProps {
   staff: Staff[];
@@ -34,158 +9,50 @@ interface StaffListProps {
   onDelete: (staff: Staff) => void;
 }
 
-const ITEMS_PER_PAGE = 10;
-
 const StaffList: React.FC<StaffListProps> = ({ staff, onEdit, onDelete }) => {
-  const [page, setPage] = useState(1);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, staffMember: Staff) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedStaff(staffMember);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedStaff(null);
-  };
-
-  const getPositionLabel = (position: StaffPosition) => {
-    const labels: Record<StaffPosition, string> = {
-      [StaffPosition.MANAGER]: 'Quản lý',
-      [StaffPosition.SUPERVISOR]: 'Giám sát',
-      [StaffPosition.BARISTA]: 'Pha chế',
-      [StaffPosition.WAITER]: 'Phục vụ',
-      [StaffPosition.CASHIER]: 'Thu ngân',
+  const getStatusLabel = (status: StaffStatus) => {
+    const labels: Record<StaffStatus, string> = {
+      [StaffStatus.ACTIVE]: 'Hoạt động',
+      [StaffStatus.INACTIVE]: 'Không hoạt động',
     };
-    return labels[position];
+    return labels[status];
   };
-
-  const getDepartmentLabel = (department: Department) => {
-    const labels: Record<Department, string> = {
-      [Department.COFFEE_BAR]: 'Quầy pha chế',
-      [Department.KITCHEN]: 'Nhà bếp',
-      [Department.SERVICE]: 'Phục vụ',
-      [Department.CASHIER]: 'Thu ngân',
-    };
-    return labels[department];
-  };
-
-  const paginatedStaff = staff.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
 
   return (
-    <Box className="">
-      <TableContainer component={Paper} className="font-poppins mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell className="font-poppins">Nhân viên</TableCell>
-              <TableCell className="font-poppins">Vị trí</TableCell>
-              <TableCell className="font-poppins">Bộ phận</TableCell>
-              <TableCell className="font-poppins">Ngày vào làm</TableCell>
-              <TableCell className="font-poppins">Lương cơ bản</TableCell>
-              <TableCell align="right" className="font-poppins">Thao tác</TableCell>
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Tên</TableCell>
+            <TableCell align="left">Email</TableCell>
+            <TableCell align="left">Số điện thoại</TableCell>
+            <TableCell align="left">Vị trí</TableCell>
+            <TableCell align="left">Trạng thái</TableCell>
+            <TableCell align="right">Hành động</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {staff.map((staffMember) => (
+            <TableRow key={staffMember.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component="th" scope="row">{staffMember.name}</TableCell>
+              <TableCell align="left">{staffMember.email}</TableCell>
+              <TableCell align="left">{staffMember.phone_number}</TableCell>
+              <TableCell align="left">{staffMember.role?.name}</TableCell>
+              <TableCell align="left">{staffMember.status ? getStatusLabel(staffMember.status) : 'N/A'}</TableCell>
+              <TableCell align="right">
+                <IconButton aria-label="edit" onClick={() => onEdit(staffMember)}>
+                  <Edit />
+                </IconButton>
+                <IconButton aria-label="delete" onClick={() => onDelete(staffMember)}>
+                  <Delete />
+                </IconButton>
+              </TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedStaff.map((staffMember) => (
-              <TableRow key={staffMember.id}>
-                <TableCell>
-                  <Box className="flex items-center gap-3">
-                    <Avatar>{staffMember.name[0]}</Avatar>
-                    <div>
-                      <Typography variant="subtitle2" className="font-poppins">
-                        {staffMember.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" className="font-poppins">
-                        ID: {staffMember.userId}
-                      </Typography>
-                    </div>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={getPositionLabel(staffMember.position || StaffPosition.WAITER)}
-                    color="primary"
-                    variant="outlined"
-                    className="font-poppins"
-                  />
-                </TableCell>
-                <TableCell className="font-poppins">{getDepartmentLabel(staffMember.department || Department.SERVICE)}</TableCell>
-                <TableCell className="font-poppins">{formatDate(staffMember.startDate || new Date())}</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, staffMember)}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Box className="mt-4 flex justify-center">
-        <Pagination
-          count={Math.ceil(staff.length / ITEMS_PER_PAGE)}
-          page={page}
-          onChange={(_, value) => setPage(value)}
-          color="primary"
-          className="font-poppins"
-        />
-      </Box>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-          className="bg-white/90"
-      >
-        <MenuItem onClick={() => {
-          if (selectedStaff) onEdit(selectedStaff);
-          handleMenuClose();
-        }} className="font-poppins">
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Chỉnh sửa thông tin</ListItemText>
-        </MenuItem>
-        <MenuItem className="font-poppins">
-          <ListItemIcon>
-            <Schedule fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Xem lịch làm việc</ListItemText>
-        </MenuItem>
-        <MenuItem className="font-poppins">
-          <ListItemIcon>
-            <RequestPage fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Xem đơn xin nghỉ</ListItemText>
-        </MenuItem>
-        <MenuItem className="font-poppins">
-          <ListItemIcon>
-            <Payments fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Xem bảng lương</ListItemText>
-        </MenuItem>
-        <MenuItem className="font-poppins"
-        onClick={() => {
-          if (selectedStaff) onDelete(selectedStaff);
-          handleMenuClose();
-        }}>
-          <ListItemIcon>
-            <Schedule fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Xóa</ListItemText>
-        </MenuItem>
-      </Menu>
-    </Box>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

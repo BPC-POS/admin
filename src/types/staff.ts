@@ -8,9 +8,10 @@ export interface Staff {
   role_id?: StaffPosition | null; 
   status?: StaffStatus;     
   meta?: Record<string, unknown>;        
-  member_id?: number;   
+  member_id?: number;
+  role?: Role;  
   shifts?: number[];   
-  member?: Record<string, unknown>;       
+  member?: Member;       
   position?: StaffPosition; 
   department?: Department; 
   startDate?: string | Date;
@@ -18,6 +19,31 @@ export interface Staff {
   leaves?: LeaveRequest[];
 }
 
+export interface Member { 
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  avatar: string | null;
+  email: string;
+  phone_number: string;
+  gender: number;
+  day_of_birth: string;
+  token: string | null;
+  name: string;
+  status: number;
+  first_login: string | null;
+  meta: any;
+}
+
+export interface Role { 
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  status: number;
+  description: string;
+  meta: any; 
+}
 
 export enum StaffPosition {
   MANAGER = 1,
