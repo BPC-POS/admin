@@ -3,19 +3,10 @@ import {
   Paper,
   Tabs,
   Tab,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
   Box,
-  Button,
 } from '@mui/material';
 import {
-  Edit,
-  Delete,
-  Visibility,
   VisibilityOff,
-  Add,
 } from '@mui/icons-material';
 import { Category } from '@/types/product';
 import CategoryModalPOS from './CategoryModalPOS';
@@ -37,11 +28,9 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
   onCategoryChange,
   onAddCategory,
   onEditCategory,
-  onDeleteCategory,
-  onToggleCategory,
   isLoading = false,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -49,30 +38,6 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setSelectedCategory(category);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedCategory(null);
-  };
-
-  const handleEdit = () => {
-    handleMenuClose();
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = () => {
-    if (selectedCategory && onDeleteCategory) {
-      onDeleteCategory(selectedCategory.id);
-    }
-    handleMenuClose();
-  };
-
-  const handleToggle = () => {
-    if (selectedCategory && onToggleCategory) {
-      onToggleCategory(selectedCategory.id);
-    }
-    handleMenuClose();
   };
 
   const handleSubmit = (data: Omit<Category, 'id'>) => {
@@ -85,27 +50,11 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
     setSelectedCategory(null);
   };
 
-  const handleOpenAddModal = () => {
-    setSelectedCategory(null);
-    setIsModalOpen(true);
-  };
-
   return (
     <>
       <Paper className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
         <Box className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold font-poppins">Danh mục sản phẩm</h2>
-          {onAddCategory && (
-            <Button 
-              startIcon={<Add />} 
-              variant="contained" 
-              onClick={handleOpenAddModal}
-              disabled={isLoading}
-              className="font-poppins"
-            >
-              Thêm danh mục
-            </Button>
-          )}
         </Box>
         <Tabs
           value={currentCategory}
@@ -130,7 +79,6 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
                 {!category.isActive && (
                   <VisibilityOff fontSize="small" className="text-gray-400" />
                 )}
-                {/* REMOVE IconButton from here */}
               </div>
             }
             value={category.id}
@@ -140,40 +88,6 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
           ))}
         </Tabs>
       </Paper>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        PaperProps={{
-          className: "bg-white/90 backdrop-blur-lg rounded-xl shadow-lg"
-        }}
-      >
-        <MenuItem onClick={handleEdit} className="font-poppins">
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Chỉnh sửa</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleToggle} className="font-poppins">
-          <ListItemIcon>
-            {selectedCategory?.isActive ? (
-              <VisibilityOff fontSize="small" />
-            ) : (
-              <Visibility fontSize="small" />
-            )}
-          </ListItemIcon>
-          <ListItemText>
-            {selectedCategory?.isActive ? 'Ẩn danh mục' : 'Hiện danh mục'}
-          </ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleDelete} className="text-red-600 font-poppins">
-          <ListItemIcon>
-            <Delete fontSize="small" className="text-red-600" />
-          </ListItemIcon>
-          <ListItemText>Xóa</ListItemText>
-        </MenuItem>
-      </Menu>
 
       <CategoryModalPOS
         open={isModalOpen}

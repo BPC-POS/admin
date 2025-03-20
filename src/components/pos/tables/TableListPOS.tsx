@@ -17,7 +17,7 @@ import {
 } from '@mui/icons-material';
 import { Table as TableType, TableStatus } from '@/types/table';
 import TableModalPOS from './TableModalPOS';
-// Interface để tương thích với dữ liệu API
+
 interface ApiTableType extends Omit<TableType, 'area' | 'areaId'> {
   area?: string | { name: string };
   areaId: number;
@@ -30,6 +30,7 @@ interface TableListPOSProps {
   onEdit: (table: ApiTableType) => void;
   onStatusChange: (id: number, status: TableStatus) => void;
   onTableSelect: (table: ApiTableType) => void;
+  onShowSnackbar: (message: string, severity: 'success' | 'error' | 'info') => void;
 }
 
 const statusColors = {
@@ -48,13 +49,11 @@ const statusLabels = {
   [TableStatus.MAINTENANCE]: 'Bảo trì',
 };
 
-// Hỗ trợ nhiều loại khu vực
 const getAreaBackground = (area: string | { name?: string } | undefined): string => {
-  if (!area) return '#f1f3f5'; // Màu mặc định
+  if (!area) return '#f1f3f5'; 
   
   const areaString = typeof area === 'object' ? (area.name || '') : String(area);
   
-  // Map khu vực sang màu
   const areaColors: Record<string, string> = {
     'INDOOR': '#E8F5E9',
     'indoor': '#E8F5E9',
@@ -70,7 +69,6 @@ const getAreaBackground = (area: string | { name?: string } | undefined): string
   return areaColors[areaString] || '#f1f3f5';
 };
 
-// Hiển thị tên khu vực
 const getAreaName = (table: ApiTableType): string => {
   if (table.area) {
     if (typeof table.area === 'object' && table.area.name) {
@@ -86,6 +84,7 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
   onStatusChange,
   onTableSelect,
   onEdit,
+  onShowSnackbar,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedTableForMenu, setSelectedTableForMenu] = React.useState<ApiTableType | null>(null);
@@ -111,6 +110,10 @@ const TableListPOS: React.FC<TableListPOSProps> = ({
   };
 
   const handleOpenTableModal = (table: ApiTableType) => {
+    if (table.status === TableStatus.OCCUPIED) {
+      onShowSnackbar?.(`Bàn ${table.name} đang có khách. Vui lòng chọn bàn trống.`, 'info'); 
+      return;
+    }
     setSelectedTableForModal(table);
     setIsTableModalOpen(true);
   };

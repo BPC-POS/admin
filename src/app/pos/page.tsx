@@ -253,7 +253,6 @@ const PosPage = () => {
           )
         );
         showSnackbar('Cập nhật trạng thái thành công', 'success');
-        fetchTablesData();
       }
     } catch (error: unknown) {
       const apiError = error as ApiError;
@@ -472,7 +471,7 @@ const PosPage = () => {
         total_amount: totalAmount,
         discount: 0,
         tax: taxAmount,
-        status: OrderStatusAPI.PENDING,
+        status: OrderStatusAPI.CONFIRMED,
         payment_info: paymentMethod === 'cash' ? "Thanh toán tiền mặt tại quầy" : "Thanh toán chuyển khoản",
         shipping_address: shippingAddress || "Take Away",
         items: orderItemsForApi,
@@ -546,6 +545,7 @@ const PosPage = () => {
                 onEdit={handleEditTableFromList as any}
                 onStatusChange={handleStatusChange}
                 onTableSelect={handleTableSelect as any}
+                onShowSnackbar={showSnackbar}
               />
               <ProductCategoriesPOS
                 categories={categories}
