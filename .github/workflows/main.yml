@@ -23,6 +23,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.FILE_ENV }}" > .env
+
       - name: Build Docker image
         run: |
           docker build -t ${{ env.DOCKER_IMAGE }} .
