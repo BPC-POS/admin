@@ -19,47 +19,38 @@ import {
   Receipt,
   LocalPrintshop,
 } from '@mui/icons-material';
-import { Order, OrderStatus, PaymentStatus } from '@/types/order';
-import { formatCurrency } from '@/utils//format';
+import { OrderAPI, OrderStatusAPI, PaymentStatus } from '@/types/order';
+import { formatCurrency } from '@/utils/format';
 
 interface OrderListProps {
-  orders: Order[];
-  onViewDetail: (order: Order) => void;
-  onStatusChange: (orderId: number, status: OrderStatus) => void;
+  orders: OrderAPI[];
+  onViewDetail: (order: OrderAPI) => void;
+  onStatusChange: (orderId: number, status: OrderStatusAPI) => void;
   onPaymentStatusChange: (orderId: number, status: PaymentStatus) => void;
 }
 
 const statusColors = {
-  [OrderStatus.PENDING]: 'warning',
-  [OrderStatus.CONFIRMED]: 'info',
-  [OrderStatus.PREPARING]: 'primary',
-  [OrderStatus.READY]: 'secondary',
-  [OrderStatus.COMPLETED]: 'success',
-  [OrderStatus.CANCELLED]: 'error',
+  [OrderStatusAPI.PENDING]: 'warning',
+  [OrderStatusAPI.CONFIRMED]: 'info',
+  [OrderStatusAPI.PREPARING]: 'primary',
+  [OrderStatusAPI.READY]: 'secondary',
+  [OrderStatusAPI.COMPLETED]: 'success',
+  [OrderStatusAPI.CANCELLED]: 'error',
 } as const;
 
 const statusLabels = {
-  [OrderStatus.PENDING]: 'Chờ xác nhận',
-  [OrderStatus.CONFIRMED]: 'Đã xác nhận',
-  [OrderStatus.PREPARING]: 'Đang pha chế',
-  [OrderStatus.READY]: 'Sẵn sàng phục vụ',
-  [OrderStatus.COMPLETED]: 'Hoàn thành',
-  [OrderStatus.CANCELLED]: 'Đã hủy',
+  [OrderStatusAPI.PENDING]: 'Chờ xác nhận',
+  [OrderStatusAPI.CONFIRMED]: 'Đã xác nhận',
+  [OrderStatusAPI.PREPARING]: 'Đang pha chế',
+  [OrderStatusAPI.READY]: 'Sẵn sàng phục vụ',
+  [OrderStatusAPI.COMPLETED]: 'Hoàn thành',
+  [OrderStatusAPI.CANCELLED]: 'Đã hủy',
 };
 
-const paymentStatusColors = {
-  [PaymentStatus.UNPAID]: 'error',
-  [PaymentStatus.PARTIALLY_PAID]: 'warning',
-  [PaymentStatus.PAID]: 'success',
-  [PaymentStatus.REFUNDED]: 'info',
+const paymentMethodLabels = {
+  1: 'Tiền mặt',
+  2: 'Chuyển khoản',
 } as const;
-
-const paymentStatusLabels = {
-  [PaymentStatus.UNPAID]: 'Chưa thanh toán',
-  [PaymentStatus.PARTIALLY_PAID]: 'Thanh toán một phần',
-  [PaymentStatus.PAID]: 'Đã thanh toán',
-  [PaymentStatus.REFUNDED]: 'Đã hoàn tiền',
-};
 
 const ITEMS_PER_PAGE = 10;
 
@@ -89,57 +80,47 @@ const OrderList: React.FC<OrderListProps> = ({
               <TableCell className="font-poppins font-semibold">Khách hàng</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Bàn</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Trạng thái</TableCell>
-              <TableCell align="center" className="font-poppins font-semibold">Thanh toán</TableCell>
+              <TableCell align="center" className="font-poppins font-semibold">Thanh toán</TableCell> {/* New column */}
               <TableCell align="right" className="font-poppins font-semibold">Tổng tiền</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Thao tác</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedOrders.map((order) => (
-              <TableRow 
-                key={order.id} 
-                hover 
+              <TableRow
+                key={order.id?.toString()}
+                hover
                 className="transition-colors duration-150 hover:bg-blue-50/50"
               >
                 <TableCell className="border-b border-blue-100/30">
                   <Typography variant="subtitle2" className="font-poppins font-medium">
-                    {order.orderNumber}
+                    {order.id?.toString()}
                   </Typography>
                   <Typography variant="caption" className="font-poppins text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
+                    {order.createdAt ? new Date(order.createdAt).toLocaleString() : '-'}
                   </Typography>
                 </TableCell>
                 <TableCell className="border-b border-blue-100/30">
                   <Typography variant="subtitle2" className="font-poppins font-medium">
-                    {order.customerName}
+                    User ID: {order.user_id} {/* Displaying User ID as customer info */}
                   </Typography>
-                  {order.customerPhone && (
-                    <Typography variant="caption" className="font-poppins text-gray-500">
-                      {order.customerPhone}
-                    </Typography>
-                  )}
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30 font-poppins">
-                  {order.tableId || '-'}
+                  {order.meta?.table_id?.toString() || '-'}
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30">
                   <Chip
-                    label={statusLabels[order.status as OrderStatus]}
-                    color={statusColors[order.status as OrderStatus]}
+                    label={statusLabels[order.status]}
+                    color={statusColors[order.status]}
                     size="small"
                     className="font-poppins"
                   />
                 </TableCell>
-                <TableCell align="center" className="border-b border-blue-100/30">
-                  <Chip
-                    label={paymentStatusLabels[order.paymentStatus as PaymentStatus]}
-                    color={paymentStatusColors[order.paymentStatus as PaymentStatus]}
-                    size="small"
-                    className="font-poppins"
-                  />
+                <TableCell align="center" className="border-b border-blue-100/30 font-poppins"> {/* New cell for payment method */}
+                  {paymentMethodLabels[order.meta?.payment_method as keyof typeof paymentMethodLabels] || '-'}
                 </TableCell>
                 <TableCell align="right" className="border-b border-blue-100/30 font-poppins font-medium">
-                  {formatCurrency(order.totalAmount)}
+                  {formatCurrency(Number(order.total_amount))} {/* Parse total_amount to Number */}
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30">
                   <Box className="flex justify-center gap-1">

@@ -15,32 +15,27 @@ import {
   TableRow,
   Box,
   TableContainer,
+  CircularProgress,
 } from '@mui/material';
-import { Order, OrderStatus, PaymentStatus } from '@/types/order';
+import { OrderAPI, OrderStatusAPI, PaymentStatus } from '@/types/order';
 import { formatCurrency } from '@/utils/format';
 
 interface OrderDetailModalProps {
   open: boolean;
-  order: Order | null;
+  order: OrderAPI | null;
   onClose: () => void;
-  onStatusChange: (orderId: number, status: OrderStatus) => void;
+  onStatusChange: (orderId: number, status: OrderStatusAPI) => void;
   onPaymentStatusChange: (orderId: number, status: PaymentStatus) => void;
+  loadingDetail?: boolean;
 }
 
 const statusOptions = [
-  { value: OrderStatus.PENDING, label: 'Chờ xác nhận', color: 'warning' },
-  { value: OrderStatus.CONFIRMED, label: 'Đã xác nhận', color: 'info' },
-  { value: OrderStatus.PREPARING, label: 'Đang pha chế', color: 'primary' },
-  { value: OrderStatus.READY, label: 'Sẵn sàng phục vụ', color: 'secondary' },
-  { value: OrderStatus.COMPLETED, label: 'Hoàn thành', color: 'success' },
-  { value: OrderStatus.CANCELLED, label: 'Đã hủy', color: 'error' },
-] as const;
-
-const paymentStatusOptions = [
-  { value: PaymentStatus.UNPAID, label: 'Chưa thanh toán', color: 'error' },
-  { value: PaymentStatus.PARTIALLY_PAID, label: 'Thanh toán một phần', color: 'warning' },
-  { value: PaymentStatus.PAID, label: 'Đã thanh toán', color: 'success' },
-  { value: PaymentStatus.REFUNDED, label: 'Đã hoàn tiền', color: 'info' },
+  { value: OrderStatusAPI.PENDING, label: 'Chờ xác nhận', color: 'warning' },
+  { value: OrderStatusAPI.CONFIRMED, label: 'Đã xác nhận', color: 'info' },
+  { value: OrderStatusAPI.PREPARING, label: 'Đang pha chế', color: 'primary' },
+  { value: OrderStatusAPI.READY, label: 'Sẵn sàng phục vụ', color: 'secondary' },
+  { value: OrderStatusAPI.COMPLETED, label: 'Hoàn thành', color: 'success' },
+  { value: OrderStatusAPI.CANCELLED, label: 'Đã hủy', color: 'error' },
 ] as const;
 
 const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
@@ -48,15 +43,31 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   order,
   onClose,
   onStatusChange,
-  onPaymentStatusChange,
+  loadingDetail,
 }) => {
-  if (!order) return null;
-
+  if (!open || !order) return null;
+  if (loadingDetail) { 
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          className: "rounded-xl shadow-2xl"
+        }}
+      >
+        <DialogContent className="flex justify-center items-center py-24">
+          <CircularProgress />
+        </DialogContent>
+      </Dialog>
+    );
+  }
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         className: "rounded-xl shadow-2xl"
@@ -64,10 +75,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     >
       <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
         <Typography variant="h6" className="font-poppins font-semibold text-gray-800">
-          Chi tiết đơn hàng #{order.orderNumber}
+          Chi tiết đơn hàng #{order.id?.toString() ?? 'N/A'}
         </Typography>
         <Typography variant="caption" className="font-poppins text-gray-600">
-          {new Date(order.createdAt).toLocaleString()}
+          {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}
         </Typography>
       </DialogTitle>
 
@@ -78,12 +89,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               Thông tin khách hàng
             </Typography>
             <Box className="bg-gray-50 p-4 rounded-lg">
-              <Typography className="font-poppins mb-2">{order.customerName}</Typography>
-              {order.customerPhone && (
-                <Typography className="font-poppins mb-2 text-gray-600">{order.customerPhone}</Typography>
-              )}
-              {order.tableId && (
-                <Typography className="font-poppins text-gray-600">Bàn số: {order.tableId}</Typography>
+              <Typography className="font-poppins mb-2">User ID: {order.user_id}</Typography>
+              {order.meta?.table_id && (
+                <Typography className="font-poppins text-gray-600">Bàn số: {String(order.meta.table_id)}</Typography>
               )}
             </Box>
           </Grid>
@@ -107,24 +115,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   ))}
                 </Box>
               </div>
-
-              <div>
-                <Typography variant="subtitle2" className="font-poppins font-medium text-gray-700 mb-3">
-                  Trạng thái thanh toán
-                </Typography>
-                <Box className="flex gap-2 flex-wrap">
-                  {paymentStatusOptions.map((option) => (
-                    <Chip
-                      key={option.value}
-                      label={option.label}
-                      color={option.color}
-                      variant={order.paymentStatus === option.value ? 'filled' : 'outlined'}
-                      onClick={() => onPaymentStatusChange(Number(order.id), option.value)}
-                      className="font-poppins cursor-pointer transition-all hover:shadow-md"
-                    />
-                  ))}
-                </Box>
-              </div>
             </Box>
           </Grid>
 
@@ -143,22 +133,17 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {order.items.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-gray-50">
+                  {(order.orderItems ?? []).map((item) => (
+                    <TableRow key={item.id?.toString()} className="hover:bg-gray-50">
                       <TableCell className="font-poppins">
                         <Typography variant="body2" className="font-poppins">
-                          {item.productName}
+                          {item.product?.name ?? 'Unknown Product'}
                         </Typography>
-                        {item.note && (
-                          <Typography variant="caption" className="font-poppins text-gray-500">
-                            Ghi chú: {item.note}
-                          </Typography>
-                        )}
                       </TableCell>
-                      <TableCell align="center" className="font-poppins">{item.quantity}</TableCell>
-                      <TableCell align="right" className="font-poppins">{formatCurrency(item.price)}</TableCell>
+                      <TableCell align="center" className="font-poppins">{String(item.quantity)}</TableCell>
+                      <TableCell align="right" className="font-poppins">{formatCurrency(Number(item.unit_price))}</TableCell>
                       <TableCell align="right" className="font-poppins">
-                        {formatCurrency(item.price * item.quantity)}
+                        {formatCurrency(Number(item.unit_price) * Number(item.quantity))}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -167,36 +152,25 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       Tổng cộng
                     </TableCell>
                     <TableCell align="right" className="font-poppins font-semibold text-blue-600">
-                      {formatCurrency(order.totalAmount)}
+                      {formatCurrency(Number(order.total_amount))}
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
           </Grid>
-
-          {order.note && (
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="font-poppins font-medium text-gray-700 mb-2">
-                Ghi chú
-              </Typography>
-              <Box className="bg-yellow-50 p-4 rounded-lg">
-                <Typography className="font-poppins text-gray-700">{order.note}</Typography>
-              </Box>
-            </Grid>
-          )}
         </Grid>
       </DialogContent>
 
       <DialogActions className="bg-gray-50 px-6 py-4">
-        <Button 
+        <Button
           onClick={onClose}
           className="font-poppins text-gray-600 hover:bg-gray-100"
         >
           Đóng
         </Button>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => window.print()}
           className="font-poppins bg-blue-600 hover:bg-blue-700"
         >

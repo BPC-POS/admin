@@ -1,89 +1,120 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
   Paper,
   Container,
+  CircularProgress,
 } from '@mui/material';
 import OrderList from '@/components/admin/orders/OrderList';
 import OrderFilter from '@/components/admin/orders/OrderFilter';
 import OrderStats from '@/components/admin/orders/OrderStats';
 import OrderDetailModal from '@/components/admin/orders/OrderDetailModal';
-import { Order, OrderFilter as OrderFilterType, OrderStatus, PaymentStatus } from '@/types/order';
-import mockOrders from '@/mocks/mockOrders';
+import { OrderAPI, OrderFilter as OrderFilterType, OrderStatusAPI, PaymentStatus } from '@/types/order';
+import { getOrder, getOrderById } from '@/api/order'; 
 
-const OrdersPage = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+const OrdersPage: React.FC= () => {
+  const [orders, setOrders] = useState<OrderAPI[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<OrderAPI | null>(null);
   const [filter, setFilter] = useState<OrderFilterType>({});
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
 
-  const handleStatusChange = async (orderId: number, status: OrderStatus) => {
+  const fetchOrdersData = useCallback(async () => {
+    setLoading(true);
     try {
-      // TODO: API call
-      setOrders(prev =>
-        prev.map(order =>
-          order.id === orderId
-            ? { ...order, status, updatedAt: new Date() }
-            : order
+      const response = await getOrder();
+      if (response.status === 200) {
+        setOrders(response.data);
+        console.log(response.data);
+      } else {
+        console.error("Lỗi khi tải dữ liệu orders:", response.status);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrdersData();
+  }, [fetchOrdersData]);
+
+  const handleStatusChange = async (orderId: number, status: OrderStatusAPI) => {
+    try {
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, status: status as OrderStatusAPI, updatedAt: new Date().toISOString() } : order
         )
       );
+      if (selectedOrder?.id === orderId) { 
+        setSelectedOrder(prevSelectedOrder => prevSelectedOrder ? { ...prevSelectedOrder, status: status as OrderStatusAPI, updatedAt: new Date().toISOString() } : null);
+      }
     } catch (error) {
-      console.error('Error updating order status:', error);
+      console.error('Lỗi cập nhật trạng thái đơn hàng:', error);
     }
   };
 
   const handlePaymentStatusChange = async (orderId: number, status: PaymentStatus) => {
     try {
-      // TODO: API call
-      setOrders(prev =>
-        prev.map(order =>
-          order.id === orderId
-            ? { ...order, paymentStatus: status, updatedAt: new Date() }
-            : order
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, paymentStatus: status, updatedAt: new Date().toISOString() } : order
         )
       );
+      if (selectedOrder?.id === orderId) { 
+        setSelectedOrder(prevSelectedOrder => prevSelectedOrder ? { ...prevSelectedOrder, paymentStatus: status, updatedAt: new Date().toISOString() } : null);
+      }
     } catch (error) {
-      console.error('Error updating payment status:', error);
+      console.error('Lỗi cập nhật trạng thái thanh toán:', error);
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    if (filter.search) {
-      const searchLower = filter.search.toLowerCase();
-      const matchesSearch = 
-        order.orderNumber?.toLowerCase().includes(searchLower) ||
-        order.customerName?.toLowerCase().includes(searchLower) ||
-        order.customerPhone?.includes(filter.search);
-      if (!matchesSearch) return false;
+  const handleViewDetail = async (order: OrderAPI) => {
+    setLoadingDetail(true); 
+    try {
+      const response = await getOrderById(Number(order.id));
+      if (response.status === 200) {
+        setSelectedOrder(response.data); 
+        setIsDetailModalOpen(true);
+      } else {
+        console.error("Lỗi khi tải chi tiết đơn hàng:", response.status);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải chi tiết đơn hàng:", error);
+    } finally {
+      setLoadingDetail(false); 
     }
-
-    if (filter.status && order.status !== filter.status) return false;
-    if (filter.paymentStatus && order.paymentStatus !== filter.paymentStatus) return false;
-    if (filter.tableId && order.tableId !== filter.tableId) return false;
-
-    if (filter.startDate && new Date(order.createdAt) < filter.startDate) return false;
-    if (filter.endDate && new Date(order.createdAt) > filter.endDate) return false;
-
-    return true;
-  });
-
-  const handleViewDetail = (order: Order) => {
-    setSelectedOrder(order);
-    setIsDetailModalOpen(true);
   };
+
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 [font-family:system-ui,Poppins,sans-serif]">
+    <div className="min-h-screen bg-gradient-to-b from-[#2C3E50] to-[#3498DB] p-6 font-poppins">
       <Container maxWidth="xl">
         <Box sx={{ mb: 4 }} className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
-          <Typography 
-            variant="h4" 
+          <Typography
+            variant="h4"
             className="font-bold mb-4 font-montserrat bg-clip-text text-transparent bg-gradient-to-r from-blue-900 to-blue-100"
-            component="h1" 
-            sx={{ 
+            component="h1"
+            sx={{
               fontWeight: 600,
               mb: 3,
               color: '#ffffff'
@@ -91,12 +122,12 @@ const OrdersPage = () => {
           >
             Quản lý đơn hàng
           </Typography>
-          <OrderStats orders={filteredOrders} />
+          <OrderStats orders={orders as OrderAPI[]} /> 
         </Box>
 
-        <Paper 
+        <Paper
           elevation={0}
-          sx={{ 
+          sx={{
             mb: 4,
             borderRadius: '16px',
             boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
@@ -118,7 +149,7 @@ const OrdersPage = () => {
           }}
         >
           <OrderList
-            orders={filteredOrders}
+            orders={orders} 
             onStatusChange={handleStatusChange}
             onPaymentStatusChange={handlePaymentStatusChange}
             onViewDetail={handleViewDetail}
@@ -128,12 +159,10 @@ const OrdersPage = () => {
         <OrderDetailModal
           open={isDetailModalOpen}
           order={selectedOrder}
-          onClose={() => {
-            setIsDetailModalOpen(false);
-            setSelectedOrder(null);
-          }}
+          onClose={handleCloseDetailModal}
           onStatusChange={handleStatusChange}
           onPaymentStatusChange={handlePaymentStatusChange}
+          loadingDetail={loadingDetail}
         />
       </Container>
     </div>

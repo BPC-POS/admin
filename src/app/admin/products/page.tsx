@@ -15,7 +15,6 @@ import { Product, Category } from '@/types/product';
 import { createProduct, getProducts, uploadImage, deleteProductById, getProductById, updateProduct } from '@/api/product';
 import { getCategories, createCategory, deleteCategoryById } from '@/api/category';
 
-// Define a type for API errors
 interface ApiError {
   response?: {
     data?: {
@@ -27,7 +26,6 @@ interface ApiError {
   status?: number;
 }
 
-// Define types for product attributes and variants
 interface ProductAttribute {
   id?: string | number;
   attribute_id: string | number;

@@ -32,7 +32,7 @@ export interface Member {
   name: string;
   status: number;
   first_login: string | null;
-  meta: any;
+  meta: Record<string, unknown>;
 }
 
 export interface Role { 
@@ -42,7 +42,7 @@ export interface Role {
   name: string;
   status: number;
   description: string;
-  meta: any; 
+  meta: Record<string, unknown>; 
 }
 
 export enum StaffPosition {

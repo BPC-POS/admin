@@ -16,10 +16,10 @@ import {
   Autocomplete,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Staff, StaffStatus } from '@/types/staff'; // StaffPosition đã được loại bỏ
+import { Staff, StaffStatus, Role } from '@/types/staff';
 import { Member } from '@/types/user';
 import { getMembers } from '@/api/member';
-import { getRole } from '@/api/role'; // Import getRole API
+import { getRole } from '@/api/role'; 
 
 interface StaffModalProps {
   open: boolean;
@@ -33,7 +33,7 @@ const initialFormState: Partial<Staff> = {
   name: '',
   email: '',
   phone_number: '',
-  role_id: undefined, // role_id bây giờ là number hoặc undefined
+  role_id: undefined, 
   status: StaffStatus.ACTIVE,
   member_id: undefined,
 };
@@ -50,13 +50,13 @@ const StaffModal: React.FC<StaffModalProps> = ({
   const [members, setMembers] = useState<Member[]>([]);
   const [memberSearchValue, setMemberSearchValue] = useState<string>('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [roles, setRoles] = useState<any[]>([]); // State để lưu trữ danh sách roles từ API
+  const [roles, setRoles] = useState<Role[]>([]); 
 
   useEffect(() => {
     if (editItem) {
       setFormData({
         ...editItem,
-        role_id: editItem.role_id // Đảm bảo role_id được set đúng type
+        role_id: editItem.role_id 
       });
       setSelectedMember((editItem.member as unknown as Member) || null);
     } else {

@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 import { Product } from "@/types/product";
 import { Add, Remove } from "@mui/icons-material";
-import { OrderItem } from "@/types/order";
+import { OrderItemAPI } from "@/types/order";
 import { getProductById } from "@/api/product";
 
 interface ProductVariant {
@@ -38,7 +38,7 @@ interface ProductModalPOSProps {
   open: boolean;
   onClose: () => void;
   product: Product | null;
-  onAddToOrder: (items: OrderItem[]) => void;
+  onAddToOrder: (items: OrderItemAPI[]) => void;
 }
 
 const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
@@ -61,14 +61,13 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
           const response = await getProductById(product.id);
           if (response.status === 200 && response.data.variants) {
             setVariants(response.data.variants);
-            // Set default variant if available
             if (response.data.variants.length > 0) {
               setSelectedVariant(response.data.variants[0]);
             }
           }
         } catch (error) {
           console.error("Error fetching product variants:", error);
-          setVariantError("Không thể tải thông tin variant");
+          setVariantError("Không thể tải thông tin phiên bản");
         } finally {
           setIsLoading(false);
         }
@@ -92,14 +91,16 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
 
   const handleVariantChange = (event: SelectChangeEvent) => {
     const variantId = Number(event.target.value);
-    const chosenVariant = variants.find(v => v.id === variantId);
+    const chosenVariant = variants.find((v) => v.id === variantId);
     setSelectedVariant(chosenVariant || null);
     setVariantError(chosenVariant ? null : "Vui lòng chọn phiên bản");
   };
 
   const getVariantDisplayName = (variant: ProductVariant) => {
-    const sizeAttribute = variant.attributes.find(attr => attr.attribute_id === 1);
-    return `${sizeAttribute ? sizeAttribute.value : ''} ${variant.sku} - ${variant.price.toLocaleString("vi-VN")}đ`.trim();
+    const sizeAttribute = variant.attributes.find((attr) => attr.attribute_id === 1);
+    return `${sizeAttribute ? sizeAttribute.value : ""} ${variant.sku} - ${variant.price.toLocaleString(
+      "vi-VN"
+    )}đ`.trim();
   };
 
   const handleAddToOrderClick = () => {
@@ -108,19 +109,28 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
       return;
     }
 
-    const orderItem: OrderItem = {
-      id: Date.now(),
-      productId: product.id,
-      variantId: selectedVariant.id,
-      productName: product.name,
-      price: selectedVariant.price,
-      quantity: quantity,
-      total: selectedVariant.price * quantity,
+    console.log("Product ID:", product.id);
+    console.log("Quantity:", quantity);
+    console.log("Unit Price:", product.price); 
+    console.log("Variant ID:", selectedVariant.id);
+
+    const newItem: OrderItemAPI = {
+      product_id: product.id, 
+      quantity: quantity,      
+      unit_price: selectedVariant.price,
+      variant_id: selectedVariant.id,   
+      meta: {},
+      product_name: product.name,
     };
 
-    onAddToOrder([orderItem]);
+    const itemsToAdd: OrderItemAPI[] = [newItem];
+
+    console.log("Items being passed to onAddToOrder:", itemsToAdd); 
+
+    onAddToOrder(itemsToAdd);
     onClose();
   };
+
 
   const handleIncreaseQuantity = () => {
     setQuantity((prevQuantity) => prevQuantity + 1);
@@ -131,6 +141,7 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
       setQuantity((prevQuantity) => prevQuantity - 1);
     }
   };
+
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -158,6 +169,11 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
                     fill
                     className="object-cover rounded-lg font-poppins"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px"
+                    onError={(e) => {
+                      console.error("Error loading image:", product.image, e);
+                      // Optionally set a placeholder image if load fails
+                      // e.currentTarget.src = '/path/to/placeholder-image.png';
+                    }}
                   />
                 </Box>
               </Grid>

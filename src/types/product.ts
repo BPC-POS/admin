@@ -103,12 +103,12 @@ export interface ProductCategory {
     id: number | string;
     name: string;
     description?: string;
-    label?: string;    // Một số API có thể trả về label thay vì name
-    status?: number;   // Status từ API (1: active, 0: inactive)
-    isActive?: boolean;// Boolean biểu thị trạng thái hoạt động
-    parent_id?: number | null; // ID của danh mục cha (nếu có)
+    label?: string;    
+    status?: number;  
+    isActive?: boolean;
+    parent_id?: number | null; 
     image_url?: string;
-    meta?: ProductMeta;        // Thông tin metadata khác
+    meta?: ProductMeta;       
 }
 
 export interface Size {

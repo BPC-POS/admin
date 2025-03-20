@@ -16,7 +16,6 @@ enum TableStatus {
   INACTIVE = 4
 }
 
-// Interface để tương thích với dữ liệu API
 interface ApiTable {
   id: number;
   name: string;

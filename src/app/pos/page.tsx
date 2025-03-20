@@ -18,12 +18,14 @@ import { Category, Product } from '@/types/product';
 import ProductCategoriesPOS from '@/components/pos/products/ProductCategoriesPOS';
 import ProductListPOS from '@/components/pos/products/ProductListPOS';
 import SummaryPOS from '@/components/pos/layout/SummaryPOS';
-import { OrderItem } from '@/types/order';
+import { OrderAPI, OrderStatusAPI, OrderItemAPI } from '@/types/order';
 import ProductModalPOS from '@/components/pos/products/ProductModalPOS';
 import { getTables, getTableAreas, updateTable, getTableById } from '@/api/table';
 import { getProducts } from '@/api/product';
-import { getCategories } from '@/api/category';
-import { createCategory, deleteCategoryById } from '@/api/category';
+import { getCategories, createCategory, deleteCategoryById } from '@/api/category';
+import { createOrder } from '@/api/order';
+import { getPaymentQRCodeImage } from '@/api/payment';
+import InvoiceModal from '@/components/pos/layout/InvoiceModal';
 
 interface ApiError {
   response?: {
@@ -96,10 +98,12 @@ const PosPage = () => {
   const [currentCategory, setCurrentCategory] = useState('all');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [, setEditingProduct] = useState<Product | undefined>();
-  const [orderItemsForSummary, setOrderItemsForSummary] = useState<OrderItem[]>([]);
+  const [orderItemsForSummary, setOrderItemsForSummary] = useState<OrderItemAPI[]>([]);
 
   const [selectedTableForOrder, setSelectedTableForOrder] = useState<PosTable | null>(null);
   const [selectedProductForModal, setSelectedProductForModal] = useState<Product | null>(null);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState<boolean>(false);
+  const [invoicePdfBlob, setInvoicePdfBlob] = useState<Blob | null>(null);
 
   const fetchTablesData = useCallback(async () => {
     setTablesLoading(true);
@@ -107,12 +111,11 @@ const PosPage = () => {
       const response = await getTables();
       const mappedTables = response.data.map((table: PosTable) => ({
         ...table,
-        status: 
+        status:
           (typeof table.status === 'number' && table.status in numericStatusToTableStatus)
             ? numericStatusToTableStatus[table.status as keyof typeof numericStatusToTableStatus]
             : TableStatus.AVAILABLE,
       }));
-
       setTables(mappedTables);
     } catch (error: unknown) {
       const apiError = error as ApiError;
@@ -167,25 +170,23 @@ const PosPage = () => {
     try {
       const response = await getProducts();
       if (response.status === 200) {
-        const apiProducts = response.data.map((product: Product) => {
-          return {
-            id: product.id,
-            name: product.name,
-            description: product.description || '',
-            price: product.price || 0,
-            image: product.meta?.image_url,
-            category: product.category_id ? product.category_id.toString() : 'all',
-            isAvailable: product.status === 1 || product.status === 5,
-            status: product.status,
-            createdAt: product.created_at || new Date(),
-            updatedAt: product.updated_at || new Date(),
-            size: product.variants?.map((variant: ProductVariant) => ({
-              name: variant.attributes?.find((attr: ProductAttribute) => attr.attribute_id === 1)?.value || 'Default',
-              price: variant.price || product.price,
-              isDefault: true
-            })) || [{ name: 'Default', price: product.price, isDefault: true }]
-          };
-        });
+        const apiProducts = response.data.map((product: Product) => ({
+          id: product.id,
+          name: product.name,
+          description: product.description || '',
+          price: product.price || 0,
+          image: product.meta?.image_url,
+          category: product.category_id ? product.category_id.toString() : 'all',
+          isAvailable: product.status === 1 || product.status === 5,
+          status: product.status,
+          createdAt: product.created_at || new Date(),
+          updatedAt: product.updated_at || new Date(),
+          size: product.variants?.map((variant: ProductVariant) => ({
+            name: variant.attributes?.find((attr: ProductAttribute) => attr.attribute_id === 1)?.value || 'Default',
+            price: variant.price || product.price,
+            isDefault: true
+          })) || [{ name: 'Default', price: product.price, isDefault: true }]
+        }));
         setProducts(apiProducts);
       } else {
         showSnackbar("Không thể tải sản phẩm", "error");
@@ -245,7 +246,6 @@ const PosPage = () => {
           areaId: tableResponse.data.areaId || 0,
           meta: tableResponse.data.meta || {},
         };
-        
         await updateTable(tableData);
         setTables(prev =>
           prev.map(table =>
@@ -270,15 +270,14 @@ const PosPage = () => {
 
   const filteredTables = currentArea === 'all'
     ? tables
-    : tables.filter(table => 
-        String(table.areaId) === currentArea || 
-        String(table.area_id) === currentArea || 
-        (typeof table.area === 'object' && table.area && 'id' in table.area && String(table.area.id) === currentArea) || 
+    : tables.filter(table =>
+        String(table.areaId) === currentArea ||
+        String(table.area_id) === currentArea ||
+        (typeof table.area === 'object' && table.area && 'id' in table.area && String(table.area.id) === currentArea) ||
         String(table.area) === currentArea
       );
 
   useEffect(() => {
-    console.log(`Filtered tables for area "${currentArea}":`, filteredTables.length);
   }, [currentArea, filteredTables]);
 
   const handleEditCategory = async (id: string, data: Omit<Category, 'id'>) => {
@@ -378,42 +377,26 @@ const PosPage = () => {
     setIsProductModalOpen(true);
   };
 
-  const handleAddToOrder = (items: OrderItem[]) => {
+  const handleAddToOrder = (items: OrderItemAPI[]) => {
     if (!selectedTableForOrder) {
       showSnackbar('Vui lòng chọn bàn trước khi thêm sản phẩm', 'error');
       return;
     }
 
-    // Update cart items
     setOrderItemsForSummary(prevItems => {
       const updatedItems = [...prevItems];
-      
-      // Add new items to cart, combining with existing ones if needed
       items.forEach(newItem => {
         const existingItemIndex = updatedItems.findIndex(
-          item => item.productId === newItem.productId && 
-                 (item.variantId !== undefined && newItem.variantId !== undefined && 
-                  item.variantId === newItem.variantId)
+          item => item.product_id === newItem.product_id &&
+                 (item.variant_id !== undefined && newItem.variant_id !== undefined &&
+                  item.variant_id === newItem.variant_id)
         );
-        
         if (existingItemIndex !== -1) {
-          // Update quantity if item already exists
-          updatedItems[existingItemIndex].quantity += newItem.quantity;
-          
-          // Update total if exists
-          if (updatedItems[existingItemIndex].total !== undefined && newItem.total !== undefined) {
-            updatedItems[existingItemIndex].total += newItem.total;
-          } else {
-            // Calculate total from price and quantity
-            updatedItems[existingItemIndex].total = 
-              updatedItems[existingItemIndex].price * updatedItems[existingItemIndex].quantity;
-          }
+          updatedItems[existingItemIndex].quantity = Number(updatedItems[existingItemIndex].quantity) + Number(newItem.quantity);
         } else {
-          // Add new item
           updatedItems.push(newItem);
         }
       });
-      
       return updatedItems;
     });
 
@@ -423,8 +406,8 @@ const PosPage = () => {
   const handleUpdateQuantity = (productId: number, quantityChange: number) => {
     setOrderItemsForSummary(prevItems => {
       return prevItems.map(item => {
-        if (item.productId === productId) {
-          const newQuantity = item.quantity + quantityChange;
+        if (item.product_id === productId) {
+          const newQuantity = Number(item.quantity) + quantityChange;
           return {
             ...item,
             quantity: newQuantity > 0 ? newQuantity : item.quantity
@@ -437,20 +420,9 @@ const PosPage = () => {
 
   const handleRemoveItemSummary = (productId: number) => {
     setOrderItemsForSummary(prevItems => {
-      return prevItems.filter(item => item.productId !== productId);
+      return prevItems.filter(item => item.product_id !== productId);
     });
     showSnackbar('Món đã được xóa khỏi order', 'success');
-  };
-
-  const handleCheckout = () => {
-    if (orderItemsForSummary.length === 0) {
-      showSnackbar('Không có món nào trong order để thanh toán.', 'info');
-      return;
-    }
-    alert('Thanh toán thành công!');
-    setOrderItemsForSummary([]);
-    setSelectedTableForOrder(null);
-    showSnackbar('Thanh toán thành công', 'success');
   };
 
   const handleAddCategory = async (categoryData: Omit<Category, 'id'>) => {
@@ -459,7 +431,7 @@ const PosPage = () => {
       const response = await createCategory(categoryData);
       if (response.status === 201 || response.status === 200) {
         showSnackbar('Thêm danh mục thành công', 'success');
-        fetchCategories(); // Refresh categories
+        fetchCategories();
       } else {
         showSnackbar('Không thể thêm danh mục', 'error');
       }
@@ -470,6 +442,87 @@ const PosPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCheckoutOrder = async (paymentMethod: 'cash' | 'transfer', taxAmount: number, shippingAddress: string) => {
+    if (orderItemsForSummary.length === 0 || !selectedTableForOrder) {
+      showSnackbar('Vui lòng chọn bàn và thêm món trước khi thanh toán.', 'info');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const orderItemsForApi: OrderItemAPI[] = orderItemsForSummary.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: Number(item.unit_price),
+        discount: item.discount || 0,
+        variant_id: item.variant_id || 0,
+        meta: {}
+      }));
+
+      let totalAmount = 0;
+      orderItemsForSummary.forEach(item => {
+        totalAmount += Number(item.unit_price) * Number(item.quantity);
+      });
+
+      const orderPayload: OrderAPI = {
+        user_id: 1,
+        order_date: new Date().toISOString(),
+        total_amount: totalAmount,
+        discount: 0,
+        tax: taxAmount,
+        status: OrderStatusAPI.PENDING,
+        payment_info: paymentMethod === 'cash' ? "Thanh toán tiền mặt tại quầy" : "Thanh toán chuyển khoản",
+        shipping_address: shippingAddress || "Take Away",
+        items: orderItemsForApi,
+        meta: {
+          table_id: selectedTableForOrder.id,
+          payment_method: paymentMethod === 'cash' ? 1 : 2
+        }
+      };
+
+      const response = await createOrder(orderPayload);
+      if (response.status === 201 || response.status === 200) {
+        const orderId = response.data.id;
+
+        if (paymentMethod === 'transfer') {
+          try {
+            const pdfBlob = await getPaymentQRCodeImage(orderId);
+            setInvoicePdfBlob(pdfBlob);
+            setIsInvoiceModalOpen(true);
+            showSnackbar(`Thanh toán chuyển khoản thành công, Invoice đang được hiển thị!`, 'success');
+          } catch (downloadError: any) {
+            console.error("Error downloading invoice:", downloadError);
+            showSnackbar(`Thanh toán chuyển khoản thành công, nhưng lỗi khi tải Invoice. Vui lòng thử lại sau.`, 'error');
+          }
+        } else {
+          showSnackbar(`Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản'} và tạo order thành công!`, 'success');
+        }
+
+        if (selectedTableForOrder) {
+          await handleStatusChange(selectedTableForOrder.id, TableStatus.OCCUPIED); 
+        } else {
+          console.log("selectedTableForOrder is null, cannot update table status."); 
+        }
+
+
+        setOrderItemsForSummary([]);
+        setSelectedTableForOrder(null);
+      } else {
+        showSnackbar(`Thanh toán bằng ${paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản'} thành công, nhưng có lỗi khi tạo order.`, 'info');
+      }
+    } catch (error: any) {
+      console.error("Error during checkout and creating order:", error);
+      showSnackbar('Lỗi khi thanh toán và tạo order.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseInvoiceModal = () => {
+    setIsInvoiceModalOpen(false);
+    setInvoicePdfBlob(null); 
   };
 
   return (
@@ -485,9 +538,7 @@ const PosPage = () => {
               <TableAreaTabsPOS
                 areas={areas}
                 currentArea={currentArea}
-                onAreaChange={(area) => {
-                  setCurrentArea(typeof area === 'string' ? area : String(area));
-                }}
+                onAreaChange={(area) => setCurrentArea(typeof area === 'string' ? area : String(area))}
                 tables={tables as any}
               />
               <TableListPOS
@@ -519,13 +570,19 @@ const PosPage = () => {
                 orderItems={orderItemsForSummary}
                 onUpdateQuantity={handleUpdateQuantity}
                 onRemoveItem={handleRemoveItemSummary}
-                onCheckout={handleCheckout}
+                onCheckoutOrder={handleCheckoutOrder}
                 onCancelOrder={handleCancelOrder}
               />
             </Grid>
           </Grid>
         )}
       </Paper>
+
+      <InvoiceModal
+        open={isInvoiceModalOpen}
+        onClose={handleCloseInvoiceModal}
+        pdfBlob={invoicePdfBlob}
+      />
 
       <TableModalPOS
         open={isEditTableModalOpen}

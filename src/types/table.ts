@@ -5,7 +5,7 @@ export interface Table {
   name: string;
   capacity: number;
   status: TableStatus;
-  area: TableArea; // Changed to TableArea
+  area: TableArea; 
   isActive: boolean;
   qrCode?: string;
   note?: string;
@@ -24,7 +24,7 @@ export enum TableStatus {
 export interface CreateTableDTO {
   name: string;
   capacity: number;
-  area: string; // Keep area as string for CreateTableDTO (assuming backend expects area name/string for creation)
+  area: string; 
   isActive: boolean;
   note?: string;
 }
@@ -36,7 +36,7 @@ export interface UpdateTableDTO extends Partial<CreateTableDTO> {
 
 export interface TableArea {
   code: "indoor" | "outdoor" | "vip";
-  id: string; // Keep id as string as per TableArea interface
+  id: string; 
   name: string;
   description?: string;
   isActive: boolean;

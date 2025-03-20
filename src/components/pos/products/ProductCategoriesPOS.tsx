@@ -3,7 +3,6 @@ import {
   Paper,
   Tabs,
   Tab,
-  IconButton,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -12,7 +11,6 @@ import {
   Button,
 } from '@mui/material';
 import {
-  MoreVert,
   Edit,
   Delete,
   Visibility,
@@ -125,25 +123,20 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
           <Tab label="Tất cả" value="all" className="font-poppins font-bold" />
           {categories.map((category) => (
             <Tab
-              key={category.id}
-              label={
-                <div className="flex items-center gap-2 font-poppins">
-                  {category.name}
-                  {!category.isActive && (
-                    <VisibilityOff fontSize="small" className="text-gray-400" />
-                  )}
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, category)}
-                    className="ml-1"
-                  >
-                    <MoreVert fontSize="small" />
-                  </IconButton>
-                </div>
-              }
-              value={category.id}
-              className="font-poppins font-bold"
-            />
+            key={category.id}
+            label={
+              <div className="flex items-center gap-2 font-poppins">
+                {category.name}
+                {!category.isActive && (
+                  <VisibilityOff fontSize="small" className="text-gray-400" />
+                )}
+                {/* REMOVE IconButton from here */}
+              </div>
+            }
+            value={category.id}
+            className="font-poppins font-bold"
+            onClick={(e) => handleMenuOpen(e, category)}
+          />
           ))}
         </Tabs>
       </Paper>
