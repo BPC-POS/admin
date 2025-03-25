@@ -38,6 +38,8 @@ const createOrder = async (orderData: OrderAPI): Promise<AxiosResponse> => {
       order_date: orderData.order_date instanceof Date ? orderData.order_date.toISOString() : orderData.order_date
     };
 
+    console.log("Formatted Order Data:", formattedOrderData);
+
     const response: AxiosResponse = await orderApi.post("/orders", formattedOrderData);
     return response;
   } catch (error: unknown) {
