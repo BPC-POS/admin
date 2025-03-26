@@ -127,3 +127,20 @@ export interface OrderStats {
   byStatus: Record<OrderStatus, number>;
   byPayment: Record<PaymentStatus, number>;
 } 
+
+export interface SummaryData {
+  todayRevenue: string;
+  totalOrdersToday: number;
+  pendingOrders: number;
+  completedOrders: number;
+}
+
+export interface ProductCount {
+  id: number;
+  name: string;
+  count: number;
+}
+
+export type ChartDataPoint = {
+  [key: string]: string | number;
+};

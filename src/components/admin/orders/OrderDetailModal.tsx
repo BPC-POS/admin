@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { OrderAPI, OrderStatusAPI, PaymentStatus } from '@/types/order';
 import { formatCurrency } from '@/utils/format';
+import { patchOrder } from '@/api/order';
 
 interface OrderDetailModalProps {
   open: boolean;
@@ -45,8 +46,31 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   onStatusChange,
   loadingDetail,
 }) => {
+  const [currentStatus, setCurrentStatus] = useState<OrderStatusAPI | undefined>(order?.status);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
+
+  useEffect(() => {
+    setCurrentStatus(order?.status);
+  }, [order?.status]);
+
   if (!open || !order) return null;
-  if (loadingDetail) { 
+
+  const handleStatusChangeChip = async (status: OrderStatusAPI) => {
+    if (order.id) {
+      setCurrentStatus(status);
+      setIsUpdatingStatus(true);
+      try {
+        await patchOrder(order.id, status);
+        onStatusChange(order.id, status);
+      } catch (error) {
+        console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+      } finally {
+        setIsUpdatingStatus(false);
+      }
+    }
+  };
+
+  if (loadingDetail) {
     return (
       <Dialog
         open={open}
@@ -63,6 +87,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       </Dialog>
     );
   }
+
   return (
     <Dialog
       open={open}
@@ -108,9 +133,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       key={option.value}
                       label={option.label}
                       color={option.color}
-                      variant={order.status === option.value ? 'filled' : 'outlined'}
-                      onClick={() => onStatusChange(Number(order.id), option.value)}
-                      className="font-poppins cursor-pointer transition-all hover:shadow-md"
+                      variant={currentStatus === option.value ? 'filled' : 'outlined'} 
+                      onClick={() => !isUpdatingStatus && handleStatusChangeChip(option.value)} 
+                      className={`font-poppins cursor-pointer transition-all hover:shadow-md ${isUpdatingStatus ? 'pointer-events-none opacity-50' : ''}`} 
+                      icon={isUpdatingStatus && currentStatus === option.value ? <CircularProgress size={20} color="inherit" /> : undefined} 
                     />
                   ))}
                 </Box>

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { OrderAPI } from '@/types/order';
+import { OrderAPI, OrderStatusAPI  } from '@/types/order';
 
 const orderApi: AxiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_AUTH_URL,
@@ -73,5 +73,15 @@ const getOrderById = async (id: number): Promise<AxiosResponse> => {
   }
 };
 
-export {getOrder, createOrder, updateOrder, getOrderById}
+const patchOrder = async (id: number, status: OrderStatusAPI): Promise<AxiosResponse> => {
+  try {
+    const response: AxiosResponse = await orderApi.patch(`/orders/${id}`, { status }); 
+    return response;
+  } catch (error: unknown) {
+    console.error(`Error updating order status for order ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export {getOrder, createOrder, updateOrder, getOrderById, patchOrder}
 
