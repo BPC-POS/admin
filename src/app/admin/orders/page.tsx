@@ -13,10 +13,11 @@ import OrderFilter from '@/components/admin/orders/OrderFilter';
 import OrderStats from '@/components/admin/orders/OrderStats';
 import OrderDetailModal from '@/components/admin/orders/OrderDetailModal';
 import { OrderAPI, OrderFilter as OrderFilterType, OrderStatusAPI, PaymentStatus } from '@/types/order';
-import { getOrder, getOrderById } from '@/api/order'; 
+import { getOrder, getOrderById } from '@/api/order';
 
 const OrdersPage: React.FC= () => {
   const [orders, setOrders] = useState<OrderAPI[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<OrderAPI[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderAPI | null>(null);
   const [filter, setFilter] = useState<OrderFilterType>({});
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -29,7 +30,7 @@ const OrdersPage: React.FC= () => {
       const response = await getOrder();
       if (response.status === 200) {
         setOrders(response.data);
-        console.log(response.data);
+        setFilteredOrders(response.data);
       } else {
         console.error("Lỗi khi tải dữ liệu orders:", response.status);
       }
@@ -44,6 +45,34 @@ const OrdersPage: React.FC= () => {
     fetchOrdersData();
   }, [fetchOrdersData]);
 
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = [...orders];
+
+      if (filter.search) {
+        const searchTerm = filter.search.toLowerCase();
+        filtered = filtered.filter(order => String(order.id).toLowerCase().includes(searchTerm));
+      }
+      if (filter.status) {
+        filtered = filtered.filter(order => order.status === filter.status);
+      }
+      if (filter.paymentStatus) {
+        filtered = filtered.filter(order => order.meta?.payment_method === filter.paymentStatus);
+      }
+      if (filter.startDate) {
+        const startDate = new Date(filter.startDate);
+        filtered = filtered.filter(order => new Date(order.createdAt ?? new Date()) >= startDate);
+      }
+      if (filter.endDate) {
+        filtered = filtered.filter(order => new Date(order.createdAt ?? new Date()) <= new Date(filter.endDate ?? new Date()));
+      }
+
+      setFilteredOrders(filtered);
+    };
+
+    applyFilters();
+  }, [filter, orders]);
+
   const handleStatusChange = async (orderId: number, status: OrderStatusAPI) => {
     try {
       setOrders(prevOrders =>
@@ -51,7 +80,7 @@ const OrdersPage: React.FC= () => {
           order.id === orderId ? { ...order, status: status as OrderStatusAPI, updatedAt: new Date().toISOString() } : order
         )
       );
-      if (selectedOrder?.id === orderId) { 
+      if (selectedOrder?.id === orderId) {
         setSelectedOrder(prevSelectedOrder => prevSelectedOrder ? { ...prevSelectedOrder, status: status as OrderStatusAPI, updatedAt: new Date().toISOString() } : null);
       }
     } catch (error) {
@@ -66,7 +95,7 @@ const OrdersPage: React.FC= () => {
           order.id === orderId ? { ...order, paymentStatus: status, updatedAt: new Date().toISOString() } : order
         )
       );
-      if (selectedOrder?.id === orderId) { 
+      if (selectedOrder?.id === orderId) {
         setSelectedOrder(prevSelectedOrder => prevSelectedOrder ? { ...prevSelectedOrder, paymentStatus: status, updatedAt: new Date().toISOString() } : null);
       }
     } catch (error) {
@@ -75,11 +104,11 @@ const OrdersPage: React.FC= () => {
   };
 
   const handleViewDetail = async (order: OrderAPI) => {
-    setLoadingDetail(true); 
+    setLoadingDetail(true);
     try {
       const response = await getOrderById(Number(order.id));
       if (response.status === 200) {
-        setSelectedOrder(response.data); 
+        setSelectedOrder(response.data);
         setIsDetailModalOpen(true);
       } else {
         console.error("Lỗi khi tải chi tiết đơn hàng:", response.status);
@@ -87,15 +116,19 @@ const OrdersPage: React.FC= () => {
     } catch (error) {
       console.error("Lỗi khi tải chi tiết đơn hàng:", error);
     } finally {
-      setLoadingDetail(false); 
+      setLoadingDetail(false);
     }
   };
-
 
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
   };
+
+  const handleFilterChange = (newFilter: OrderFilterType) => {
+    setFilter(newFilter);
+  };
+
 
   if (loading) {
     return (
@@ -122,7 +155,7 @@ const OrdersPage: React.FC= () => {
           >
             Quản lý đơn hàng
           </Typography>
-          <OrderStats orders={orders as OrderAPI[]} /> 
+          <OrderStats orders={orders as OrderAPI[]} />
         </Box>
 
         <Paper
@@ -136,7 +169,7 @@ const OrdersPage: React.FC= () => {
         >
           <OrderFilter
             filter={filter}
-            onFilterChange={setFilter}
+            onFilterChange={handleFilterChange}
           />
         </Paper>
 
@@ -149,7 +182,7 @@ const OrdersPage: React.FC= () => {
           }}
         >
           <OrderList
-            orders={orders} 
+            orders={filteredOrders}
             onStatusChange={handleStatusChange}
             onPaymentStatusChange={handlePaymentStatusChange}
             onViewDetail={handleViewDetail}

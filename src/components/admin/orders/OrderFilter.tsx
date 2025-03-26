@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; 
 import {
   Paper,
   Grid,
@@ -11,7 +11,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Search, FilterList, RestartAlt } from '@mui/icons-material';
-import { OrderFilter as OrderFilterType, OrderStatus, PaymentStatus } from '@/types/order';
+import { OrderFilter as OrderFilterType, OrderStatusAPI, PaymentStatus } from '@/types/order';
 
 interface OrderFilterProps {
   filter: OrderFilterType;
@@ -19,12 +19,29 @@ interface OrderFilterProps {
 }
 
 const OrderFilter: React.FC<OrderFilterProps> = ({
-  filter,
+  filter: propFilter, 
   onFilterChange,
 }) => {
+  const [localFilter, setLocalFilter] = useState<OrderFilterType>(propFilter); 
+
+  useEffect(() => {
+    setLocalFilter(propFilter);
+  }, [propFilter]);
+
+
   const handleReset = () => {
-    onFilterChange({});
+    setLocalFilter({});
+    onFilterChange({}); 
   };
+
+  const handleFilterSubmit = () => {
+    onFilterChange(localFilter);
+  };
+
+  const handleLocalFilterChange = (newFilter: OrderFilterType) => {
+    setLocalFilter(newFilter); 
+  };
+
 
   return (
     <Paper className="p-6 rounded-xl bg-white/90 backdrop-blur-sm shadow-lg ">
@@ -33,8 +50,8 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
           <TextField
             fullWidth
             placeholder="Tìm kiếm đơn hàng..."
-            value={filter.search || ''}
-            onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
+            value={localFilter.search || ''} 
+            onChange={(e) => handleLocalFilterChange({ ...localFilter, search: e.target.value })} 
             className="font-poppins"
             InputProps={{
               startAdornment: (
@@ -51,13 +68,16 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
           <FormControl fullWidth>
             <InputLabel className="font-poppins">Trạng thái</InputLabel>
             <Select
-              value={filter.status || ''}
+              value={localFilter.status || ''}
               label="Trạng thái"
-              onChange={(e) => onFilterChange({ ...filter, status: e.target.value as OrderStatus })}
+              onChange={(e) => handleLocalFilterChange({
+                ...localFilter,
+                status: e.target.value ? Number(e.target.value) as OrderStatusAPI : undefined 
+              })}
               className="rounded-lg bg-white font-poppins"
             >
               <MenuItem value="" className="font-poppins">Tất cả</MenuItem>
-              {Object.values(OrderStatus).map((status) => (
+              {Object.values(OrderStatusAPI).map((status) => (
                 <MenuItem key={status} value={status} className="font-poppins">
                   {status}
                 </MenuItem>
@@ -70,9 +90,9 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
           <FormControl fullWidth>
             <InputLabel className="font-poppins">Thanh toán</InputLabel>
             <Select
-              value={filter.paymentStatus || ''}
+              value={localFilter.paymentStatus || ''}
               label="Thanh toán"
-              onChange={(e) => onFilterChange({ ...filter, paymentStatus: e.target.value as PaymentStatus })}
+              onChange={(e) => handleLocalFilterChange({ ...localFilter, paymentStatus: e.target.value as PaymentStatus })} 
               className="rounded-lg bg-white font-poppins"
             >
               <MenuItem value="" className="font-poppins">Tất cả</MenuItem>
@@ -90,8 +110,8 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             fullWidth
             type="date"
             label="Từ ngày"
-            value={filter.startDate?.toISOString().split('T')[0] || ''}
-            onChange={(e) => onFilterChange({ ...filter, startDate: e.target.value ? new Date(e.target.value) : undefined })}
+            value={localFilter.startDate?.toISOString().split('T')[0] || ''} 
+            onChange={(e) => handleLocalFilterChange({ ...localFilter, startDate: e.target.value ? new Date(e.target.value) : undefined })} 
             InputLabelProps={{ shrink: true }}
             className="font-poppins"
             InputProps={{
@@ -105,8 +125,8 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
             fullWidth
             type="date"
             label="Đến ngày"
-            value={filter.endDate?.toISOString().split('T')[0] || ''}
-            onChange={(e) => onFilterChange({ ...filter, endDate: e.target.value ? new Date(e.target.value) : undefined })}
+            value={localFilter.endDate?.toISOString().split('T')[0] || ''} // Sử dụng localFilter
+            onChange={(e) => handleLocalFilterChange({ ...localFilter, endDate: e.target.value ? new Date(e.target.value) : undefined })} 
             InputLabelProps={{ shrink: true }}
             className="font-poppins"
             InputProps={{
@@ -127,7 +147,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({
           <Button
             variant="contained"
             startIcon={<FilterList />}
-            onClick={() => {/* TODO: Apply filters */}}
+            onClick={handleFilterSubmit} // Gọi handleFilterSubmit khi click Lọc
             className="bg-gradient-to-br from-[#2C3E50] to-[#3498DB] hover:to-blue-500 text-white font-bold py-2 px-4 rounded-xl font-poppins transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Lọc

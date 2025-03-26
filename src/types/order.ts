@@ -104,17 +104,13 @@ export enum PaymentStatus {
 }
 
 export enum PaymentMethod {
-  CASH = 'cash',              // Tiền mặt
-  CARD = 'card',              // Thẻ
-  TRANSFER = 'transfer',      // Chuyển khoản
-  MOMO = 'momo',             // Ví MoMo
-  VNPAY = 'vnpay',           // VNPay
-  ZALOPAY = 'zalopay'        // ZaloPay
+  CASH = 1,              
+  TRANSFER = 2,      
 }
 
 export interface OrderFilter {
   search?: string;
-  status?: OrderStatus;
+  status?: OrderStatusAPI;
   paymentStatus?: PaymentStatus;
   startDate?: Date;
   endDate?: Date;
