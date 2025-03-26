@@ -5,10 +5,10 @@ import ChartCard from "@/components/admin/dashboard/ChartCard";
 import TopProductsCard from "@/components/admin/dashboard/TopProductsCard";
 import LowInventoryCard from "@/components/admin/dashboard/LowInventoryCard";
 import { getOrder } from '@/api/order';
-import { OrderItemAPI, OrderAPI, SummaryData, ProductCount, ChartDataPoint, OrderStatusAPI } from "@/types/order";
+import { OrderAPI, SummaryData, ProductCount, ChartDataPoint, OrderStatusAPI } from "@/types/order";
 
 const AdminDashboardPage: React.FC = () => {
-  const [orders, setOrders] = useState<OrderAPI[]>([]);
+  const [, setOrders] = useState<OrderAPI[]>([]);
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [revenueChartData, setRevenueChartData] = useState<ChartDataPoint[]>([]);
   const [orderStatusChartData, setOrderStatusChartData] = useState<ChartDataPoint[]>([]);
@@ -25,7 +25,7 @@ const AdminDashboardPage: React.FC = () => {
         const data: OrderAPI[] = response.data;
         setOrders(data);
         processDashboardData(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to fetch orders:", err);
         setError(err instanceof Error ? err.message : "Lỗi khi tải dữ liệu đơn hàng.");
         setOrders([]);
