@@ -21,49 +21,53 @@ const FirebaseMessagingListener = () => {
 
       if (messaging) {
         unsubscribeForeground = onMessage(messaging, (payload) => {
-        console.log('Foreground Message received:', payload);
-        if (payload.notification) {
-          addNotificationRef.current({
-            messageId: payload.messageId,
-            title: payload.notification.title || 'Thông báo',
-            body: payload.notification.body || 'Bạn có tin nhắn mới.',
-          });
-        }
-      });
-    } else {
-      console.log("Firebase Messaging không khả dụng.");
-    }
+          console.log('Foreground Message received:', payload);
+          if (payload.notification) {
+            addNotificationRef.current({
+              messageId: payload.messageId,
+              title: payload.notification.title || 'Thông báo',
+              body: payload.notification.body || 'Bạn có tin nhắn mới.',
+            });
+          }
+        });
+      } else {
+        console.log("Firebase Messaging không khả dụng.");
+      }
+    };
 
     if (!notificationChannel) {
-        notificationChannel = new BroadcastChannel('fcm-notifications');
-        console.log("Broadcast Channel 'fcm-notifications' created.");
+      notificationChannel = new BroadcastChannel('fcm-notifications');
+      console.log("Broadcast Channel 'fcm-notifications' created.");
     }
 
     const handleChannelMessage = (event: MessageEvent) => {
-        console.log("Broadcast Channel message received:", event.data);
-        if (event.data && event.data.type === 'NEW_NOTIFICATION' && event.data.payload) {
-             addNotificationRef.current({
-                 messageId: event.data.payload.messageId,
-                 title: event.data.payload.title,
-                 body: event.data.payload.body,
-             });
-        }
+      console.log("Broadcast Channel message received:", event.data);
+      if (event.data && event.data.type === 'NEW_NOTIFICATION' && event.data.payload) {
+        addNotificationRef.current({
+          messageId: event.data.payload.messageId,
+          title: event.data.payload.title,
+          body: event.data.payload.body,
+        });
+      }
     };
 
     notificationChannel.addEventListener('message', handleChannelMessage);
     console.log("Broadcast Channel listener added.");
 
-    initializeMessaging();
+    // Execute initializeMessaging and handle cleanup
+    initializeMessaging().catch(console.error);
 
     return () => {
       if (unsubscribeForeground) {
         unsubscribeForeground();
         console.log("Foreground listener unsubscribed.");
       }
-        console.log("Foreground listener unsubscribed.");
+      if (notificationChannel) {
+        notificationChannel.removeEventListener('message', handleChannelMessage);
+        console.log("Broadcast Channel listener removed.");
       }
     };
-  }, [addNotification]);
+  }, []);
 
   return null;
 };
