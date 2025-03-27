@@ -1,6 +1,7 @@
+// context/NotificationContext.tsx
 "use client";
 
-import React, { createContext, useState, useContext, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useMemo, useEffect } from 'react';
 
 interface NotificationPayload {
   id: string;
@@ -12,17 +13,43 @@ interface NotificationPayload {
 
 interface NotificationContextType {
   notifications: NotificationPayload[];
-  unreadCount: number; 
+  unreadCount: number;
   addNotification: (notification: Omit<NotificationPayload, 'id' | 'timestamp' | 'read'> & { messageId?: string }) => void;
-  markAsRead: (id: string) => void; 
+  markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+const LOCAL_STORAGE_KEY = 'fcmNotifications';
+
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
+  const [notifications, setNotifications] = useState<NotificationPayload[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    try {
+      const savedNotifications = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      return savedNotifications ? JSON.parse(savedNotifications) : [];
+    } catch (error) {
+      console.error("Error reading notifications from localStorage:", error);
+      if (typeof window !== 'undefined') {
+         window.localStorage.removeItem(LOCAL_STORAGE_KEY);
+      }
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(notifications));
+      } catch (error) {
+         console.error("Error saving notifications to localStorage:", error);
+      }
+    }
+  }, [notifications]);
 
   const addNotification = useCallback((payload: Omit<NotificationPayload, 'id' | 'timestamp' | 'read'> & { messageId?: string }) => {
     const newNotification: NotificationPayload = {
@@ -30,9 +57,15 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       title: payload.title,
       body: payload.body,
       timestamp: Date.now(),
-      read: false, 
+      read: false,
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    setNotifications((prev) => {
+        if (prev.some(n => n.id === newNotification.id)) {
+            return prev;
+        }
+        const newState = [newNotification, ...prev];
+        return newState;
+    });
   }, []);
 
   const markAsRead = useCallback((id: string) => {
@@ -60,10 +93,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   return (
     <NotificationContext.Provider value={{
         notifications,
-        unreadCount, 
+        unreadCount,
         addNotification,
-        markAsRead, 
-        markAllAsRead, 
+        markAsRead,
+        markAllAsRead,
         clearNotifications
     }}>
       {children}
