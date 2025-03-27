@@ -6,12 +6,14 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import EmailIcon from '@mui/icons-material/Email';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useRouter } from "next/navigation";
-import NotificationModal from '../notify/NotificationModal'; // Import Modal component
+import NotificationModal from '../notify/NotificationModal';
+import { useNotifications } from '@/context/NotificationContext';
 
 const AdminHeader: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
-    const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false); // State cho modal notification
+    const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+    const { unreadCount, markAllAsRead } = useNotifications();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,13 +25,12 @@ const AdminHeader: React.FC = () => {
     };
 
     const handleOpenNotificationModal = () => {
-        console.log('Modal opened');
         setIsNotificationModalOpen(true);
+        markAllAsRead();
     };
 
     const handleCloseNotificationModal = () => {
         setIsNotificationModalOpen(false);
-        console.log('Modal closed');
     };
 
     return (
@@ -66,12 +67,9 @@ const AdminHeader: React.FC = () => {
                             />
                         </Badge>
                     </IconButton>
-                    <IconButton sx={{ color: 'white' }}>
-                        <Badge badgeContent={4} color="error">
-                            <NotificationsIcon
-                                sx={{ color: 'white' }}
-                                onClick={handleOpenNotificationModal} // Mở modal khi click icon
-                            />
+                    <IconButton sx={{ color: 'white' }} onClick={handleOpenNotificationModal}> 
+                        <Badge badgeContent={unreadCount} color="error"> 
+                            <NotificationsIcon sx={{ color: 'white' }} />
                         </Badge>
                     </IconButton>
                     <IconButton sx={{ color: 'white' }}>
