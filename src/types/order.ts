@@ -19,13 +19,13 @@ export interface OrderAPI {
   orderItems?: OrderItemAPI[];
 };
 
-export enum OrderStatusAPI{
-  PENDING = 6,        
+export enum OrderStatusAPI{      
   CONFIRMED = 1,    
   PREPARING = 2,     
   READY = 3,            
   COMPLETED = 4,     
-  CANCELLED = 5      
+  CANCELLED = 5,
+  PENDING = 6,  
 };
 
 export interface OrderItemAPI{
@@ -125,6 +125,7 @@ export interface OrderStats {
 } 
 
 export interface SummaryData {
+  monthlyRevenue: string;
   todayRevenue: string;
   totalOrdersToday: number;
   pendingOrders: number;
