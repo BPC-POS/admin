@@ -38,19 +38,18 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openPaymentMenu = Boolean(anchorEl);
   const [taxAmount, setTaxAmount] = useState<number>(0);
-  const [shippingAddress, setShippingAddress] = useState<string>(''); 
-
+  const [shippingAddress, setShippingAddress] = useState<string>('');
 
   const totalPrice = orderItems.reduce((total, item) => total + Number(item.unit_price) * Number(item.quantity), 0);
   const discountedPrice = totalPrice - discountAmount;
-  const priceWithTax = discountedPrice + taxAmount; 
+  const priceWithTax = discountedPrice + taxAmount;
 
   const handleCancelClick = () => {
     onCancelOrder();
     setVoucherCode('');
     setDiscountAmount(0);
-    setTaxAmount(0); 
-    setShippingAddress(''); 
+    setTaxAmount(0);
+    setShippingAddress('');
   };
 
   const handlePaymentButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -68,8 +67,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
 
   return (
     <Box
-      className="bg-white/90 backdrop-blur-lg rounded-xl p-6 shadow-lg h-full flex flex-col"
-      style={{ maxWidth: 400 }}
+      className="bg-white/90 backdrop-blur-lg rounded-xl p-6 shadow-lg h-full flex flex-col max-w-md"
     >
       <Typography variant="h6" gutterBottom className="font-poppins font-semibold">
         Đơn hàng
@@ -83,7 +81,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
         Danh sách món:
       </Typography>
 
-      <List style={{ maxHeight: 200, overflowY: 'auto' }}>
+      <List className="max-h-52 overflow-y-auto">
         {orderItems.map((item, index) => (
           <ListItem key={item.product_id?.toString() || `no-product-id-item-${index}`} className="py-2">
             <ListItemText
@@ -159,8 +157,8 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
           onChange={(e) => setShippingAddress(e.target.value)}
           className="font-poppins"
           fullWidth
-          multiline // Cho phép nhập nhiều dòng nếu cần
-          rows={2}   // Số dòng hiển thị ban đầu
+          multiline
+          rows={2}
         />
       </Box>
 
@@ -198,11 +196,7 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
           color="primary"
           fullWidth
           onClick={handlePaymentButtonClick}
-          className="font-poppins"
-          style={{ background: 'linear-gradient(to right, #2C3E50, #3498DB)' }}
-          aria-controls={openPaymentMenu ? 'payment-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={openPaymentMenu ? 'true' : undefined}
+          className="font-poppins bg-gradient-to-r from-gray-700 to-blue-500 hover:from-gray-600 hover:to-blue-400 text-white font-bold"
         >
           Thanh toán
         </Button>
@@ -215,16 +209,49 @@ const SummaryPOS: React.FC<SummaryPOSProps> = ({
             'aria-labelledby': 'payment-button',
           }}
         >
-          <MenuItem onClick={() => handleSelectPaymentMethod('cash')} className="font-poppins">Tiền mặt</MenuItem>
-          <MenuItem onClick={() => handleSelectPaymentMethod('transfer')} className="font-poppins">Chuyển khoản</MenuItem>
+          <MenuItem 
+            onClick={() => handleSelectPaymentMethod('cash')} 
+            className="font-poppins"
+            style={{
+              background: 'linear-gradient(to right, #27ae60, #2ecc71)', 
+              color: 'white', 
+              borderRadius: '8px', 
+              margin: '4px', 
+              textAlign: 'center',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            Tiền mặt
+          </MenuItem>
+
+          <MenuItem 
+            onClick={() => handleSelectPaymentMethod('transfer')} 
+            className="font-poppins"
+            style={{
+              background: 'linear-gradient(to right, #8e44ad, #9b59b6)', 
+              color: 'white', 
+              borderRadius: '8px', 
+              margin: '4px', 
+              textAlign: 'center',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            Chuyển khoản
+          </MenuItem>
         </Menu>
+
         <Button
           variant="contained"
           color="error"
           fullWidth
           onClick={handleCancelClick}
-          className="mt-2 font-poppins"
-          style={{ background: 'linear-gradient(to right, #F39C20,#E74C3C )' }}
+          className="mt-2 font-poppins bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-bold"
         >
           Hủy
         </Button>

@@ -240,7 +240,7 @@ const StaffPage = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={1}>
-          <StaffSchedule staff={staff} />
+          <StaffSchedule staff={staff} onStaffUpdate={setStaff} />
         </TabPanel>
 
         <TabPanel value={activeTab} index={2}>

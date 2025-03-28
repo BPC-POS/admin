@@ -32,11 +32,13 @@ import {
   Add,
   Delete,
 } from '@mui/icons-material';
-import { Staff } from '@/types/staff';
+import { Staff, Shift } from '@/types/staff';
 import { formatDate } from '@/utils/format';
+import { updateEmployeeById, getEmployees } from '@/api/employee';
 
 interface StaffScheduleProps {
   staff: Staff[];
+  onStaffUpdate: (updatedStaffList: Staff[]) => void;
 }
 
 const SHIFTS = [
@@ -54,6 +56,7 @@ interface ScheduleDialogProps {
   assignedStaff: number[];
   onAssign: (staffId: number) => void;
   onRemove: (staffId: number) => void;
+  employee: Staff;
 }
 
 const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
@@ -71,10 +74,10 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
   const availableStaff = staff.filter(s => s.id !== undefined && !assignedStaff.includes(s.id));
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         className: "bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg"
@@ -129,11 +132,11 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
                 <ListItem key={staffId} divider className="font-poppins">
                   <ListItemText
                     primary={staffMember?.name}
-                    secondary={`ID: ${staffMember?.userId}`}
+                    secondary={`ID: ${staffMember?.id}`}
                   />
                   <ListItemSecondaryAction>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       color="error"
                       onClick={() => onRemove(staffId)}
                     >
@@ -153,15 +156,17 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
   );
 };
 
-const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
+const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [scheduleDialog, setScheduleDialog] = useState<{
-    open: boolean;
-    shift: typeof SHIFTS[0];
-    date: Date;
-  } | null>(null);
-  
-  const [schedules, setSchedules] = useState<Record<string, number[]>>({});
+  const [scheduleDialog, setScheduleDialog] = useState<
+    {
+      open: boolean;
+      shift: typeof SHIFTS[0];
+      date: Date;
+      employee: Staff;
+    } | null
+  >(null);
+  const [, setIsLoadingSchedule] = useState<boolean>(false);
 
   const getWeekDates = () => {
     const dates = [];
@@ -188,32 +193,118 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
     setCurrentDate(newDate);
   };
 
-  const getScheduleKey = (date: Date, shiftId: number) => {
-    return `${date.toISOString().split('T')[0]}-${shiftId}`;
+  const getAssignedStaffIdsForShift = (employee: Staff, date: Date, shiftId: number): number[] => {
+    const dateString = date.toISOString().split('T')[0];
+    const assignedShifts = employee.shifts?.filter(
+      (shift: Shift) => formatDate(new Date(shift.start_time)) === dateString && shift.meta?.shiftId === shiftId
+    ) || [];
+
+    return assignedShifts.map(shift => shift.employee_id);
   };
 
-  const getAssignedStaff = (date: Date, shiftId: number) => {
-    const key = getScheduleKey(date, shiftId);
-    return schedules[key] || [];
-  };
 
-  const handleAssignStaff = (staffId: number) => {
+  const handleAssignStaff = async () => {
     if (!scheduleDialog) return;
-    const key = getScheduleKey(scheduleDialog.date, scheduleDialog.shift.id);
-    setSchedules(prev => ({
-      ...prev,
-      [key]: [...(prev[key] || []), staffId],
-    }));
+    setIsLoadingSchedule(true);
+    try {
+      const dateString = scheduleDialog.date.toISOString().split('T')[0];
+      const shift = scheduleDialog.shift;
+      const employeeToUpdate = scheduleDialog.employee;
+
+      const newShift: Shift = {
+        employee_id: employeeToUpdate.id as number,
+        start_time: new Date(`${dateString}T${shift.startTime}:00`).toISOString(),
+        end_time: new Date(`${dateString}T${shift.endTime}:00`).toISOString(),
+        meta: {
+          shiftId: shift.id,
+          additionalData: {}
+        }
+      };
+
+      const updatedShifts = [...(employeeToUpdate.shifts || []), newShift];
+
+      // Include all required Staff properties in the update
+      const updatedEmployeeData: Staff = {
+        ...employeeToUpdate,
+        shifts: updatedShifts,
+      };
+
+      console.log("Request Payload (PATCH /employees):", updatedEmployeeData);
+
+      const response = await updateEmployeeById(employeeToUpdate.id as number, updatedEmployeeData);
+      console.log("Response from PATCH /employees:", response);
+
+      if (response.status === 200) {
+        const updatedStaffListResponse = await getEmployees();
+        console.log("Response from GET /employees (after PATCH):", updatedStaffListResponse);
+        if (updatedStaffListResponse.status === 200) {
+          onStaffUpdate(updatedStaffListResponse.data);
+        } else {
+          console.error("Lỗi khi tải lại danh sách nhân viên sau khi cập nhật ca làm việc");
+        }
+        setScheduleDialog(null);
+      } else {
+        console.error("Lỗi khi cập nhật ca làm việc cho nhân viên");
+      }
+
+
+    } catch (error) {
+      console.error("Lỗi khi gán nhân viên vào ca:", error);
+    } finally {
+      setIsLoadingSchedule(false);
+    }
   };
 
-  const handleRemoveStaff = (staffId: number) => {
+  const handleRemoveStaff = async () => {
     if (!scheduleDialog) return;
-    const key = getScheduleKey(scheduleDialog.date, scheduleDialog.shift.id);
-    setSchedules(prev => ({
-      ...prev,
-      [key]: prev[key]?.filter(id => id !== staffId) || [],
-    }));
+    setIsLoadingSchedule(true);
+    try {
+      const dateString = scheduleDialog.date.toISOString().split('T')[0];
+      const shiftToRemove = scheduleDialog.shift;
+      const employeeToUpdate = scheduleDialog.employee;
+
+      const updatedShifts = employeeToUpdate.shifts?.filter(
+        (shift: Shift) => !(formatDate(new Date(shift.start_time)) === dateString && shift.meta?.shiftId === shiftToRemove.id)
+      ) || [];
+
+      // Include all required Staff properties in the update
+      const updatedEmployeeData: Staff = {
+        ...employeeToUpdate,
+        shifts: updatedShifts,
+      };
+
+
+      console.log("Request Payload (PATCH /employees):", updatedEmployeeData);
+
+      const response = await updateEmployeeById(employeeToUpdate.id as number, updatedEmployeeData);
+      console.log("Response from PATCH /employees:", response);
+
+      if (response.status === 200) {
+        const updatedStaffListResponse = await getEmployees();
+        console.log("Response from GET /employees (after PATCH):", updatedStaffListResponse);
+        if (updatedStaffListResponse.status === 200) {
+          onStaffUpdate(updatedStaffListResponse.data);
+        } else {
+          console.error("Lỗi khi tải lại danh sách nhân viên sau khi xóa ca làm việc");
+        }
+        setScheduleDialog(null);
+      } else {
+        console.error("Lỗi khi xóa ca làm việc cho nhân viên");
+      }
+
+    } catch (error) {
+      console.error("Lỗi khi xóa nhân viên khỏi ca:", error);
+    } finally {
+      setIsLoadingSchedule(false);
+    }
   };
+
+
+  const getAssignedStaffForCell = (employee: Staff, date: Date, shift: typeof SHIFTS[0]) => {
+    const assignedStaffIds = getAssignedStaffIdsForShift(employee, date, shift.id);
+    return staff.filter(emp => assignedStaffIds.includes(emp.id as number));
+  }
+
 
   return (
     <Box>
@@ -260,34 +351,39 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
                   </Typography>
                 </TableCell>
                 {getWeekDates().map((date) => {
-                  const assignedStaff = getAssignedStaff(date, shift.id);
+                  const assignedStaffForCell = getAssignedStaffForCell(staff[0], date, shift);
+
                   return (
-                    <TableCell 
-                      key={date.toISOString()} 
+                    <TableCell
+                      key={date.toISOString()}
                       align="center"
-                      onClick={() => setScheduleDialog({ open: true, shift, date })}
+                      onClick={() => {
+                        const firstStaffMember = staff.length > 0 ? staff[0] : undefined;
+                        if (firstStaffMember) {
+                          setScheduleDialog({ open: true, shift, date, employee: firstStaffMember });
+                        } else {
+                          console.warn("Không có nhân viên nào để lên lịch.");
+                        }
+                      }}
                       className="font-poppins cursor-pointer"
-                      style={{ 
-                        backgroundColor: assignedStaff.length ? `${shift.color}10` : undefined,
+                      style={{
+                        backgroundColor: assignedStaffForCell.length ? `${shift.color}10` : undefined,
                       }}
                     >
-                      {assignedStaff.length > 0 ? (
+                      {assignedStaffForCell.length > 0 ? (
                         <Box className="flex flex-wrap justify-center gap-1">
-                          {assignedStaff.map(staffId => {
-                            const staffMember = staff.find(s => s.id === staffId);
-                            return (
-                              <Tooltip 
-                                key={staffId} 
-                                title={staffMember?.name}
+                          {assignedStaffForCell.map(staffMember => (
+                            <Tooltip
+                              key={staffMember.id}
+                              title={staffMember?.name}
+                            >
+                              <Avatar
+                                sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
                               >
-                                <Avatar 
-                                  sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
-                                >
-                                  {staffMember?.name[0]}
-                                </Avatar>
-                              </Tooltip>
-                            );
-                          })}
+                                {staffMember?.name[0]}
+                              </Avatar>
+                            </Tooltip>
+                          ))}
                         </Box>
                       ) : (
                         <IconButton size="small">
@@ -310,7 +406,8 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff }) => {
           shift={scheduleDialog.shift}
           date={scheduleDialog.date}
           staff={staff}
-          assignedStaff={getAssignedStaff(scheduleDialog.date, scheduleDialog.shift.id)}
+          employee={scheduleDialog.employee}
+          assignedStaff={getAssignedStaffIdsForShift(scheduleDialog.employee, scheduleDialog.date, scheduleDialog.shift.id)}
           onAssign={handleAssignStaff}
           onRemove={handleRemoveStaff}
         />

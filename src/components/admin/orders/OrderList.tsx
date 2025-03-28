@@ -13,6 +13,7 @@ import {
   Box,
   Tooltip,
   Pagination,
+  CircularProgress,
 } from '@mui/material';
 import {
   Visibility,
@@ -21,6 +22,8 @@ import {
 } from '@mui/icons-material';
 import { OrderAPI, OrderStatusAPI, PaymentStatus } from '@/types/order';
 import { formatCurrency } from '@/utils/format';
+import { getPaymentQRCodeImage } from '@/api/payment';
+import InvoiceModal from '@/components/pos/layout/InvoiceModal';
 
 interface OrderListProps {
   orders: OrderAPI[];
@@ -59,6 +62,10 @@ const OrderList: React.FC<OrderListProps> = ({
   onViewDetail,
 }) => {
   const [page, setPage] = useState(1);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false); 
+  const [invoicePdfBlob, setInvoicePdfBlob] = useState<Blob | null>(null);
+  const [loadingInvoice, setLoadingInvoice] = useState<boolean>(false); 
+  const [currentInvoiceOrderId, setCurrentInvoiceOrderId] = useState<number | null>(null); 
 
   const paginatedOrders = orders.slice(
     (page - 1) * ITEMS_PER_PAGE,
@@ -70,6 +77,30 @@ const OrderList: React.FC<OrderListProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handlePrintInvoice = async (order: OrderAPI) => {
+    if (!order.id) {
+      console.error("Order ID không hợp lệ để in hóa đơn");
+      return;
+    }
+    setLoadingInvoice(true);
+    setCurrentInvoiceOrderId(order.id); 
+    try {
+      const pdfBlob = await getPaymentQRCodeImage(order.id);
+      setInvoicePdfBlob(pdfBlob);
+      setIsInvoiceModalOpen(true);
+    } catch (error) {
+      console.error("Lỗi khi tải hóa đơn PDF:", error);
+    } finally {
+      setLoadingInvoice(false);
+      setCurrentInvoiceOrderId(null); 
+    }
+  };
+
+  const handleCloseInvoiceModal = () => {
+    setIsInvoiceModalOpen(false);
+    setInvoicePdfBlob(null);
+  };
+  
   return (
     <Box>
       <TableContainer component={Paper} className="rounded-xl overflow-hidden shadow-lg bg-white/90 backdrop-blur-sm">
@@ -80,7 +111,7 @@ const OrderList: React.FC<OrderListProps> = ({
               <TableCell className="font-poppins font-semibold">Khách hàng</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Bàn</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Trạng thái</TableCell>
-              <TableCell align="center" className="font-poppins font-semibold">Thanh toán</TableCell> {/* New column */}
+              <TableCell align="center" className="font-poppins font-semibold">Thanh toán</TableCell> 
               <TableCell align="right" className="font-poppins font-semibold">Tổng tiền</TableCell>
               <TableCell align="center" className="font-poppins font-semibold">Thao tác</TableCell>
             </TableRow>
@@ -102,7 +133,7 @@ const OrderList: React.FC<OrderListProps> = ({
                 </TableCell>
                 <TableCell className="border-b border-blue-100/30">
                   <Typography variant="subtitle2" className="font-poppins font-medium">
-                    User ID: {order.user_id} {/* Displaying User ID as customer info */}
+                    User ID: {order.user_id} 
                   </Typography>
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30 font-poppins">
@@ -116,11 +147,11 @@ const OrderList: React.FC<OrderListProps> = ({
                     className="font-poppins"
                   />
                 </TableCell>
-                <TableCell align="center" className="border-b border-blue-100/30 font-poppins"> {/* New cell for payment method */}
+                <TableCell align="center" className="border-b border-blue-100/30 font-poppins"> 
                   {paymentMethodLabels[order.meta?.payment_method as keyof typeof paymentMethodLabels] || '-'}
                 </TableCell>
                 <TableCell align="right" className="border-b border-blue-100/30 font-poppins font-medium">
-                  {formatCurrency(Number(order.total_amount))} {/* Parse total_amount to Number */}
+                  {formatCurrency(Number(order.total_amount))} 
                 </TableCell>
                 <TableCell align="center" className="border-b border-blue-100/30">
                   <Box className="flex justify-center gap-1">
@@ -134,8 +165,17 @@ const OrderList: React.FC<OrderListProps> = ({
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="In hóa đơn">
-                      <IconButton size="small" className="text-green-600 hover:bg-green-50">
-                        <Receipt />
+                      <IconButton
+                        size="small"
+                        className="text-green-600 hover:text-green-700"
+                        onClick={() => handlePrintInvoice(order)} 
+                        disabled={loadingInvoice && currentInvoiceOrderId === order.id} 
+                      >
+                        {loadingInvoice && currentInvoiceOrderId === order.id ? (
+                          <CircularProgress size={24} color="inherit" /> 
+                        ) : (
+                          <Receipt /> 
+                        )}
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="In chế biến">
@@ -161,6 +201,11 @@ const OrderList: React.FC<OrderListProps> = ({
           size="large"
         />
       </Box>
+      <InvoiceModal
+        open={isInvoiceModalOpen}
+        onClose={handleCloseInvoiceModal}
+        pdfBlob={invoicePdfBlob}
+      />
     </Box>
   );
 };
