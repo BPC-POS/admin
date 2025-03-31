@@ -57,12 +57,18 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedCategory(null);
+    // setSelectedCategory(null);
   };
 
   const handleEdit = () => {
-    handleMenuClose();
-    setIsModalOpen(true);
+    // selectedCategory vẫn giữ giá trị từ handleMenuOpen
+    if (selectedCategory) { // Nên kiểm tra để chắc chắn
+        setAnchorEl(null); // Đóng menu
+        setIsModalOpen(true); // Mở modal
+        console.log('Editing category:', selectedCategory); // Log vẫn hoạt động
+    } else {
+        handleMenuClose(); // Nếu không có selectedCategory thì đóng menu bình thường
+    }
   };
 
   const handleDelete = () => {
@@ -70,6 +76,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
       onDeleteCategory(selectedCategory.id);
     }
     handleMenuClose();
+    setSelectedCategory(null);
   };
 
   const handleToggle = () => {
@@ -77,6 +84,7 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
       onToggleCategory(selectedCategory.id);
     }
     handleMenuClose();
+    setSelectedCategory(null);
   };
 
   const handleCategoryCreatedNotification = () => {

@@ -121,7 +121,7 @@ const UserModal: React.FC<UserModalProps> = ({
       <form onSubmit={handleSubmit}>
         <DialogTitle className="flex justify-between items-center bg-gradient-to-r from-[#2C3E50] to-[#3498DB] text-white p-4 rounded-t-2xl">
           <span className="text-xl font-bold">
-            {editItem ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
+            {editItem ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới'}
           </span>
           <IconButton onClick={onClose} size="small" className="text-white hover:text-gray-200">
             <Close />

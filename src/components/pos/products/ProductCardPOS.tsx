@@ -1,12 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import {
-  Card,
-  CardContent,
   Typography,
   Box,
-  Chip,
-  Stack
 } from '@mui/material';
 import { Circle } from '@mui/icons-material';
 import { Product, ProductStatus } from '@/types/product';
@@ -49,13 +45,28 @@ const statusLabels = {
 };
 
 const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
-  const productStatus = typeof product.status === 'number' 
-    ? mapApiStatusToProductStatus(product.status) 
+  const productStatus = typeof product.status === 'number'
+    ? mapApiStatusToProductStatus(product.status)
     : product.status;
 
+  const tailwindStatusColors = {
+    'success': 'bg-green-500 text-white',
+    'error': 'bg-red-500 text-white',
+    'warning': 'bg-yellow-500 text-black',
+    'info': 'bg-blue-500 text-white',
+    'primary': 'bg-indigo-500 text-white',
+    'secondary': 'bg-purple-500 text-white'
+  };
+
+  const getTailwindChipColor = (muiColor: 'success' | 'error' | 'warning' | 'info' | 'primary' | 'secondary' | undefined) => {
+    if (!muiColor) return 'bg-gray-200 text-gray-700'; // Default color if MUI color is undefined
+    return tailwindStatusColors[muiColor] || 'bg-gray-200 text-gray-700'; // Fallback to default if color not found
+  };
+
+
   return (
-    <Card
-      className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden"
+    <div
+      className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 font-poppins bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden cursor-pointer"
       onClick={() => onProductClick(product)}
     >
       <Box className="relative w-full pt-[75%] group">
@@ -67,15 +78,14 @@ const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute top-2 right-2">
-          <Chip
-            label={statusLabels[productStatus]}
-            color={statusColors[productStatus]}
-            size="small"
-            className="shadow-lg font-poppins font-medium"
-          />
+          <span
+            className={`chip inline-flex items-center justify-center h-6 rounded-full text-xs font-medium shadow-lg px-2 ${getTailwindChipColor(statusColors[productStatus])}`}
+          >
+            {statusLabels[productStatus]}
+          </span>
         </div>
       </Box>
-      <CardContent className="p-3">
+      <div className="p-3">
         <div className="space-y-2">
           <div className="flex justify-between items-start">
             <div>
@@ -85,34 +95,34 @@ const ProductCardPOS = ({ product, onProductClick }: ProductCardPOSProps) => {
               <div className="flex items-center gap-1 mt-0.5">
                 <Circle
                   className={`w-2 h-2 ${product.isAvailable ? 'text-green-500' : 'text-red-500'}`}
+                  sx={{ fontSize: '0.75rem' }}
                 />
-                <Typography variant="caption" className="font-poppins text-gray-600">
+                <Typography variant="caption" className="font-poppins text-gray-600 text-sm">
                   {product.isAvailable ? 'Còn hàng' : 'Hết hàng'}
                 </Typography>
               </div>
             </div>
           </div>
 
-          <Stack direction="row" spacing={0.5} className="flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1">
             {product.size && product.size.map((size: { name: React.Key | null | undefined; price: number; isDefault: boolean; }) => (
-              <Chip
+              <span
                 key={size.name}
-                label={`${size.name ? `${size.name}: ` : ''}${size.price.toLocaleString('vi-VN')}đ`}
-                size="small"
-                variant={size.isDefault ? "filled" : "outlined"}
-                className="font-poppins shadow-sm text-xs"
-              />
+                className={`chip inline-flex items-center justify-center h-6 rounded-full text-xs font-medium shadow-sm px-2 ${size.isDefault ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-700 border border-gray-200'}`}
+              >
+                {`${size.name ? `${size.name}: ` : ''}${size.price.toLocaleString('vi-VN')}đ`}
+              </span>
             ))}
-          </Stack>
+          </div>
 
           {product.toppings && product.toppings.length > 0 && (
-            <Typography variant="caption" className="font-poppins text-gray-600 line-clamp-1">
+            <Typography variant="caption" className="font-poppins text-gray-600 line-clamp-1 text-sm">
               Topping: {product.toppings.map(t => t.name).join(', ')}
             </Typography>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

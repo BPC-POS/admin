@@ -88,7 +88,7 @@ const PosPage = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success' as 'success' | 'error' | 'info',
+    severity: 'success' as 'success' | 'error' | 'info' | 'warning',
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -263,7 +263,7 @@ const PosPage = () => {
     }
   };
 
-  const showSnackbar = (message: string, severity: 'success' | 'error' | 'info') => {
+  const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -526,7 +526,7 @@ const PosPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2C3E50] to-[#3498DB] p-5">
-      <Paper className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+      <Paper className="bg-white/60 p-4 rounded-lg shadow-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}>
         {tablesLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="200px">
             <CircularProgress />

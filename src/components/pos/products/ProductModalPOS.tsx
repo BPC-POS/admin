@@ -4,21 +4,19 @@ import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
   IconButton,
   Grid,
-  TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
   CircularProgress,
+  Divider, // Import Divider
 } from "@mui/material";
 import Image from "next/image";
 import { Product } from "@/types/product";
-import { Add, Remove } from "@mui/icons-material";
+import { Add, Remove, Close } from "@mui/icons-material"; // Thêm icon Close
 import { OrderItemAPI } from "@/types/order";
 import { getProductById } from "@/api/product";
 
@@ -55,19 +53,28 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
 
   useEffect(() => {
     const fetchProductDetails = async () => {
-      if (product && product.id) {
+      if (product?.id) {
         setIsLoading(true);
+        setVariants([]);
+        setSelectedVariant(null);
+        setVariantError(null);
+        setQuantity(1); // Reset quantity khi đổi sản phẩm
         try {
           const response = await getProductById(product.id);
-          if (response.status === 200 && response.data.variants) {
-            setVariants(response.data.variants);
-            if (response.data.variants.length > 0) {
-              setSelectedVariant(response.data.variants[0]);
+          if (response?.status === 200 && response.data && Array.isArray(response.data.variants)) {
+            const activeVariants = response.data.variants.filter((v: ProductVariant) => v.status === 1);
+            setVariants(activeVariants);
+            if (activeVariants.length > 0) {
+              setSelectedVariant(activeVariants[0]);
+            } else {
+              setVariantError("Sản phẩm hiện không có phiên bản nào.");
             }
+          } else {
+             setVariantError("Không tìm thấy thông tin phiên bản.");
           }
         } catch (error) {
           console.error("Error fetching product variants:", error);
-          setVariantError("Không thể tải thông tin phiên bản");
+          setVariantError("Lỗi khi tải thông tin phiên bản.");
         } finally {
           setIsLoading(false);
         }
@@ -79,213 +86,214 @@ const ProductModalPOS: React.FC<ProductModalPOSProps> = ({
     }
 
     return () => {
-      setSelectedVariant(null);
-      setQuantity(1);
-      setVariantError(null);
+      if (!open) { // Chỉ reset khi modal thực sự đóng
+          setSelectedVariant(null);
+          setQuantity(1);
+          setVariantError(null);
+          setVariants([]);
+      }
     };
   }, [product, open]);
 
-  if (!product) {
-    return null;
-  }
+  if (!product) return null;
 
-  const handleVariantChange = (event: SelectChangeEvent) => {
+  const handleVariantChange = (event: SelectChangeEvent<string>) => {
     const variantId = Number(event.target.value);
     const chosenVariant = variants.find((v) => v.id === variantId);
     setSelectedVariant(chosenVariant || null);
-    setVariantError(chosenVariant ? null : "Vui lòng chọn phiên bản");
+    setVariantError(null);
+    setQuantity(1); // Reset quantity khi đổi variant
   };
 
-  const getVariantDisplayName = (variant: ProductVariant) => {
-    const sizeAttribute = variant.attributes.find((attr) => attr.attribute_id === 1);
-    return `${sizeAttribute ? sizeAttribute.value : ""} ${variant.sku} - ${variant.price.toLocaleString(
-      "vi-VN"
-    )}đ`.trim();
+  const getVariantDisplayName = (variant: ProductVariant): string => {
+    const sizeAttribute = variant.attributes.find((attr) => attr.attribute_id === 1); // Assuming ID 1 is Size
+    return `${sizeAttribute ? sizeAttribute.value : "Default"} (${variant.sku}) - ${variant.price.toLocaleString("vi-VN")}đ`.trim();
   };
 
   const handleAddToOrderClick = () => {
     if (!selectedVariant) {
-      setVariantError("Vui lòng chọn phiên bản");
+      setVariantError("Vui lòng chọn một phiên bản.");
       return;
     }
 
-    console.log("Product ID:", product.id);
-    console.log("Quantity:", quantity);
-    console.log("Unit Price:", product.price); 
-    console.log("Variant ID:", selectedVariant.id);
-
     const newItem: OrderItemAPI = {
-      product_id: product.id, 
-      quantity: quantity,      
+      product_id: product.id,
+      quantity: quantity,
       unit_price: selectedVariant.price,
-      variant_id: selectedVariant.id,   
-      meta: {},
+      variant_id: selectedVariant.id,
+      meta: {
+        variant_display_name: getVariantDisplayName(selectedVariant),
+        product_image: product.image
+      },
       product_name: product.name,
     };
 
-    const itemsToAdd: OrderItemAPI[] = [newItem];
-
-    console.log("Items being passed to onAddToOrder:", itemsToAdd); 
-
-    onAddToOrder(itemsToAdd);
+    onAddToOrder([newItem]);
     onClose();
   };
 
+  const handleIncreaseQuantity = () => setQuantity((q) => q + 1);
+  const handleDecreaseQuantity = () => setQuantity((q) => Math.max(1, q - 1));
 
-  const handleIncreaseQuantity = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
-
-  const handleDecreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity((prevQuantity) => prevQuantity - 1);
-    }
-  };
-
+  const formatCurrency = (value: number): string => value.toLocaleString("vi-VN") + "đ";
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} aria-labelledby="product-modal-title">
       <Box
         sx={{
           position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 500,
+          width: { xs: '95%', sm: '85%', md: '70%', lg: '50%' }, // Responsive width
+          maxWidth: 650, // Giới hạn max width
           bgcolor: "background.paper",
           boxShadow: 24,
-          p: 4,
           borderRadius: 2,
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column', // Cho phép phần content scroll
+          overflow: 'hidden', // Ẩn scroll của box chính
         }}
       >
-        <Card>
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Box className="relative w-full aspect-square font-poppins">
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: 1, borderColor: 'divider' }}>
+             <Typography className="text-black" variant="h6" component="h2" fontWeight="bold" id="product-modal-title">
+                {product.name}
+             </Typography>
+             <IconButton onClick={onClose} size="small">
+                 <Close />
+             </IconButton>
+         </Box>
+
+         {/* Phần nội dung chính có thể scroll */}
+        <Box sx={{ overflowY: 'auto', p: { xs: 2, sm: 3 } }}> {/* Padding cho nội dung */}
+            <Grid container spacing={{ xs: 2, sm: 3 }}>
+              <Grid item xs={12} sm={5}>
+                <Box sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', borderRadius: 1.5, overflow: 'hidden', bgcolor: 'grey.200' }}>
                   <Image
-                    src={product.image}
+                    src={product.image || '/images/placeholder.png'} // Luôn có ảnh placeholder
                     alt={product.name}
                     fill
-                    className="object-cover rounded-lg font-poppins"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px"
-                    onError={(e) => {
-                      console.error("Error loading image:", product.image, e);
-                      // Optionally set a placeholder image if load fails
-                      // e.currentTarget.src = '/path/to/placeholder-image.png';
-                    }}
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 600px) 90vw, (max-width: 900px) 40vw, 300px"
+                    priority
                   />
                 </Box>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
-                className="flex flex-col justify-between"
-              >
-                <Box className="font-poppins">
-                  <Typography variant="h6" component="h2" gutterBottom className="font-poppins font-semibold text-black">
-                    {product.name}
-                  </Typography>
+              <Grid item xs={12} sm={7} sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Box flexGrow={1}> {/* Phần mô tả và chọn variant chiếm không gian còn lại */}
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    gutterBottom
+                    sx={{ mb: 2, maxHeight: { xs: 60, sm: 80 }, overflowY: 'auto' }}
                   >
-                    {product.description}
+                    {product.description || "Không có mô tả."}
                   </Typography>
 
                   {isLoading ? (
-                    <Box display="flex" justifyContent="center" p={2}>
-                      <CircularProgress size={24} />
+                    <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+                      <CircularProgress size={20} />
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>Đang tải phiên bản...</Typography>
                     </Box>
                   ) : variants.length > 0 ? (
-                    <FormControl fullWidth margin="normal" error={!!variantError}>
-                      <InputLabel id="variant-select-label">Phiên bản</InputLabel>
+                    <FormControl fullWidth margin="dense" error={!!variantError} required disabled={isLoading}>
+                      <InputLabel id="variant-select-label">Chọn phiên bản</InputLabel>
                       <Select
                         labelId="variant-select-label"
-                        id="variant-select"
                         value={selectedVariant ? String(selectedVariant.id) : ""}
-                        label="Phiên bản"
+                        label="Chọn phiên bản"
                         onChange={handleVariantChange}
+                        MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }} // Giới hạn chiều cao dropdown
                       >
                         {variants.map((variant) => (
-                          <MenuItem key={variant.id} value={variant.id}>
+                          <MenuItem key={variant.id} value={String(variant.id)}>
                             {getVariantDisplayName(variant)}
                           </MenuItem>
                         ))}
                       </Select>
                       {variantError && (
-                        <Typography variant="caption" color="error">
+                        <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                           {variantError}
                         </Typography>
                       )}
                     </FormControl>
                   ) : (
-                    <Typography color="error" variant="body2">
-                      Không có phiên bản nào cho sản phẩm này
+                    <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
+                      {variantError || "Sản phẩm chưa có phiên bản."}
                     </Typography>
                   )}
                 </Box>
 
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography className="font-poppins" variant="subtitle1">Số lượng:</Typography>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <IconButton
-                        onClick={handleDecreaseQuantity}
-                        disabled={quantity <= 1}
-                        size="small"
-                      >
-                        <Remove />
-                      </IconButton>
-                      <TextField
-                        type="number"
-                        size="small"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        inputProps={{ min: 1 }}
-                        sx={{ width: 60, mx: 1 }}
-                      />
-                      <IconButton onClick={handleIncreaseQuantity} size="small">
-                        <Add />
-                      </IconButton>
+                {/* Chỉ hiển thị khi đã chọn variant */}
+                {selectedVariant && (
+                  <Box sx={{ mt: 2 }}>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Typography className="text-black" variant="body1" fontWeight="500">Số lượng:</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                        <IconButton onClick={handleDecreaseQuantity} disabled={quantity <= 1 || isLoading} size="small" sx={{ borderRight: 1, borderColor: 'divider', borderRadius: '4px 0 0 4px', p: 0.5 }}>
+                          <Remove fontSize="small"/>
+                        </IconButton>
+                        <Typography sx={{ px: 1.5, minWidth: 30, textAlign: 'center' }}>{quantity}</Typography>
+                        <IconButton onClick={handleIncreaseQuantity} disabled={isLoading} size="small" sx={{ borderLeft: 1, borderColor: 'divider', borderRadius: '0 4px 4px 0', p: 0.5 }}>
+                          <Add fontSize="small"/>
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
+                        <Typography variant="body1" color="text.secondary" sx={{ mr: 0.5 }}>Tổng:</Typography>
+                        <Typography variant="h6" fontWeight="bold" color="error.main">
+                          {formatCurrency(selectedVariant.price * quantity)}
+                        </Typography>
                     </Box>
                   </Box>
-
-                  {selectedVariant && (
-                    <Typography variant="subtitle1" className="mb-4 font-poppins text-right">
-                      Tổng: {(selectedVariant.price * quantity).toLocaleString("vi-VN")}đ
-                    </Typography>
-                  )}
-
-                  <Box
-                    sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}
-                  >
-                    <Button onClick={onClose}>Huỷ</Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleAddToOrderClick}
-                      disabled={!selectedVariant || isLoading}
-                      style={{background: 'linear-gradient(90deg, #2C3E50 0%, #3498DB 100%)'}}
-                      className='font-poppins font-semibold'
-                    >
-                      Thêm vào order
-                    </Button>
-                  </Box>
-                </Box>
+                )}
               </Grid>
             </Grid>
-          </CardContent>
-        </Card>
+        </Box>
+
+        {/* Footer với các nút hành động */}
+        <Box
+          sx={{
+              p: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 1.5,
+              borderTop: 1,
+              borderColor: 'divider',
+              bgcolor: 'background.paper', 
+          }}
+        >
+          <Button
+              onClick={onClose}
+              variant="outlined"
+              color="error" 
+              sx={{ fontWeight: 500 }} // Chữ đậm vừa
+          >
+            Huỷ
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddToOrderClick}
+            disabled={!selectedVariant || isLoading}
+            startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : null} // Icon loading nhỏ
+            sx={{
+              fontWeight: 'bold',
+              minWidth: 140, // Đặt chiều rộng tối thiểu
+              bgcolor: 'primary.main', // Màu chính từ theme
+              '&:hover': {
+                bgcolor: 'primary.dark', // Màu tối hơn khi hover
+              },
+              '&.Mui-disabled': {
+                bgcolor: 'action.disabledBackground',
+                color: 'action.disabled',
+              }
+            }}
+          >
+            {isLoading ? 'Đang thêm...' : 'Thêm vào order'}
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );

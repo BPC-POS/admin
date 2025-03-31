@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Paper,
   Tabs,
   Tab,
   Box,
@@ -9,7 +8,6 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 import { Category } from '@/types/product';
-import CategoryModalPOS from './CategoryModalPOS';
 
 interface ProductCategoriesPOSProps {
   categories: Category[];
@@ -26,13 +24,10 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
   categories,
   currentCategory,
   onCategoryChange,
-  onAddCategory,
-  onEditCategory,
-  isLoading = false,
+
 }) => {
   const [, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [, setSelectedCategory] = useState<Category | null>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, category: Category) => {
     event.stopPropagation();
@@ -40,41 +35,29 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
     setSelectedCategory(category);
   };
 
-  const handleSubmit = (data: Omit<Category, 'id'>) => {
-    if (selectedCategory && onEditCategory) {
-      onEditCategory(selectedCategory.id, data);
-    } else if (onAddCategory) {
-      onAddCategory(data);
-    }
-    setIsModalOpen(false);
-    setSelectedCategory(null);
-  };
-
   return (
     <>
-      <Paper className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
+      <div className="mb-6 bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg font-poppins"> {/* Thêm font-poppins vào đây */}
         <Box className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold font-poppins">Danh mục sản phẩm</h2>
+          <h2 className="text-lg font-bold">Danh mục sản phẩm</h2> 
         </Box>
         <Tabs
           value={currentCategory}
           onChange={(_, value) => onCategoryChange(value)}
           variant="scrollable"
           scrollButtons="auto"
-          className="font-poppins"
           TabIndicatorProps={{
             style: {
               backgroundColor: '#3498DB',
-              fontFamily: 'Poppins',
             }
           }}
         >
-          <Tab label="Tất cả" value="all" className="font-poppins font-bold" />
+          <Tab label="Tất cả" value="all" className="font-bold" /> 
           {categories.map((category) => (
             <Tab
             key={category.id}
             label={
-              <div className="flex items-center gap-2 font-poppins">
+              <div className="flex items-center gap-2"> 
                 {category.name}
                 {!category.isActive && (
                   <VisibilityOff fontSize="small" className="text-gray-400" />
@@ -82,23 +65,13 @@ const ProductCategoriesPOS: React.FC<ProductCategoriesPOSProps> = ({
               </div>
             }
             value={category.id}
-            className="font-poppins font-bold"
+            className="font-bold" 
             onClick={(e) => handleMenuOpen(e, category)}
           />
           ))}
         </Tabs>
-      </Paper>
+      </div>
 
-      <CategoryModalPOS
-        open={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedCategory(null);
-        }}
-        onSubmit={handleSubmit}
-        editItem={selectedCategory || undefined}
-        isLoading={isLoading}
-      />
     </>
   );
 };
