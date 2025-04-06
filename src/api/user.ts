@@ -34,7 +34,7 @@ const getUsers = async (): Promise<AxiosResponse<User[]>> => {
 const updateUserFCM = async (firebase_token: string): Promise<AxiosResponse<User>> => {
   try {
     console.log(firebase_token);
-    const response = await userApi.patch(`/users/me`, firebase_token);
+    const response = await userApi.patch(`/users/me`, { firebase_token: firebase_token });
     return response;
   } catch (error: unknown) {
     console.error("Error updating user:", error);
