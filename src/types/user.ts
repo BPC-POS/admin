@@ -9,6 +9,7 @@ export interface User {
   name: string;
   password?: string;
   status: number;
+  firebase_token?: string;
 }
 
 export interface Member {
