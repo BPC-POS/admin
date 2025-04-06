@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Paper,
   Box,
@@ -35,6 +35,7 @@ import {
 import { Staff, Shift } from '@/types/staff';
 import { formatDate } from '@/utils/format';
 import { updateEmployeeById, getEmployees } from '@/api/employee';
+import { getShifts, createShift, updateShift, deleteShift } from '@/api/shift';
 
 interface StaffScheduleProps {
   staff: Staff[];
@@ -113,7 +114,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
               variant="contained"
               onClick={() => {
                 if (selectedStaff) {
-                  onAssign(selectedStaff);
+                  onAssign(selectedStaff as number);
                   setSelectedStaff(0);
                 }
               }}
@@ -156,7 +157,8 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({
   );
 };
 
-const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) => {
+
+const StaffSchedule = ({ staff, onStaffUpdate }: StaffScheduleProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [scheduleDialog, setScheduleDialog] = useState<
     {
@@ -167,6 +169,27 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
     } | null
   >(null);
   const [, setIsLoadingSchedule] = useState<boolean>(false);
+  const [shiftsData, setShiftsData] = useState<Shift[]>([]);
+
+  useEffect(() => {
+    const fetchShifts = async () => {
+      setIsLoadingSchedule(true);
+      try {
+        const response = await getShifts();
+        if (response.status === 200) {
+          setShiftsData(response.data);
+        } else {
+          console.error("Failed to fetch shifts:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching shifts:", error);
+      } finally {
+        setIsLoadingSchedule(false);
+      }
+    };
+
+    fetchShifts();
+  }, []);
 
   const getWeekDates = () => {
     const dates = [];
@@ -193,23 +216,28 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
     setCurrentDate(newDate);
   };
 
-  const getAssignedStaffIdsForShift = (employee: Staff, date: Date, shiftId: number): number[] => {
+  const getAssignedStaffIdsForShift = (date: Date, shiftId: number): number[] => {
     const dateString = date.toISOString().split('T')[0];
-    const assignedShifts = employee.shifts?.filter(
+    const assignedShifts = shiftsData?.filter(
       (shift: Shift) => formatDate(new Date(shift.start_time)) === dateString && shift.meta?.shiftId === shiftId
     ) || [];
 
-    return assignedShifts.map(shift => shift.employee_id);
-  };
+  return assignedShifts.map(shift => shift.employee_id);
+};
 
 
-  const handleAssignStaff = async () => {
+  const handleAssignStaff = async (selectedStaffId: number) => {
     if (!scheduleDialog) return;
     setIsLoadingSchedule(true);
     try {
       const dateString = scheduleDialog.date.toISOString().split('T')[0];
       const shift = scheduleDialog.shift;
-      const employeeToUpdate = scheduleDialog.employee;
+      const employeeToUpdate = staff.find(s => s.id === selectedStaffId);
+
+      if (!employeeToUpdate) {
+        console.error("Employee not found for ID:", selectedStaffId);
+        return; 
+      }
 
       const newShift: Shift = {
         employee_id: employeeToUpdate.id as number,
@@ -221,35 +249,27 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
         }
       };
 
-      const updatedShifts = [...(employeeToUpdate.shifts || []), newShift];
-
-      // Include all required Staff properties in the update
-      const updatedEmployeeData: Staff = {
-        ...employeeToUpdate,
-        shifts: updatedShifts,
-      };
-
-      console.log("Request Payload (PATCH /employees):", updatedEmployeeData);
-
-      const response = await updateEmployeeById(employeeToUpdate.id as number, updatedEmployeeData);
-      console.log("Response from PATCH /employees:", response);
-
-      if (response.status === 200) {
+      const response = await createShift(newShift);
+      
+      if (response.status === 201) { 
+        const updatedShiftsListResponse = await getShifts();
+        if (updatedShiftsListResponse.status === 200) {
+          setShiftsData(updatedShiftsListResponse.data);
+        } else {
+          console.error("Failed to refresh shifts after creating:", updatedShiftsListResponse.status);
+        }
         const updatedStaffListResponse = await getEmployees();
-        console.log("Response from GET /employees (after PATCH):", updatedStaffListResponse);
         if (updatedStaffListResponse.status === 200) {
           onStaffUpdate(updatedStaffListResponse.data);
         } else {
-          console.error("Lỗi khi tải lại danh sách nhân viên sau khi cập nhật ca làm việc");
+          console.error("Failed to refresh staff list after creating shift");
         }
         setScheduleDialog(null);
       } else {
-        console.error("Lỗi khi cập nhật ca làm việc cho nhân viên");
+        console.error("Failed to create shift:", response.status);
       }
-
-
     } catch (error) {
-      console.error("Lỗi khi gán nhân viên vào ca:", error);
+      console.error("Error assigning staff to shift:", error);
     } finally {
       setIsLoadingSchedule(false);
     }
@@ -261,47 +281,50 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
     try {
       const dateString = scheduleDialog.date.toISOString().split('T')[0];
       const shiftToRemove = scheduleDialog.shift;
-      const employeeToUpdate = scheduleDialog.employee;
+      const employeeToRemove = scheduleDialog.employee; 
 
-      const updatedShifts = employeeToUpdate.shifts?.filter(
-        (shift: Shift) => !(formatDate(new Date(shift.start_time)) === dateString && shift.meta?.shiftId === shiftToRemove.id)
-      ) || [];
+      const shiftToDelete = shiftsData.find(
+        (shift: Shift) => 
+          formatDate(new Date(shift.start_time)) === dateString && 
+          shift.meta?.shiftId === shiftToRemove.id &&
+          shift.employee_id === employeeToRemove.id
+      );
 
-      // Include all required Staff properties in the update
-      const updatedEmployeeData: Staff = {
-        ...employeeToUpdate,
-        shifts: updatedShifts,
-      };
-
-
-      console.log("Request Payload (PATCH /employees):", updatedEmployeeData);
-
-      const response = await updateEmployeeById(employeeToUpdate.id as number, updatedEmployeeData);
-      console.log("Response from PATCH /employees:", response);
-
-      if (response.status === 200) {
-        const updatedStaffListResponse = await getEmployees();
-        console.log("Response from GET /employees (after PATCH):", updatedStaffListResponse);
-        if (updatedStaffListResponse.status === 200) {
-          onStaffUpdate(updatedStaffListResponse.data);
+      if (shiftToDelete && shiftToDelete.id) {
+        const response = await deleteShift(shiftToDelete.id);
+        if (response.status === 204 || response.status === 200) { 
+          const updatedShiftsListResponse = await getShifts();
+          if (updatedShiftsListResponse.status === 200) {
+            setShiftsData(updatedShiftsListResponse.data);
+          } else {
+            console.error("Failed to refresh shifts after deleting:", updatedShiftsListResponse.status);
+          }
+          const updatedStaffListResponse = await getEmployees();
+          if (updatedStaffListResponse.status === 200) {
+            onStaffUpdate(updatedStaffListResponse.data);
+          } else {
+            console.error("Failed to refresh staff list after deleting shift");
+          }
+          setScheduleDialog(null);
         } else {
-          console.error("Lỗi khi tải lại danh sách nhân viên sau khi xóa ca làm việc");
+          console.error("Failed to delete shift:", response.status);
         }
-        setScheduleDialog(null);
       } else {
-        console.error("Lỗi khi xóa ca làm việc cho nhân viên");
+        console.warn("No shift found to delete");
+        setScheduleDialog(null); 
       }
 
     } catch (error) {
-      console.error("Lỗi khi xóa nhân viên khỏi ca:", error);
+      console.error("Error removing staff from shift:", error);
     } finally {
       setIsLoadingSchedule(false);
     }
   };
 
 
-  const getAssignedStaffForCell = (employee: Staff, date: Date, shift: typeof SHIFTS[0]) => {
-    const assignedStaffIds = getAssignedStaffIdsForShift(employee, date, shift.id);
+
+  const getAssignedStaffForCell = (date: Date, shift: typeof SHIFTS[0]) => {
+    const assignedStaffIds = getAssignedStaffIdsForShift(date, shift.id);
     return staff.filter(emp => assignedStaffIds.includes(emp.id as number));
   }
 
@@ -351,7 +374,8 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
                   </Typography>
                 </TableCell>
                 {getWeekDates().map((date) => {
-                  const assignedStaffForCell = getAssignedStaffForCell(staff[0], date, shift);
+                  const assignedStaffForCell = getAssignedStaffForCell(date, shift);
+                  const assignedStaffIds = getAssignedStaffIdsForShift(date, shift.id);
 
                   return (
                     <TableCell
@@ -406,8 +430,8 @@ const StaffSchedule: React.FC<StaffScheduleProps> = ({ staff, onStaffUpdate }) =
           shift={scheduleDialog.shift}
           date={scheduleDialog.date}
           staff={staff}
+          assignedStaff={getAssignedStaffIdsForShift(scheduleDialog.date, scheduleDialog.shift.id)}
           employee={scheduleDialog.employee}
-          assignedStaff={getAssignedStaffIdsForShift(scheduleDialog.employee, scheduleDialog.date, scheduleDialog.shift.id)}
           onAssign={handleAssignStaff}
           onRemove={handleRemoveStaff}
         />

@@ -19,7 +19,7 @@ export const formatDate = (date: string | Date | number): string => {
     if (!parsedDate.isValid()) {
       throw new Error('Invalid Date');
     }
-    return parsedDate.format('DD/MM/YYYY HH:mm');
+    return parsedDate.format('YYYY-MM-DD');
   } catch (error) {
     console.error("Lỗi trong formatDate:", error);
     return 'Invalid Date'; 
