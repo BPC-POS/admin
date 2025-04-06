@@ -1,5 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getMessaging, getToken, isSupported, Messaging } from "firebase/messaging"; 
+import { updateUserFCM } from '@/api/user';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -63,6 +64,13 @@ export const requestPermission = async (): Promise<string | null> => {
             const token = await getToken(messaging, { vapidKey: vapidKey });
 
             if (token) {
+                try {
+                    console.log("🚀 ~ requestPermission ~ res:")
+                    const res = await updateUserFCM(token);
+                    console.log("🚀 ~ requestPermission ~ res:", res)
+                } catch (error) {
+                    console.error("Failed to update user FCM token:", error);
+                }
                 console.log("FCM Token:", token);
                 return token;
             } else {
