@@ -71,7 +71,6 @@ export const requestPermission = async (): Promise<string | null> => {
                 } catch (error) {
                     console.error("Failed to update user FCM token:", error);
                 }
-                console.log("FCM Token:", token);
                 return token;
             } else {
                 console.warn("Could not get FCM registration token.");
