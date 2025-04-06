@@ -34,8 +34,8 @@ import {
 } from '@mui/icons-material';
 import { Staff, Shift } from '@/types/staff';
 import { formatDate } from '@/utils/format';
-import { updateEmployeeById, getEmployees } from '@/api/employee';
-import { getShifts, createShift, updateShift, deleteShift } from '@/api/shift';
+import {  getEmployees } from '@/api/employee';
+import { getShifts, createShift, deleteShift } from '@/api/shift';
 
 interface StaffScheduleProps {
   staff: Staff[];
@@ -375,7 +375,6 @@ const StaffSchedule = ({ staff, onStaffUpdate }: StaffScheduleProps) => {
                 </TableCell>
                 {getWeekDates().map((date) => {
                   const assignedStaffForCell = getAssignedStaffForCell(date, shift);
-                  const assignedStaffIds = getAssignedStaffIdsForShift(date, shift.id);
 
                   return (
                     <TableCell
